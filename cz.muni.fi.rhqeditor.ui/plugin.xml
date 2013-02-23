@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.newWizards">
+     <category 
+		id = "cz.muni.fi.rhqeditor.category"
+		name = "RHQ Bundle"/>
+		<wizard
+	   		id = "cz.muni.fi.rhqbunle.ui.wizards.newproject"
+      	   	name = "RHQ Bundle"
+      	   	project="true"
+	   		class="cz.muni.fi.rhqeditor.ui.wizards.NewProjectWizard"
+	   		category = "cz.muni.fi.rhqeditor.category"
+	   		icon="icons/rhq.gif">
+	   		<description>RHQ Bundle project</description>
+		</wizard>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            default="false"
+            id="cz.muni.fi.rhqeditor.ui.editor1"
+            name="RHQ Editor"
+            class="cz.muni.fi.rhqeditor.ui.RhqEditor"
+            icon="icons/rhq.gif">
+      </editor>
+   </extension>
+
+   <extension
+         id="rhqproblemmarker"
+         name="rhqproblemmarker"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="org.eclipse.core.resources.problemmarker">
+      </super>
+      <persistent value="true" />
+   </extension>
+   <extension
+         point="org.eclipse.ui.startup">
+      <startup
+            class="cz.muni.fi.rhqeditor.ui.Startup">
+      </startup>
+    </extension>
+   
+</plugin>

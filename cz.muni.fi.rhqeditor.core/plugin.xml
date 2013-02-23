@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.core.resources.natures"
+      id="cz.muni.fi.rhqeditor.natures.rhqeditornature"
+      name="RHQEditorNature">
+      <runtime>
+         <run
+               class="cz.muni.fi.rhqeditor.core.natures.RHQEditorNature">
+         </run>
+      </runtime>
+   </extension>
+   <extension
+         id="cz.muni.fi.rhqeditor.rhqproblemmarker"
+         name="rhqproblemmarker"
+         point="org.eclipse.core.resources.markers">
+   </extension>
+   
+
+</plugin>
+ 
