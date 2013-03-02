@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="cz.muni.fi.rhqeditor.feature"
+      label="RHQ Editor"
+      version="0.0.1">
+
+   <description url="http://www.example.com/description">
+      Add description.
+   </description>
+
+   <copyright url="http://www.example.com/copyright">
+      Add copyright
+   </copyright>
+
+   <license url="http://www.example.com/license">
+      FOSS
+   </license>
+      
+   <plugin
+     id="cz.muni.fi.rhqeditor.ui"
+     version="1.0.0.201302221720" download-size="165" install-size="772"/>
+      
+   <plugin
+     id="cz.muni.fi.rhqeditor.core"
+     version="0.0.2" download-size="19" install-size="33"/>  
+
+
+</feature>

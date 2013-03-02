@@ -220,6 +220,23 @@
     </structure>
   </task>
   
+  <task name="rhq:fileset">
+    <description>
+    Add description.
+  </description>
+    <structure>
+      <attributes>
+        <attribute name="includes" required="no">
+          <description>
+          	Relative path to files that should be included
+        </description>
+        </attribute>
+      </attributes>
+      <elements>
+    </elements>
+    </structure>
+  </task>
+  
   
 <!--  END -->
 

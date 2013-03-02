@@ -6,13 +6,8 @@ import java.util.Map;
 
 import org.eclipse.ant.internal.core.IAntCoreConstants;
 import org.eclipse.ant.internal.ui.AntSourceViewerConfiguration;
-import org.eclipse.ant.internal.ui.IAntUIConstants;
 import org.eclipse.ant.internal.ui.editor.AntAutoEditStrategy;
-import org.eclipse.ant.internal.ui.editor.AntEditor;
 import org.eclipse.ant.internal.ui.editor.AntEditorCompletionProcessor;
-
-import cz.muni.fi.rhqeditor.core.RhqPathExtractor;
-import cz.muni.fi.rhqeditor.ui.RhqEditorCompletionProcessor;
 import org.eclipse.ant.internal.ui.editor.formatter.XmlDocumentFormattingStrategy;
 import org.eclipse.ant.internal.ui.editor.formatter.XmlElementFormattingStrategy;
 import org.eclipse.ant.internal.ui.editor.text.AntDocumentSetupParticipant;

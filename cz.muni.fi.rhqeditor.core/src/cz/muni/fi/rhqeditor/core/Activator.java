@@ -1,18 +1,12 @@
 package cz.muni.fi.rhqeditor.core;
 
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-
-import cz.muni.fi.rhqeditor.core.listeners.RecipeChangeListener;
 
 public class Activator implements BundleActivator {
 
 	private static BundleContext context;
+	public static final String UI_PLUGIN_ID = "cz.muni.fi.rhqeditor.ui";
 
 	static BundleContext getContext() {
 		return context;

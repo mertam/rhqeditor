@@ -53,7 +53,7 @@
 		  name	   CDATA #REQUIRED
 		  exploded %RHQBoolean; "true">
 		  
-<!ELEMENT rhq:url-archive (%RHQTypes)*>
+<!ELEMENT rhq:url-archive (%RHQTypes;)*>
 <!ATTLIST rhq:url-archive 
 		  url	   CDATA #REQUIRED
 		  exploded %RHQBoolean; "true">	

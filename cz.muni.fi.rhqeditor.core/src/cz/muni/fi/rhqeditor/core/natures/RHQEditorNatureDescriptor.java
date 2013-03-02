@@ -24,8 +24,8 @@ public class RHQEditorNatureDescriptor implements IProjectNatureDescriptor{
 
 	@Override
 	public String[] getNatureSetIds() {
-		// TODO Auto-generated method stub
-		return null;
+		String[] ids = new String[]{NATURE_ID};
+		return ids;
 	}
 
 	@Override

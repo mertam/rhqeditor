@@ -17,6 +17,23 @@
    </extension>
    
    <extension
+         point="org.eclipse.ui.exportWizards">
+         <category
+               id="cz.muni.fi.rhqeditor.ui.export"
+               name="RHQ Bundle">
+         </category>
+         <wizard
+               id="cz.muni.fi.rhqeditor.ui.exportwizard"
+               name="ExportWizard"
+               category="cz.muni.fi.rhqeditor.ui.export"
+               class="cz.muni.fi.rhqeditor.ui.wizards.ExportWizzard">
+               <description>
+                  RHQ bundle export wizard
+               </description>
+               
+         </wizard>
+   </extension>
+   <extension
          point="org.eclipse.ui.editors">
       <editor
             default="false"
@@ -42,5 +59,51 @@
             class="cz.muni.fi.rhqeditor.ui.Startup">
       </startup>
     </extension>
+
+
+   <extension
+         point="org.eclipse.debug.ui.launchShortcuts">
+      <shortcut
+            class="cz.muni.fi.rhqeditor.ui.LunchShortcut"
+            id="cz.muni.fi.rhqeditor.ui.shortcut1"
+            label="shortcut"
+            modes="run">
+            <contextualLaunch>
+            <contextLabel
+                  mode="run"
+                  label="RHQ standalone deployment">
+            </contextLabel>
+            <enablement>
+            	<with variable="selection">
+			 <count value="1"/>
+			  <iterate>
+			  	  <instanceof
+			           value="org.eclipse.core.resources.IResource">
+			  	  </instanceof>
+			  </iterate>
+			 </with>
+            </enablement>
+            </contextualLaunch>
+      </shortcut>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="preferences.PreferencePage"
+            id="cz.muni.fi.rhqeditor.ui.prefenecePages"
+            name="RHQ">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.ui.propertyPages">
+      <page
+            class="preferences.RHQPropertyPage"
+            id="cz.muni.fi.rhqeditor.propertyPage"
+            name="RHQ">
+      </page>
+   </extension>
+   
+   
+    
    
 </plugin>

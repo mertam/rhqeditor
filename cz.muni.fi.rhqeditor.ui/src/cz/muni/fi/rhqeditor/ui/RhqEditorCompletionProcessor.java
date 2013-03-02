@@ -6,8 +6,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -58,11 +56,8 @@ import org.eclipse.ant.internal.ui.model.AntTargetNode;
 import org.eclipse.ant.internal.ui.model.AntTaskNode;
 import org.eclipse.core.commands.Command;
 import org.eclipse.core.commands.ParameterizedCommand;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.bindings.TriggerSequence;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.text.BadLocationException;
@@ -98,11 +93,12 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import utils.ExtractorProvider;
+import utils.RhqConstants;
+import utils.RhqPathExtractor;
+
 import com.ibm.icu.text.MessageFormat;
 
-import cz.muni.fi.rhqeditor.core.ExtractorProvider;
-import cz.muni.fi.rhqeditor.core.RhqConstants;
-import cz.muni.fi.rhqeditor.core.RhqPathExtractor;
 import cz.muni.fi.rhqeditor.ui.TaskDescriptionProvider.ProposalNode;
 
 public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
@@ -2006,8 +2002,13 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
    
     	List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
     	for(IPath pathToFile : files){
-    //recipe isn't inserted into proposals
-    		if(!pathToFile.toString().equals(RhqConstants.RHQ_RECIPE_FILE));
+    		System.out.println(pathToFile);
+//    		if(pathToFile.toString().startsWith("."))
+//    			continue;
+    		
+    //filter deploy.xml and hidden files
+    		if(!(pathToFile.lastSegment().toString().equals(RhqConstants.RHQ_RECIPE_FILE) ||
+    			pathToFile.toString().startsWith(".")))
     		 	proposals.add(attributeValueProposal(document, prefix, pathToFile.toString()));
     	}
     	return (ICompletionProposal[])proposals.toArray(new ICompletionProposal[proposals.size()]);  
@@ -2040,7 +2041,6 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
     
     private ICompletionProposal[] addArchiveContentProposals(IDocument document, String prefix, String archiveName){
     	List<IPath> files = fRhqpathExtractor.getContentOfArchiveByPrefix(archiveName, prefix);
-    	
     	if(files.isEmpty())
     		return new ICompletionProposal[0];
     	List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();

@@ -3,19 +3,19 @@ package cz.muni.fi.rhqeditor.ui.wizards;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardPage;
-
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 
 
 public class NewProjectWizardPage1 extends WizardPage{
@@ -73,10 +73,20 @@ public class NewProjectWizardPage1 extends WizardPage{
 	private String				newProjectName = null;
 
 	
-	protected NewProjectWizardPage1(String pageName) {
-		super(pageName);
-		// TODO Auto-generated constructor stub
+//	protected NewProjectWizardPage1(String pageName) {
+//		super(pageName);
+//		// TODO Auto-generated constructor stub
+//	}
+
+	protected NewProjectWizardPage1(String pageName, String title,
+			ImageDescriptor titleImage) {
+		super(pageName, title, titleImage);
 	}
+	
+	protected NewProjectWizardPage1(String pageName){
+		super(pageName);
+	}
+	
 
 	@Override
 	public void createControl(Composite parent) {

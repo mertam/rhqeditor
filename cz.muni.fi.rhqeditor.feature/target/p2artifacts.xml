@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?artifactRepository version='1.1.0'?>
+<artifacts size='1'>
+  <artifact classifier='org.eclipse.update.feature' id='cz.muni.fi.rhqeditor.feature' version='0.0.1'>
+    <properties size='6'>
+      <property name='artifact.size' value='2026'/>
+      <property name='download.size' value='2026'/>
+      <property name='maven-groupId' value='cz.muni.fi.rhqeditor'/>
+      <property name='maven-artifactId' value='cz.muni.fi.rhqeditor.feature'/>
+      <property name='maven-version' value='0.0.1'/>
+      <property name='download.contentType' value='application/zip'/>
+    </properties>
+  </artifact>
+</artifacts>

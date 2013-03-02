@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/cz.muni.fi.rhqeditor.0.0.1.jar" id="cz.muni.fi.rhqeditor.feature" version="0.0.1"/>
+</site>

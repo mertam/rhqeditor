@@ -6,8 +6,10 @@ Bundle-Version: 0.0.1
 Bundle-Activator: cz.muni.fi.rhqeditor.core.Activator
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ant.core,
- org.eclipse.core.resources;bundle-version="3.8.1"
+ org.eclipse.core.resources;bundle-version="3.8.1",
+ org.eclipse.ui.console;bundle-version="3.5.100"
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.eclipse.core.resources
-Export-Package: cz.muni.fi.rhqeditor.core
+Export-Package: cz.muni.fi.rhqeditor.core,
+ utils
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7

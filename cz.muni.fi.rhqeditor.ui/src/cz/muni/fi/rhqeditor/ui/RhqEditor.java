@@ -37,7 +37,6 @@ import org.eclipse.ant.internal.ui.model.IAntModelListener;
 import org.eclipse.ant.internal.ui.preferences.AntEditorPreferenceConstants;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -105,10 +104,10 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.ContentOutline;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
-import org.omg.CORBA.FREE_MEM;
 
-import cz.muni.fi.rhqeditor.core.ExtractorProvider;
-import cz.muni.fi.rhqeditor.core.RhqPathExtractor;
+import utils.ExtractorProvider;
+import utils.RhqPathExtractor;
+
 
 
 /**
@@ -589,7 +588,7 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
     private RhqRecipeValidator fRhqRecipeValidator = null;
     
   
-    private RhqPathExtractor fRhqPathExtractor = null;
+
     /**
      * Default no-argument constructor
      */
@@ -601,11 +600,6 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
 		configureInsertMode(SMART_INSERT, false);
 		setInsertMode(INSERT);
 		
-
-		RhqEditorSourceViewerConfiguration conf = (RhqEditorSourceViewerConfiguration)getSourceViewerConfiguration();
-
-		
-
     }
 
     /* (non-Javadoc)
