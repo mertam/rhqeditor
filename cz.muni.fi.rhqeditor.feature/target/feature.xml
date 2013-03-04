@@ -18,11 +18,11 @@
       
    <plugin
      id="cz.muni.fi.rhqeditor.ui"
-     version="1.0.0.201302221720" download-size="165" install-size="772"/>
+     version="1.0.0.201303041639" download-size="179" install-size="802"/>
       
    <plugin
      id="cz.muni.fi.rhqeditor.core"
-     version="0.0.2" download-size="19" install-size="33"/>  
+     version="0.0.3" download-size="30" install-size="53"/>  
 
 
 </feature>

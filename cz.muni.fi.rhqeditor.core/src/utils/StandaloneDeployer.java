@@ -81,6 +81,9 @@ public class StandaloneDeployer {
 		
 		String propertyValue;
 		for(String property: propManager.getInputPropertiesFromRecipe()){
+			//ignore rhq.deploy.dir
+			if(property.equals(RhqConstants.RHQ_DEPLOY_DIR))
+				continue;
 			propertyValue = projNode.get(RhqConstants.RHQ_PROPERTY_INPUT+property, RhqConstants.NOT_FOUND);
 			if(!propertyValue.equals(RhqConstants.NOT_FOUND) && !propertyValue.isEmpty()){
 				deployCommand.append("-D"+property+"="+propertyValue+" ");

@@ -1,12 +1,8 @@
 package cz.muni.fi.rhqeditor.core;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -19,7 +15,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
 import utils.ExtractorProvider;
-import utils.RhqConstants;
 import utils.RhqPathExtractor;
 
 public class BundleExport {
@@ -52,8 +47,8 @@ public class BundleExport {
 			protected IStatus run(IProgressMonitor monitor) {
 				
 				try(
-						 ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fTargetFile));
-						 ) {
+					 ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fTargetFile));
+						) {
 					 	   byte[] buf = new byte[1024];
 					       IFile currentFile;
 					       for (IPath file: extractor.getAllFiles() ) {

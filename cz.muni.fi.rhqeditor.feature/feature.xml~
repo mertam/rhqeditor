@@ -22,7 +22,7 @@
       
    <plugin
      id="cz.muni.fi.rhqeditor.core"
-     version="0.0.1"/>  
+     version="0.0.2"/>  
 
 
 </feature>

@@ -6,7 +6,6 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import utils.RhqConstants;
-
 import cz.muni.fi.rhqeditor.ui.UiActivator;
 
 public class PreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {

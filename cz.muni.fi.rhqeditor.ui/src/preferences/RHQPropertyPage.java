@@ -67,6 +67,8 @@ public class RHQPropertyPage  extends PropertyPage implements IWorkbenchProperty
 		fElement = element;
 		fManager = new InputPropertiesManager((IProject)element);
 		fRecipeProperties = fManager.getInputPropertiesFromRecipe();
+		//rhq.deploy.dir is handled different way 
+		fRecipeProperties.remove(RhqConstants.RHQ_DEPLOY_DIR);
 	}
 	
 	@Override
@@ -128,7 +130,7 @@ public class RHQPropertyPage  extends PropertyPage implements IWorkbenchProperty
         
         txtDeployPath = new Text(myComposite, SWT.BORDER);
         txtDeployPath.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-        txtDeployPath.setText(fPrefs.get(RhqConstants.RHQ_PROPERTY_INPUT+RhqConstants.RHQ_DEPLOY_DIR,""));
+        txtDeployPath.setText(fPrefs.get(RhqConstants.RHQ_DEPLOY_DIR,""));
         
         btnDirectoryDialog = new Button(myComposite, SWT.NONE);
         btnDirectoryDialog.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));

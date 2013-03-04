@@ -1,6 +1,8 @@
 package cz.muni.fi.rhqeditor.core.listeners;
 
 import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -13,6 +15,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 import utils.ExtractorProvider;
+import utils.RecipeReader;
 import utils.RhqConstants;
 import utils.RhqPathExtractor;
 import cz.muni.fi.rhqeditor.core.ProjectScanner;
@@ -25,6 +28,8 @@ import cz.muni.fi.rhqeditor.core.ProjectScanner;
 
 public class RecipeChangeListener implements IResourceChangeListener{
 
+	
+		
 	
 	/**
 	 * When resource is chan
@@ -87,12 +92,16 @@ public class RecipeChangeListener implements IResourceChangeListener{
 			stackDelta.push(d);
 		}
 			
+		//indicates whether some resource was removed or added in this change event, used for renaming files in recipe
+		//if both are not null, then refactoring occured
+		IPath removedResourcePath = null;
+		IPath addedResourcePath = null;
 		IResourceDelta currentDelta;
 		//go through all deltas
 		while(!stackDelta.isEmpty()){
 			currentDelta = stackDelta.pop();
 			switch(currentDelta.getKind()){
-			case IResourceDelta.ADDED: 
+				case IResourceDelta.ADDED: 
 				
 				IResource addedResource = currentDelta.getResource();
 				IPath path = currentDelta.getFullPath();
@@ -109,6 +118,11 @@ public class RecipeChangeListener implements IResourceChangeListener{
 					}else{
 						extractor.addFile(path);
 					}
+					//handle refactoring file
+					addedResourcePath = path;
+					if(removedResourcePath != null){
+						renameFileInRecipe(addedResourcePath, removedResourcePath, project);
+					}
 				}
 				break;
 				
@@ -124,31 +138,57 @@ public class RecipeChangeListener implements IResourceChangeListener{
 			case IResourceDelta.REMOVED:  
 				System.out.println("removed");
 				extractor.removeFile(currentDelta.getFullPath().removeFirstSegments(1));
-				;break;
+				removedResourcePath = currentDelta.getFullPath();
+				removedResourcePath = removedResourcePath.removeFirstSegments(1);
+				if(addedResourcePath != null){
+					renameFileInRecipe(addedResourcePath, removedResourcePath, project);
+				}
 				
-//			case IResourceDelta.OPEN:  System.out.println("open");break;
-//			case IResourceDelta.CONTENT:  System.out.println("content");break;
-//			case IResourceDelta.REPLACED:  System.out.println("replaced");break;
+				break;
+				
+
 			default: System.out.println("def");
 			}
 			
 		}
 	}
 	
-
-
-//	
-//	public void setExtractor(RhqPathExtractor ext){
-//		fExtractor = ext;
-//	}
-//	
-//	public void setProject(IProject proj){
-//		fProject = proj;
-//	}
-//	
-//	public boolean hasProject(){
-//		return (fProject == null ? false : true);
-//	}
 	
+	/**
+	 * 
+	 * @param addedResourcePath
+	 * @param removedResourcePath
+	 */
+	private void renameFileInRecipe( IPath addedResourcePath, IPath removedResourcePath, IProject proj){
+		StringBuilder sb = RecipeReader.readRecipe(proj);
+		
+		//some error occured
+		if(sb == null)
+			return;
+		
+		
+		
+        Pattern pattern = 
+        Pattern.compile("file2.txt");
+        System.out.println(pattern.toString());
+        Matcher matcher = 
+        pattern.matcher(sb.toString());
 
+        boolean found = false;
+        while (matcher.find()) {
+        	System.out.println(matcher.start());
+        	System.out.println("found");
+        }
+        if(!found){
+            System.out.println("not found");
+        }
+		
+		String content = sb.toString();
+		content.replaceAll(removedResourcePath.toString(), addedResourcePath.toString());
+		RecipeReader.setRecipeContent(proj, content);
+	}
+	
+	
 }
+
+

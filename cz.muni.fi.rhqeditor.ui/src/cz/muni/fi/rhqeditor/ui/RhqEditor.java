@@ -183,9 +183,8 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
 //			}
 
 			IDocument doc = getSourceViewer().getDocument();
-
-			ITextSelection select= (ITextSelection)getSourceViewer().getSelectionProvider().getSelection();
-			int cursorPosition = select.getOffset() + select.getLength();
+			
+//			ITextSelection select= (ITextSelection)getSourceViewer().getSelectionProvider().getSelection();
 			
 //			System.out.println(doc.get);
 				try{
@@ -201,9 +200,6 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
 				fRhqRecipeValidator = new RhqRecipeValidator();
 				fRhqRecipeValidator.setAnnotationModel(fRhqAnnotationModel);
 				Map<IProject, RhqPathExtractor> m = ExtractorProvider.getInstance().getMap();
-				for(IProject proj: m.keySet()){
-					System.out.println(proj.getName() + " " + m.get(proj).toString());
-				}
 				RhqPathExtractor ext = m.get(getAntModel().getFile().getProject());
 				fRhqRecipeValidator.setExtractor(ext);			
 				
@@ -224,9 +220,9 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
 				updateOccurrenceAnnotations(textSelection, model);
 			}
 		
-			if (AntUIPlugin.getDefault().getPreferenceStore().getBoolean(IAntUIPreferenceConstants.OUTLINE_LINK_WITH_EDITOR)) {
+//			if (AntUIPlugin.getDefault().getPreferenceStore().getBoolean(IAntUIPreferenceConstants.OUTLINE_LINK_WITH_EDITOR)) {
 				synchronizeOutlinePage(node, true);
-			}
+//			}
 			setSelection(node, false);
 		}
 	}

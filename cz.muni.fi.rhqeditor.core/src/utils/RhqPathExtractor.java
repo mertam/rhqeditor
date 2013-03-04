@@ -27,10 +27,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
-import com.sun.istack.internal.localization.Localizable;
-
-
-
 
 /**
  * This class provides functionality for extracting all files from project directory and all sub directories
@@ -48,6 +44,8 @@ public class RhqPathExtractor {
 	private Map<String,ArrayList<IPath> >   fArchiveContent = null;
 	
 	AtomicBoolean 				fShouldBeJobScheduled		= null;
+	
+	private String FILE_SEPARATOR = System.getProperty("file.separator");
 	
 	/**
 	 * 
@@ -343,39 +341,41 @@ public class RhqPathExtractor {
 	private boolean validateRelativePath(String expresion, List<IPath> possiblePaths){
 		
 		StringBuilder buf = new StringBuilder();
-		String [] splitted = expresion.split("/");
+		String [] splitted = expresion.split(FILE_SEPARATOR);
 		for(String s: splitted){
 			if(s.equals("**")){
 				buf.append(".*");
-				buf.append("/");
+				buf.append(FILE_SEPARATOR);
 				continue;
 			}
 			if(s.equals("*")){
 				buf.append("\\w*");
-				buf.append("/");
+				buf.append(FILE_SEPARATOR);
 				continue;
 			}
 			
 			if(s.matches("\\w*")){
 				buf.append(s);
-				buf.append("/");
+				buf.append(FILE_SEPARATOR);
 				continue;
 			}
 			
 			if(s.matches("[[\\w\\.]\\*]+|[\\*]\\w\\.]]+")){
 				for(String s2: s.split("\\*")){
-					if(!s2.isEmpty())
+					if(!s2.isEmpty()){
+						s2 = s2.replaceAll("\\.", "\\\\.");
 						buf.append(s2);
+					}
 					buf.append(".*");
 				}
 				buf = new StringBuilder(buf.subSequence(0, buf.length() - ".*".length()));
-				buf.append("/");
+				buf.append(FILE_SEPARATOR);
 				continue;
 			}
 		}
-		//cheks whether there is additonal "/"
+		//cheks whether there is additonal FILE_SEPARATOR
 		if(buf.length() > 0)
-			buf = new StringBuilder(buf.subSequence(0, buf.length() - "/".length()));
+			buf = new StringBuilder(buf.subSequence(0, buf.length() - FILE_SEPARATOR.length()));
 		
 		
 		String currentPath;

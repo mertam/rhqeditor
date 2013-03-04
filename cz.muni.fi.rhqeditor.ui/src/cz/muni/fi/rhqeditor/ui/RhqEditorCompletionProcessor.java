@@ -56,6 +56,9 @@ import org.eclipse.ant.internal.ui.model.AntTargetNode;
 import org.eclipse.ant.internal.ui.model.AntTaskNode;
 import org.eclipse.core.commands.Command;
 import org.eclipse.core.commands.ParameterizedCommand;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.bindings.TriggerSequence;
@@ -82,6 +85,7 @@ import org.eclipse.jface.text.templates.TemplateProposal;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
@@ -94,6 +98,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import utils.ExtractorProvider;
+import utils.InputPropertiesManager;
 import utils.RhqConstants;
 import utils.RhqPathExtractor;
 
@@ -1103,7 +1108,32 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
 					displayStringToProposals.put(propertyName, proposal);
 				}
             }
-        }      
+        }
+//ADDED input-properties to proposal
+        InputPropertiesManager ips = new InputPropertiesManager(antModel.getFile().getProject());
+        ArrayList<String> arrayProperties= ips.getInputPropertiesFromRecipe();
+        //rhq.deploy.dir is not in recipe
+        arrayProperties.add(RhqConstants.RHQ_DEPLOY_DIR);
+        for(String inputProperty: arrayProperties){
+        	 if(!inputProperty.startsWith(prefix))
+        		 continue;
+        	 StringBuffer replacementString = new StringBuffer();
+             if (appendBraces) {
+             	replacementString.append("${"); //$NON-NLS-1$
+             }
+             replacementString.append(inputProperty);
+             if (appendBraces) {
+             	replacementString.append('}');
+             }
+        	
+        	ICompletionProposal proposal = new AntCompletionProposal(
+        			replacementString.toString(), replacementOffset, replacementLength, 
+        		    replacementString.length(), image, inputProperty, null, AntCompletionProposal.PROPERTY_PROPOSAL);
+        	proposals.add(proposal);
+        }
+
+       
+       
 		return (ICompletionProposal[])proposals.toArray(new ICompletionProposal[proposals.size()]);          
     }
 
@@ -1243,8 +1273,9 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
 		String proposalInfo = getDescriptionProvider().getDescriptionForTask(elementName);
 		boolean hasNestedElements= hasNestedElements(elementName);
 //ADDED	
-		hasNestedElements = hasNestedElements || RhqConstants.RHQ_PAIRED_TAGS.contains(elementName);
-		
+		if(elementName.startsWith(RhqConstants.RHQ_PREFIX))
+			hasNestedElements = RhqConstants.RHQ_PAIRED_TAGS.contains(elementName);
+			
 		String replacementString = getTaskProposalReplacementString(elementName, hasNestedElements);
 		int replacementOffset = cursorPosition - aPrefix.length();
 		int replacementLength = aPrefix.length();

@@ -15,8 +15,8 @@
       <provided namespace='org.eclipse.equinox.p2.iu' name='cz.muni.fi.rhqeditor.feature.feature.group' version='0.0.1'/>
     </provides>
     <requires size='3'>
-      <required namespace='org.eclipse.equinox.p2.iu' name='cz.muni.fi.rhqeditor.ui' range='[1.0.0.201302221720,1.0.0.201302221720]'/>
-      <required namespace='org.eclipse.equinox.p2.iu' name='cz.muni.fi.rhqeditor.core' range='[0.0.2,0.0.2]'/>
+      <required namespace='org.eclipse.equinox.p2.iu' name='cz.muni.fi.rhqeditor.ui' range='[1.0.0.201303041639,1.0.0.201303041639]'/>
+      <required namespace='org.eclipse.equinox.p2.iu' name='cz.muni.fi.rhqeditor.core' range='[0.0.3,0.0.3]'/>
       <required namespace='org.eclipse.equinox.p2.iu' name='cz.muni.fi.rhqeditor.feature.feature.jar' range='[0.0.1,0.0.1]'>
         <filter>
           (org.eclipse.update.install.features=true)

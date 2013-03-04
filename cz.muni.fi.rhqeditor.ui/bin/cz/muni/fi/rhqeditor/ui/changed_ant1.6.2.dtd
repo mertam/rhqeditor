@@ -58,7 +58,7 @@
 		  url	   CDATA #REQUIRED
 		  exploded %RHQBoolean; "true">	
 		  
-<!ELEMENT rhq:fileset (rhq:file)*>
+<!ELEMENT rhq:fileset (rhq:file | include | exclude)*>
 <!ATTLIST rhq:fileset 
 		  includes 	CDATA #REQUIRED>		  
 
@@ -77,6 +77,8 @@
 		  info		CDATA #IMPLIED
 		  message	CDATA #IMPLIED>
 		  
+<!ELEMENT rhq:ignore (%RHQTypes;)*>
+<!ELEMENT rhq:replace (%RHQTypes;)*>
 <!-- end -->
 
 <!ATTLIST extension-point

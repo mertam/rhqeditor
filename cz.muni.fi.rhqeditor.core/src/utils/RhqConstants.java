@@ -10,7 +10,8 @@ public class RhqConstants {
 	public static final int 	RHQ_VERSION_4_5_1 		= 0;
 	
 									
-	public static final String RHQ_NATURE_ID =  "cz.muni.fi.rhqeditor.natures.rhqeditornature";
+	public static final String 	RHQ_NATURE_ID =  "cz.muni.fi.rhqeditor.natures.rhqeditornature";
+	public static final String	RHQ_PREFIX = "rhq:";
 	
 	public static final String 	RHQ_ARCHIVE_ZIP_SUFFIX 	= ".zip";
 	public static final String	RHQ_ARCHIVE_JAR_SUFFIX 	= ".jar";
@@ -27,6 +28,7 @@ public class RhqConstants {
 	public static final String 	RHQ_TYPE_URL_FILE 			= "rhq:url_file";
 	public static final String 	RHQ_TYPE_AUDIT			 	= "rhq:audit";	
 	public static final String 	RHQ_TYPE_FILESET			= "rhq:fileset";
+	public static final String  RHQ_TYPE_BUNDLE				= "rhq:bundle";
 	
 	
 	
@@ -66,6 +68,8 @@ public class RhqConstants {
 	public static final String RHQ_PROPERTY_NODE = "rhq";
 	public static final String RHQ_PROPERTY_INPUT = "input-property:";
 	public static final String RHQ_DEPLOY_DIR = "rhq.deploy.dir";
+	public static final String RHQ_DEPLOY_NAME = "rhq.deploy.name";
+	public static final String RHQ_DEPLOY_ID = "rhq.deploy.id";
 	public static final String RHQ_DEPLOYER_PATH = "rhq.deployer.path";
 	
 	public static final String NOT_FOUND = "not found";

@@ -20,14 +20,7 @@ import utils.RhqConstants;
 
 
 public class RHQEditorProject {
-	
-//	private static final String 	PROJECT_NATURE_ID = "cz.muni.fi.rhqeditor.natures.rhqeditornature";
-//	private IProject 				iprojProject = null;	
-	
-	//path to toot project dir, if it's not stored in workspace directory
-
-	
-		
+			
 	/**
 	 * Constructor creates project of given name in workspace
 	 * 
@@ -67,8 +60,7 @@ public class RHQEditorProject {
 	    
 	    ProjectScanner scanner = new ProjectScanner();
 	    scanner.initProject(project);
-//	    workspace.addResourceChangeListener(new RecipeChangeListener());
-//	    this.iprojProject = project;
+
 		
 	}
 	
@@ -78,13 +70,6 @@ public class RHQEditorProject {
 		//TODO dokoncit presun projektu
 	}
 	
-	
-	@Override
-	protected void finalize() throws Throwable {
-		// TODO Auto-generated method stub
-		System.out.println("project finalize");
-		super.finalize();
-	}
 	
 	private void createDefaultRecipe(String projectName) throws CoreException{
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
@@ -99,17 +84,6 @@ public class RHQEditorProject {
 	    InputStream is = new ByteArrayInputStream(str.getBytes());
 	    recipe.create(is, true, null);
 	    
-//	    IMarker marker = recipe.createMarker(IMarker.PROBLEM);
-//		marker.setAttribute(IMarker.MESSAGE, "This a a task");
-//		marker.setAttribute(IMarker.LINE_NUMBER, 1);
-//		marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
-//        marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_HIGH);
-//        
-//        IMarker marker2 = recipe.createMarker(IMarker.PROBLEM);
-//		marker2.setAttribute(IMarker.MESSAGE, "This a a task");
-//		marker2.setAttribute(IMarker.LINE_NUMBER, 1);
-//		marker2.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
-//        marker2.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_HIGH);
 
 	}
 	

@@ -1,5 +1,7 @@
 package cz.muni.fi.rhqeditor.ui;
 
+import java.io.IOException;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
@@ -69,7 +71,12 @@ public class LunchShortcut implements ILaunchShortcut2{
         sd.setProject(project);
         sd.setMessageConsoleStream(out);
         sd.deploy();
-        
+        try {
+			out.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	}
 
