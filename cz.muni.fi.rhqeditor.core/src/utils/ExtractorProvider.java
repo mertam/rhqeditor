@@ -12,7 +12,6 @@ public class ExtractorProvider {
 
 	    private static final ExtractorProvider instance = new ExtractorProvider();
 	    private Map<IProject,RhqPathExtractor> map;
-	    private boolean exist = false;
 	    
 	    private ExtractorProvider() {
 	    	map = new HashMap<IProject, RhqPathExtractor>();
@@ -28,12 +27,6 @@ public class ExtractorProvider {
 	    
 	    public Map<IProject,RhqPathExtractor> getMap(){
 	    	return Collections.unmodifiableMap(map);
-	    }
-	    
-	    public boolean exist(){
-	    	return exist;
-	    }
-	    
-	    
+	    }	    
 	
 }

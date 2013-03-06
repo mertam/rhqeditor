@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.ui.console.MessageConsoleStream;
 
 import cz.muni.fi.rhqeditor.core.Activator;
+import cz.muni.fi.rhqeditor.core.DeployerProider;
 
 public class StandaloneDeployer {
 
@@ -56,16 +57,24 @@ public class StandaloneDeployer {
 		
 		System.out.println("standalone deployment");
 		IEclipsePreferences prefs = InstanceScope.INSTANCE.getNode(Activator.UI_PLUGIN_ID);
-		
+		String useDefaultDeployer = prefs.get(RhqConstants.RHQ_USE_DEFAULT_DEPLOYER, RhqConstants.NOT_FOUND);
 		String pathToDeployer = prefs.get(RhqConstants.RHQ_DEPLOYER_PATH, RhqConstants.NOT_FOUND);
-		if(pathToDeployer.equals(RhqConstants.NOT_FOUND))
+		System.out.println("pref:" + useDefaultDeployer);
+		if(useDefaultDeployer.equals("true") || pathToDeployer.equals(RhqConstants.NOT_FOUND))
 		{
-			fConsoleStream.print("Unset path to deployer.");
-			return;
+			//use default deployer
+			DeployerProider provider = DeployerProider.getInstance();
+			provider.initializeDeployer(Activator.getFileURL("rhq-bundle-deployer-4.5.1.zip"));
+			Path path = provider.getDeployerPath();
+			if(path == null || !provider.isExexutable())
+			{
+				System.out.println("handle error: no deployer");
+				return;
+			}
+			pathToDeployer = path.toString();
 		}
 		
 		
-		System.out.println(fRunningDir.lastSegment().toString());
 		IScopeContext projectScope = new ProjectScope(fProject);
 		IEclipsePreferences projNode = projectScope.getNode(RhqConstants.RHQ_PROPERTY_NODE);
 	    		
@@ -74,6 +83,8 @@ public class StandaloneDeployer {
 			fConsoleStream.print("Unset rhq.deploy.dir");
 			return;
 		}
+		
+		
 		
 		StringBuilder deployCommand = new StringBuilder(pathToDeployer+" ");
 		deployCommand.append("-D"+RhqConstants.RHQ_DEPLOY_DIR + "=" +deployDir+" ");

@@ -71,6 +71,7 @@ public class RhqConstants {
 	public static final String RHQ_DEPLOY_NAME = "rhq.deploy.name";
 	public static final String RHQ_DEPLOY_ID = "rhq.deploy.id";
 	public static final String RHQ_DEPLOYER_PATH = "rhq.deployer.path";
+	public static final String RHQ_USE_DEFAULT_DEPLOYER = "rhq.default.deployer";
 	
 	public static final String NOT_FOUND = "not found";
 

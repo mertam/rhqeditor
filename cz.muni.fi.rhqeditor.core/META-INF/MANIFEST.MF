@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Core
 Bundle-SymbolicName: cz.muni.fi.rhqeditor.core;singleton:=true
-Bundle-Version: 0.0.3
+Bundle-Version: 0.0.2
 Bundle-Activator: cz.muni.fi.rhqeditor.core.Activator
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ant.core,

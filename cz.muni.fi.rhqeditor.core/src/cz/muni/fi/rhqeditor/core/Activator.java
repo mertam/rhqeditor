@@ -1,5 +1,7 @@
 package cz.muni.fi.rhqeditor.core;
 
+import java.net.URL;
+
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
@@ -17,13 +19,7 @@ public class Activator implements BundleActivator {
 	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
 	 */
 	public void start(BundleContext bundleContext) throws Exception {
-		Activator.context = bundleContext;
-		//TODO experimental
-//			IPath path = Path.fromOSString("pr47/deploy.xml");
-//			IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-//			IWorkspace workspace = root.getWorkspace();
-//			workspace.addResourceChangeListener(new RecipeChangeListener(path));
-			System.out.println("Activator called");
+
 	}
 
 	/*
@@ -32,6 +28,15 @@ public class Activator implements BundleActivator {
 	 */
 	public void stop(BundleContext bundleContext) throws Exception {
 		Activator.context = null;
+	}
+	
+	/**
+	 * returns project url of given file or null
+	 * @param file
+	 * @return
+	 */
+	public static URL getFileURL(String file){
+		return  context.getBundle().getEntry(file);
 	}
 
 }
