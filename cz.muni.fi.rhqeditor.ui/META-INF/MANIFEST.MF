@@ -1,10 +1,10 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Ui
+Bundle-Name: cz.muni.fi.rhqeditor.ui
 Bundle-SymbolicName: cz.muni.fi.rhqeditor.ui;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: cz.muni.fi.rhqeditor.ui.UiActivator
-Require-Bundle: cz.muni.fi.rhqeditor.core;bundle-version="0.0.1",
+Require-Bundle: cz.muni.fi.rhqeditor.core;bundle-version="1.0.0",
  org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.core.filebuffers;bundle-version="3.5.200",
@@ -15,7 +15,8 @@ Require-Bundle: cz.muni.fi.rhqeditor.core;bundle-version="0.0.1",
  org.eclipse.debug.ui;bundle-version="3.8.1"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.ibm.icu.text;version="4.4.2.2",
+Import-Package: 
+ com.ibm.icu.text;version="4.4.2.2",
  org.apache.tools.ant,
  org.apache.tools.ant.taskdefs,
  org.apache.tools.ant.types,

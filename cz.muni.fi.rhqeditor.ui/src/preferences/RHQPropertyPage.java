@@ -28,6 +28,7 @@ import org.eclipse.ui.IWorkbenchPropertyPage;
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.osgi.service.prefs.BackingStoreException;
 
+
 import utils.InputPropertiesManager;
 import utils.RhqConstants;
 
@@ -65,8 +66,9 @@ public class RHQPropertyPage  extends PropertyPage implements IWorkbenchProperty
 	public void setElement(IAdaptable element) {
 		// TODO Auto-generated method stub
 		fElement = element;
-		fManager = new InputPropertiesManager((IProject)element);
-		fRecipeProperties = fManager.getInputPropertiesFromRecipe();
+		IProject proj = (IProject) element;
+		fManager = new InputPropertiesManager(proj.getName());
+//		fRecipeProperties = fManager.getInputPropertiesFromRecipe();
 		//rhq.deploy.dir is handled different way 
 		fRecipeProperties.remove(RhqConstants.RHQ_DEPLOY_DIR);
 	}

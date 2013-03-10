@@ -7,7 +7,9 @@ import java.io.InputStreamReader;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 
 
 /**
@@ -23,7 +25,7 @@ public class RecipeReader {
 	 * @param project
 	 * @return
 	 */
-	public static StringBuilder readRecipe(IProject project){	
+	public static StringBuilder readRecipe(IProject project) throws CoreException{	
 		StringBuilder sb = new StringBuilder();
 		IFile file = project.getFile(RhqConstants.RHQ_RECIPE_FILE);
 		if(file != null){
@@ -37,7 +39,7 @@ public class RecipeReader {
 				while((line = br.readLine()) != null){
 					sb.append(line);
 				}
-			} catch (IOException | CoreException ex){
+			} catch (IOException e){
 				return null;
 			}
 		}
@@ -57,6 +59,18 @@ public class RecipeReader {
 		} catch(CoreException ex){
 			ex.printStackTrace();
 		}    
+	}
+	
+	/**
+	 * returns true if project contains file deploy.xml (must be in direct child of project folder)
+	 * @param projectName
+	 * @return
+	 */
+	public static boolean hasRrecipe(String projectName){
+		IProject proj = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+		IFile file = proj.getFile(new Path(RhqConstants.RHQ_RECIPE_FILE));
+		return file.exists();
+		
 	}
 
 }

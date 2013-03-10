@@ -64,7 +64,7 @@
    <extension
          point="org.eclipse.debug.ui.launchShortcuts">
       <shortcut
-            class="cz.muni.fi.rhqeditor.ui.LunchShortcut"
+            class="cz.muni.fi.rhqeditor.ui.launch.LunchShortcut"
             id="cz.muni.fi.rhqeditor.ui.shortcut1"
             label="shortcut"
             modes="run">
@@ -77,9 +77,10 @@
             	<with variable="selection">
 			 <count value="1"/>
 			  <iterate>
-			  	  <instanceof
-			           value="org.eclipse.core.resources.IResource">
-			  	  </instanceof>
+			  	  <or>
+			  	     <test property="org.eclipse.debug.ui.matchesPattern" value="deploy.xml"/>
+			  	  </or>
+			  	 
 			  </iterate>
 			 </with>
             </enablement>
@@ -103,7 +104,38 @@
       </page>
    </extension>
    
+      <extension
+         point="org.eclipse.debug.core.launchConfigurationTypes">
+      <launchConfigurationType
+            id="cz.muni.fi.rhqeditor.core.launchconfigurationtype"
+            name="RHQ Bundle"
+            delegate="cz.muni.fi.rhqeditor.core.RhqLaunchConfigurationDelegate"
+            public="true"
+            delegateName="delegateName"
+            modes="run"
+            >
+            
+      </launchConfigurationType>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+      <launchConfigurationTypeImage
+            configTypeID="cz.muni.fi.rhqeditor.core.launchconfigurationtype"
+            icon="icons/rhq.gif"
+            id="cz.muni.fi.rhqeditor.ui.launchConfigurationTypeImage1">
+      </launchConfigurationTypeImage>
+   </extension>
    
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+      <launchConfigurationTabGroup
+            class="cz.muni.fi.rhqeditor.ui.launch.LaunchConfigurationTagGroup"
+            id="cz.muni.fi.rhqeditor.core.launchConfigurationTabGroup1"
+            type="cz.muni.fi.rhqeditor.core.launchconfigurationtype">
+      </launchConfigurationTabGroup>
+   </extension>
+   
+ 
     
    
 </plugin>

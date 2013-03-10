@@ -14,6 +14,11 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationType;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchManager;
 
 import utils.RhqConstants;
 
@@ -61,6 +66,8 @@ public class RHQEditorProject {
 	    ProjectScanner scanner = new ProjectScanner();
 	    scanner.initProject(project);
 
+	    
+	    RhqLaunchConfigurationDelegate.createNewLaunchConfiguration(strProjectName);
 		
 	}
 	
@@ -86,6 +93,7 @@ public class RHQEditorProject {
 	    
 
 	}
+	
 	
     
 

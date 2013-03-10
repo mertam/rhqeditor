@@ -1,6 +1,11 @@
 package cz.muni.fi.rhqeditor.ui;
 
+import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -51,14 +56,17 @@ import org.eclipse.ant.internal.ui.editor.templates.TaskContextType;
 import org.eclipse.ant.internal.ui.model.AntDefiningTaskNode;
 import org.eclipse.ant.internal.ui.model.AntElementNode;
 import org.eclipse.ant.internal.ui.model.AntModel;
+import org.eclipse.ant.internal.ui.model.AntModelContentProvider;
 import org.eclipse.ant.internal.ui.model.AntProjectNode;
 import org.eclipse.ant.internal.ui.model.AntTargetNode;
 import org.eclipse.ant.internal.ui.model.AntTaskNode;
 import org.eclipse.core.commands.Command;
 import org.eclipse.core.commands.ParameterizedCommand;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.bindings.TriggerSequence;
@@ -99,6 +107,7 @@ import org.w3c.dom.NodeList;
 
 import utils.ExtractorProvider;
 import utils.InputPropertiesManager;
+import utils.InputProperty;
 import utils.RhqConstants;
 import utils.RhqPathExtractor;
 
@@ -460,6 +469,31 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
             		 currentProposalMode= PROPOSAL_MODE_NONE;
             	} else {
             		proposals= getTaskProposals(document, parentName, prefix);
+            		System.out.println("+++++++++++++");
+            		
+//            		DocumentProvider dp = DocumentProvider.getInstance();
+//            		dp.setDoc(viewer.getDocument());
+//            		
+//            		Object obj = antModel.getProjectNode();
+//            		if(obj instanceof AntElementNode){
+//            			System.out.println("instance");
+//            			AntElementNode node =(AntElementNode) obj;
+//            			System.out.println(node.getName());
+//            			for(Object o : node.getChildNodes()){
+//            				
+//            			}
+//            		}
+//            		File file = antModel.getEditedFile();
+//            		try {
+//						BufferedReader reader = new BufferedReader( new InputStreamReader(new  DataInputStream(new FileInputStream(file))));
+//						String line;
+//						while((line = reader.readLine()) != null)
+//							System.out.println(line);
+//            		} catch (IOException ex) {
+//            			System.out.println(ex.getMessage());
+//						System.out.println("read error");
+//					}
+            		System.out.println("[[[[[[[[[[[[[");
 //            		printPaths();
 //            		proposals = addRhqTasks(document, proposals, prefix);
 //            		List<ICompletionProposal> xxx = new ArrayList<ICompletionProposal>();
@@ -1110,27 +1144,32 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
             }
         }
 //ADDED input-properties to proposal
-        InputPropertiesManager ips = new InputPropertiesManager(antModel.getFile().getProject());
-        ArrayList<String> arrayProperties= ips.getInputPropertiesFromRecipe();
-        //rhq.deploy.dir is not in recipe
-        arrayProperties.add(RhqConstants.RHQ_DEPLOY_DIR);
-        for(String inputProperty: arrayProperties){
-        	 if(!inputProperty.startsWith(prefix))
+        InputPropertiesManager ips = new InputPropertiesManager(antModel.getFile().getProject().getName());
+        ArrayList<InputProperty> arrayProperties;
+		try {
+			
+			arrayProperties = ips.getInputPropertiesFromRecipe(false);
+		
+        for(InputProperty inputProperty: arrayProperties){
+        	 if(inputProperty.getName() == null || !inputProperty.getName().startsWith(prefix))
         		 continue;
         	 StringBuffer replacementString = new StringBuffer();
              if (appendBraces) {
              	replacementString.append("${"); //$NON-NLS-1$
              }
-             replacementString.append(inputProperty);
+             replacementString.append(inputProperty.getName());
              if (appendBraces) {
              	replacementString.append('}');
              }
         	
         	ICompletionProposal proposal = new AntCompletionProposal(
         			replacementString.toString(), replacementOffset, replacementLength, 
-        		    replacementString.length(), image, inputProperty, null, AntCompletionProposal.PROPERTY_PROPOSAL);
+        		    replacementString.length(), image, inputProperty.getName(), null, AntCompletionProposal.PROPERTY_PROPOSAL);
         	proposals.add(proposal);
         }
+		} catch (CoreException e) {
+			//FIXME handle error
+		}
 
        
        

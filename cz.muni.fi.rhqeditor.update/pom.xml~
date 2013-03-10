@@ -7,7 +7,7 @@
   <parent>
     <groupId>cz.muni.fi.rhqeditor</groupId>
     <artifactId>parent</artifactId>
-    <version>0.0.1</version>
+    <version>1.0.0.qualifier</version>
   </parent>
   
   <artifactId>cz.muni.fi.rhqeditor.update</artifactId>

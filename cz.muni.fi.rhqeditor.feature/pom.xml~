@@ -11,6 +11,6 @@
   </parent>
   
   <artifactId>cz.muni.fi.rhqeditor.feature</artifactId>
-  <version>0.0.2</version>
+  <version>0.0.1</version>
   <packaging>eclipse-feature</packaging>
 </project>

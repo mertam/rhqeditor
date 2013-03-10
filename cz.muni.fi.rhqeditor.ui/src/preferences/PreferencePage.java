@@ -1,5 +1,6 @@
 package preferences;
 
+import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.FileFieldEditor;
 import org.eclipse.ui.IWorkbench;
@@ -24,7 +25,16 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 
 	@Override
 	protected void createFieldEditors() {
-		addField(new FileFieldEditor(RhqConstants.RHQ_DEPLOYER_PATH, "Path to the standlalone deployer", getFieldEditorParent()));
+		
+		BooleanFieldEditor booleanEditor = new BooleanFieldEditor(
+				RhqConstants.RHQ_USE_DEFAULT_DEPLOYER, "Use default standalone editor (version 4.5.1)", getFieldEditorParent());
+		booleanEditor.setFocus();
+		addField(booleanEditor);
+		
+		
+		FileFieldEditor fileEditor = new FileFieldEditor(
+				RhqConstants.RHQ_DEPLOYER_PATH, "Path to the external deployer", getFieldEditorParent());
+		addField(fileEditor);
 		
 	}
 

@@ -1,5 +1,6 @@
 package utils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,6 +13,7 @@ public class ExtractorProvider {
 
 	    private static final ExtractorProvider instance = new ExtractorProvider();
 	    private Map<IProject,RhqPathExtractor> map;
+	    
 	    
 	    private ExtractorProvider() {
 	    	map = new HashMap<IProject, RhqPathExtractor>();
@@ -28,5 +30,14 @@ public class ExtractorProvider {
 	    public Map<IProject,RhqPathExtractor> getMap(){
 	    	return Collections.unmodifiableMap(map);
 	    }	    
-	
+	    
+		public String[] listProjects(){
+			ArrayList<String> projects = new ArrayList<>();
+			for(IProject proj: map.keySet()){
+				projects.add(proj.getName());
+			}
+			
+			Collections.sort(projects);
+			return projects.toArray(new String[projects.size()]);
+		}
 }

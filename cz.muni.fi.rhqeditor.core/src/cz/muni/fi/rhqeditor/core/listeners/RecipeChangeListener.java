@@ -121,7 +121,7 @@ public class RecipeChangeListener implements IResourceChangeListener{
 					//handle refactoring file
 					addedResourcePath = path;
 					if(removedResourcePath != null){
-						renameFileInRecipe(addedResourcePath, removedResourcePath, project);
+//						renameFileInRecipe(addedResourcePath, removedResourcePath, project);
 					}
 				}
 				break;
@@ -141,7 +141,7 @@ public class RecipeChangeListener implements IResourceChangeListener{
 				removedResourcePath = currentDelta.getFullPath();
 				removedResourcePath = removedResourcePath.removeFirstSegments(1);
 				if(addedResourcePath != null){
-					renameFileInRecipe(addedResourcePath, removedResourcePath, project);
+//					renameFileInRecipe(addedResourcePath, removedResourcePath, project);
 				}
 				
 				break;
@@ -159,35 +159,35 @@ public class RecipeChangeListener implements IResourceChangeListener{
 	 * @param addedResourcePath
 	 * @param removedResourcePath
 	 */
-	private void renameFileInRecipe( IPath addedResourcePath, IPath removedResourcePath, IProject proj){
-		StringBuilder sb = RecipeReader.readRecipe(proj);
-		
-		//some error occured
-		if(sb == null)
-			return;
-		
-		
-		
-        Pattern pattern = 
-        Pattern.compile("file2.txt");
-        System.out.println(pattern.toString());
-        Matcher matcher = 
-        pattern.matcher(sb.toString());
-
-        boolean found = false;
-        while (matcher.find()) {
-        	System.out.println(matcher.start());
-        	System.out.println("found");
-        }
-        if(!found){
-            System.out.println("not found");
-        }
-		
-		String content = sb.toString();
-		content.replaceAll(removedResourcePath.toString(), addedResourcePath.toString());
-		RecipeReader.setRecipeContent(proj, content);
-	}
-	
+//	private void renameFileInRecipe( IPath addedResourcePath, IPath removedResourcePath, IProject proj){
+//		StringBuilder sb = RecipeReader.readRecipe(proj);
+//		
+//		//some error occured
+//		if(sb == null)
+//			return;
+//		
+//		
+//		
+//        Pattern pattern = 
+//        Pattern.compile("file2.txt");
+//        System.out.println(pattern.toString());
+//        Matcher matcher = 
+//        pattern.matcher(sb.toString());
+//
+//        boolean found = false;
+//        while (matcher.find()) {
+//        	System.out.println(matcher.start());
+//        	System.out.println("found");
+//        }
+//        if(!found){
+//            System.out.println("not found");
+//        }
+//		
+//		String content = sb.toString();
+//		content.replaceAll(removedResourcePath.toString(), addedResourcePath.toString());
+//		RecipeReader.setRecipeContent(proj, content);
+//	}
+//	
 	
 }
 

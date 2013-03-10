@@ -2,7 +2,7 @@
 <feature
       id="cz.muni.fi.rhqeditor.feature"
       label="RHQ Editor"
-      version="0.0.1">
+      version="1.0.0.qualifier">
 
    <description url="http://www.example.com/description">
       Add description.
@@ -22,7 +22,7 @@
       
    <plugin
      id="cz.muni.fi.rhqeditor.core"
-     version="0.0.3"/>  
+     version="1.0.0.qualifier"/>  
 
 
 </feature>

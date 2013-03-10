@@ -105,6 +105,7 @@ import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.ContentOutline;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
+import utils.DocumentProvider;
 import utils.ExtractorProvider;
 import utils.RhqPathExtractor;
 
@@ -170,41 +171,27 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
 			
 //ADDED	markers analize
 			
-			
-//			if(getSourceViewerConfiguration() instanceof RhqEditorSourceViewerConfiguration){
-//				RhqEditorSourceViewerConfiguration viewerConf = (RhqEditorSourceViewerConfiguration)getSourceViewerConfiguration();
-//				fRhqPathExtractor = viewerConf.getPathExtractor();
-//				fRhqPathExtractor.setResource(getAntModel().getFile());
-//			}
-//			
-//			//resource is attached to extractor during first call of this
-//			if(!fRhqPathExtractor.hasResource()){
-//				fRhqPathExtractor.setResource(getAntModel().getFile());
-//			}
-
-			IDocument doc = getSourceViewer().getDocument();
-			
-//			ITextSelection select= (ITextSelection)getSourceViewer().getSelectionProvider().getSelection();
-			
-//			System.out.println(doc.get);
-				try{
-					if(fRhqAnnotationModel == null)
-						fRhqAnnotationModel = new RhqAnnotationModel(getAntModel().getFile());
-				}catch (Exception e) {
-					e.printStackTrace();
-				}
+			try{
+				if(fRhqAnnotationModel == null)
+					fRhqAnnotationModel = new RhqAnnotationModel(getAntModel().getFile());
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
 //			}
 			
-				
+			//if this is first change of recipe, init validator, path extractor and document provider
 			if(fRhqRecipeValidator == null){
 				fRhqRecipeValidator = new RhqRecipeValidator();
 				fRhqRecipeValidator.setAnnotationModel(fRhqAnnotationModel);
 				Map<IProject, RhqPathExtractor> m = ExtractorProvider.getInstance().getMap();
 				RhqPathExtractor ext = m.get(getAntModel().getFile().getProject());
-				fRhqRecipeValidator.setExtractor(ext);			
+				fRhqRecipeValidator.setExtractor(ext);	
+				fRhqRecipeValidator.setInputDocument(getSourceViewer().getDocument());
+				DocumentProvider provider = DocumentProvider.getInstance();
+				provider.attachDocumentToProject(getAntModel().getFile().getProject().getName(), getSourceViewer().getDocument());
 				
 			}
-			fRhqRecipeValidator.setInputDocument(doc);
+			
 //			fRhqRecipeValidator.setCoursorPosition(cursorPosition);
 			fRhqRecipeValidator.validateRecipe();
 //---------------------
@@ -627,19 +614,11 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
 		setCompatibilityMode(false);
 		
 
-		System.out.println("init editor");
+		
 		fMarkOccurrenceAnnotations= getPreferenceStore().getBoolean(AntEditorPreferenceConstants.EDITOR_MARK_OCCURRENCES);
 		fStickyOccurrenceAnnotations= getPreferenceStore().getBoolean(AntEditorPreferenceConstants.EDITOR_STICKY_OCCURRENCES);
 		
-		
-		
-		
 
-//ADDED pathExtractor, resource unknown here
-//		fRhqPathExtractor = new RhqPathExtractor();
-//		fRhqResourceChangeListener.setExtractor(fRhqPathExtractor);
-		
-//		ResourcesPlugin.getWorkspace().addResourceChangeListener(fRhqResourceChangeListener);
 		
 //ADDED set configuration and set path extractor
 		RhqEditorSourceViewerConfiguration sourceViewer = new RhqEditorSourceViewerConfiguration(this);
@@ -648,6 +627,7 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
 		setSourceViewerConfiguration(sourceViewer);
 		setDocumentProvider(AntUIPlugin.getDefault().getDocumentProvider());
 		
+
 		
 		fAntModelListener= new IAntModelListener() {
 

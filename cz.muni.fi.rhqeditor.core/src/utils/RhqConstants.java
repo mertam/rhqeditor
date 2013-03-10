@@ -55,6 +55,7 @@ public class RhqConstants {
 	//following tags should be displayed as paired tags in editor
 	public static final Set<String> RHQ_PAIRED_TAGS = new HashSet<String>(Arrays.asList(new String[] { 
 			RHQ_TYPE_ARCHIVE, 
+			RHQ_TYPE_BUNDLE,
 			RHQ_TYPE_DEPLOYMENT_UNIT, 
 			RHQ_TYPE_REPLACE,
 			RHQ_TYPE_IGNORE,
@@ -63,6 +64,16 @@ public class RhqConstants {
 	
 	public static final String RHQ_MARKER_TYPE = "cz.muni.fi.rhqeditor.ui.rhqproblemmarker";
 	
+	
+	public static final String RHQ_LAUNCH_CONFIGURATION_ID 			= "cz.muni.fi.rhqeditor.core.launchconfigurationtype";
+	public static final String RHQ_LAUNCH_ATTR_PROJECT 				= "cz.muni.fi.rhqditor.launchattr.project";
+	public static final String RHQ_LAUNCH_ATTR_USE_DEFAULT_DEPLOYER = "cz.muni.fi.rhqditor.launchattr.usedefaultdeployer";
+	public static final String RHQ_LAUNCH_ATTR_LOCAL_DEPLOYER 		= "cz.muni.fi.rhqditor.launchattr.localdeployer";
+	public static final String RHQ_LAUNCH_ATTR_LOCAL_DIRECTORY 		= "cz.muni.fi.rhqditor.launchattr.localdirectory";
+	public static final String RHQ_LAUNCH_ATTR_USE_LOCAL_DIRECTORY 	= "cz.muni.fi.rhqditor.launchattr.uselocaldirectory";
+	public static final String RHQ_LAUNCH_ATTR_INPUT_PROPERTY		= "cz.muni.fi.rhqditor.launchattr.inputproperty";
+	
+	public static final String RHQ_DEFAULT_DEPLOY_DIR_PATH			= "build";
 	
 	//used for handling persistent proterties
 	public static final String RHQ_PROPERTY_NODE = "rhq";

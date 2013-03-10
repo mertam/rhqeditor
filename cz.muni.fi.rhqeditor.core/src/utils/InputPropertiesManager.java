@@ -5,55 +5,103 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Plugin;
+import org.eclipse.jface.text.IDocument;
+
 
 public class InputPropertiesManager {
 
 	private IProject fProject;
 	
-	public InputPropertiesManager(IProject proj){
-		fProject = proj;
+	public InputPropertiesManager(String projectName){
+		fProject = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 	}
 	
+	
 	/**
-	 * @return StringBuffer containing while content of recipe
+	 * finds all input properties which have filled name. Implicitly searches in file stored in workspace, optionally can search 
+	 * in the IDocument of editor page if forceSearchOnSavedFile is true
+	 * 	 
+	 * @return List of all input properties from recipe
+	 * @throws CoreException when error during reading recipe occurs
 	 */
-
-
-	/**
-	 * finds all names of input properties in recipe
-	 * @return
-	 */
-	public ArrayList<String> getInputPropertiesFromRecipe(){
-		//collection of intput properties that should be displayed
-		ArrayList<String> propertyNames = new ArrayList<String>();
+	public ArrayList<InputProperty> getInputPropertiesFromRecipe(boolean forceSearchOnSavedFile) throws CoreException{
 		
-//		propertyNames.add(DEPLOY_DIR);
-		//find all input properties in recipe
-		StringBuilder sb = RecipeReader.readRecipe(fProject);
+		//init searched object
+		StringBuilder sb;
+		if(!forceSearchOnSavedFile){
+			DocumentProvider provider = DocumentProvider.getInstance();
+			IDocument document = provider.getDocument(fProject.getName());
+			String searchedContext = (document == null ? null : document.get());
+			if(searchedContext == null)
+				sb = RecipeReader.readRecipe(fProject);
+			else
+				sb = new StringBuilder(searchedContext);
+		}else{
+			sb = RecipeReader.readRecipe(fProject);
+		}
+		
 		
 		//find properties
 		Pattern pattern = Pattern.compile(RhqConstants.RHQ_TYPE_INPUT_PROPERTY + "\\s+[[\\w|\\s]*|=|\"|\\s]*name\\s*=\\s*\"");
         Matcher matcher = pattern.matcher(sb);
-
-        //add default properties
-        propertyNames.add(RhqConstants.RHQ_DEPLOY_NAME);
-        propertyNames.add(RhqConstants.RHQ_DEPLOY_ID);
-        propertyNames.add(RhqConstants.RHQ_DEPLOY_DIR);
         
-        while (matcher.find()) {
-        	//rhq:input-property....name="propname"...
+        ArrayList<InputProperty>  result = new ArrayList<>();
+        addDefaultProperties(result);
+        while(matcher.find()){
+        	InputProperty property = new InputProperty();
         	String toAdd = sb.substring(matcher.start());
-        	//name="propname"
-        	toAdd = toAdd.substring(toAdd.indexOf("name"));
-        	//propname
-        	int startQuotes = toAdd.indexOf("\"");
-        	int endQuotes = toAdd.indexOf("\"",startQuotes+1);
-        	toAdd = toAdd.substring(startQuotes+1,endQuotes);
-        	propertyNames.add(toAdd);
-        }	
-		return propertyNames;
+        	property.setName(getAttributeValue(toAdd, "name"));
+        	property.setType(getAttributeValue(toAdd, "type"));
+        	property.setDescription(getAttributeValue(toAdd, "description"));
+        	String required = getAttributeValue(toAdd, "required");
+
+        	if(required == null)
+        		property.setRequired(false);
+        	else if(required.equalsIgnoreCase("true"))
+        			property.setRequired(true);
+        		else
+        			property.setRequired(false);
+        	property.setValue(getAttributeValue(toAdd, "default"));
+        	result.add(property);
+        	
+        }
+		return result;
 	}
 	
+	private String getAttributeValue(String readFrom, String name){
+		int endIndex = readFrom.indexOf('>');
+		if(endIndex < 0)
+			return null;
+		
+		String property = readFrom.substring(0,endIndex);
+		Pattern pattern = Pattern.compile(name+"\\s*=\\s*\"");
+        Matcher matcher = pattern.matcher(property);
+        if (matcher.find()) {
+        	property = property.substring(matcher.start());
+        	int startQuotes = property.indexOf("\"");
+        	int endQuotes = property.indexOf("\"",startQuotes+1);
+        	
+        	return property.substring(startQuotes+1,endQuotes);
+        }
+        return null;
+	}
+	
+	private void addDefaultProperties(ArrayList<InputProperty> properties){
+		InputProperty dir = new InputProperty();
+		dir.setName(RhqConstants.RHQ_DEPLOY_DIR);
+		InputProperty id = new InputProperty();
+		id.setName(RhqConstants.RHQ_DEPLOY_ID);
+		InputProperty name = new InputProperty();
+		name.setName(RhqConstants.RHQ_DEPLOY_NAME);
+		properties.add(dir);
+		properties.add(id);
+		properties.add(name);
+		
+		
+	} 
 	
 	
 }
