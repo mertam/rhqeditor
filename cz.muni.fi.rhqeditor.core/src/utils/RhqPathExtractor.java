@@ -45,6 +45,8 @@ public class RhqPathExtractor {
 	
 	AtomicBoolean 				fShouldBeJobScheduled		= null;
 	
+	
+	
 	private String FILE_SEPARATOR = System.getProperty("file.separator");
 	
 	/**
@@ -197,6 +199,10 @@ public class RhqPathExtractor {
 	
 	}
 	
+	public boolean isPathToArchiveValid(IPath absolutePath){
+		return fAbsolutePathsArchives.contains(absolutePath);
+	}
+	
 	public List<IPath> getAllFiles(){
 		List<IPath> all = getAbsolutePathsArchives();
 		all.addAll(getAbsolutePathsFiles());
@@ -234,8 +240,11 @@ public class RhqPathExtractor {
 					
 		//iterates over files in project directory
 					for(IResource forResource : res){
-						if(forResource instanceof IFolder)
-							folders.push((IFolder)forResource);
+						if(forResource instanceof IFolder){
+						//ignore content of /.bin/ and /build/
+							if(!forResource.getName().equals(".bin") && !forResource.getName().equals("build"))
+								folders.push((IFolder)forResource);
+						}
 					else
 						manageResource(forResource);
 					}

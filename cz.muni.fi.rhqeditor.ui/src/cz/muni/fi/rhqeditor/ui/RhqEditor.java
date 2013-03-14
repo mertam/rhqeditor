@@ -280,7 +280,7 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
 		 * @see Job#run(org.eclipse.core.runtime.IProgressMonitor)
 		 */
 		public IStatus run(IProgressMonitor progressMonitor) {
-			
+			System.out.println("occurence");
 			fProgressMonitor= progressMonitor;
 			
 			if (isCanceled())
@@ -1339,8 +1339,7 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
 				removeOccurrenceAnnotations();
 			}
 			return;
-		}
-			
+		}	
 		fOccurrencesFinderJob= new OccurrencesFinderJob(document, positions, selection);
 		fOccurrencesFinderJob.run(new NullProgressMonitor());
 	}
@@ -1433,5 +1432,11 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
 				installOccurrencesFinder();
 			}
 		}
+	}
+	
+	
+	//ADDED
+	public IProject getProject(){
+		return fAntModel.getFile().getProject();
 	}
 }

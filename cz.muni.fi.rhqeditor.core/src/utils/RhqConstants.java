@@ -10,6 +10,8 @@ public class RhqConstants {
 	public static final int 	RHQ_VERSION_4_5_1 		= 0;
 	
 									
+	public static final String PLUGIN_UI_ID = "cz.muni.fi.rhqeditor.ui";
+	public static final String PLUGIN_CORE_ID = "cz.muni.fi.rhqeditor.core";
 	public static final String 	RHQ_NATURE_ID =  "cz.muni.fi.rhqeditor.natures.rhqeditornature";
 	public static final String	RHQ_PREFIX = "rhq:";
 	
@@ -70,7 +72,7 @@ public class RhqConstants {
 	public static final String RHQ_LAUNCH_ATTR_USE_DEFAULT_DEPLOYER = "cz.muni.fi.rhqditor.launchattr.usedefaultdeployer";
 	public static final String RHQ_LAUNCH_ATTR_LOCAL_DEPLOYER 		= "cz.muni.fi.rhqditor.launchattr.localdeployer";
 	public static final String RHQ_LAUNCH_ATTR_LOCAL_DIRECTORY 		= "cz.muni.fi.rhqditor.launchattr.localdirectory";
-	public static final String RHQ_LAUNCH_ATTR_USE_LOCAL_DIRECTORY 	= "cz.muni.fi.rhqditor.launchattr.uselocaldirectory";
+	public static final String RHQ_LAUNCH_ATTR_USE_DEFAULT_DIRECTORY 	= "cz.muni.fi.rhqditor.launchattr.usedefaultdirectory";
 	public static final String RHQ_LAUNCH_ATTR_INPUT_PROPERTY		= "cz.muni.fi.rhqditor.launchattr.inputproperty";
 	
 	public static final String RHQ_DEFAULT_DEPLOY_DIR_PATH			= "build";
@@ -85,5 +87,9 @@ public class RhqConstants {
 	public static final String RHQ_USE_DEFAULT_DEPLOYER = "rhq.default.deployer";
 	
 	public static final String NOT_FOUND = "not found";
+	
+	public static final String RHQ_STANDALONE_DEPLOYER = "rhq-bundle-deployer-4.6.0.zip";
+	public static final String RHQ_DEFAULT_BUILD_DIR = ".bin";
+	public static final String RHQ_DEFAULT_DEPLOY_DIR = "build";
 
 }

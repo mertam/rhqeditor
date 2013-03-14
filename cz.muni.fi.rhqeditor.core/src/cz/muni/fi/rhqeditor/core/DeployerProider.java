@@ -15,6 +15,8 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import utils.RhqConstants;
+
 
 /**
  * class represents singleton provider, which creates and holds information about Deployer in temp direcory
@@ -24,7 +26,7 @@ import java.util.zip.ZipFile;
 public class DeployerProider {
 	
     private static final DeployerProider instance = new DeployerProider();
-    private Path deployerDirPath = null;
+    private String deployerDirPath = null;
     private Path deployerPath = null;
     private static String FILE_SEPARATOR = System.getProperty("file.separator");
     
@@ -36,12 +38,12 @@ public class DeployerProider {
         return instance;
     }
     
-    public Path getDirectory(){
+    public String getDirectory(){
     	return deployerDirPath;
     }
     
     public void setDirectory(String prefix) throws IOException{
-    	deployerDirPath = Files.createTempDirectory(prefix);
+    	deployerDirPath = Files.createTempDirectory(prefix).toString();
     }
     
     public Path getDeployerPath(){
@@ -62,19 +64,21 @@ public class DeployerProider {
     		
     		setDirectory("deployer");
 			InputStream in = zippedDeployer.openStream();													
-			String pathToArchive = deployerDirPath.toString() + FILE_SEPARATOR + "rhq-bundle-deployer-4.5.1.zip";
+			String pathToArchive = deployerDirPath.toString() + FILE_SEPARATOR + RhqConstants.RHQ_STANDALONE_DEPLOYER;
 			FileOutputStream out = new FileOutputStream(new File(pathToArchive));
 			copyInputStream(in, out);
 			unzipFile(pathToArchive);
 			
 			out.close();
 			in.close();
+			//removes .zip
+			String deployerDir = RhqConstants.RHQ_STANDALONE_DEPLOYER.toString().substring(0,RhqConstants.RHQ_STANDALONE_DEPLOYER.length() - 4);
 			if(System.getProperty("os.name").equals("Windows"))
 				deployerPath = FileSystems.getDefault().getPath(deployerDirPath +FILE_SEPARATOR+
-						"rhq-bundle-deployer-4.5.1"+FILE_SEPARATOR+"bin"+FILE_SEPARATOR+"rhq-ant.bat");
+						deployerDir+FILE_SEPARATOR+"bin"+FILE_SEPARATOR+"rhq-ant.bat");
 			else
 	    		deployerPath = FileSystems.getDefault().getPath(deployerDirPath +FILE_SEPARATOR+
-	    				"rhq-bundle-deployer-4.5.1"+FILE_SEPARATOR+"bin"+FILE_SEPARATOR+"rhq-ant");
+	    				deployerDir+FILE_SEPARATOR+"bin"+FILE_SEPARATOR+"rhq-ant");
 			
 			setPermisions();
 		} catch (IOException e) {

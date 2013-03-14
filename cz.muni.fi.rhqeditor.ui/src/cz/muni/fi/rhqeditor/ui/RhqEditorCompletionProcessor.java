@@ -63,6 +63,7 @@ import org.eclipse.ant.internal.ui.model.AntTaskNode;
 import org.eclipse.core.commands.Command;
 import org.eclipse.core.commands.ParameterizedCommand;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -93,6 +94,7 @@ import org.eclipse.jface.text.templates.TemplateProposal;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IMarkerActionFilter;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
@@ -474,7 +476,27 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
 //            		DocumentProvider dp = DocumentProvider.getInstance();
 //            		dp.setDoc(viewer.getDocument());
 //            		
-//            		Object obj = antModel.getProjectNode();
+            		Object obj = antModel.getProjectNode();
+            		try {
+            			int m= antModel.getFile().findMaxProblemSeverity(AntUIPlugin.PI_ANTUI + ".buildFileProblem", true, 100);
+            			switch(m){
+            			case IMarker.SEVERITY_ERROR:
+            				System.out.println("error");break;
+            			case IMarker.SEVERITY_WARNING:
+            				System.out.println("warning");break;
+            			case IMarker.SEVERITY_INFO:
+            				System.out.println("info");break;
+            			case -1:
+            				System.out.println("-1");
+            			}
+            			IMarker mm[] = antModel.getFile().findMarkers(AntUIPlugin.PI_ANTUI + ".buildFileProblem", true, 100);
+            			for(IMarker marker:mm){
+            				System.out.println(marker.getType());
+            			}
+					} catch (CoreException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 //            		if(obj instanceof AntElementNode){
 //            			System.out.println("instance");
 //            			AntElementNode node =(AntElementNode) obj;
@@ -1166,16 +1188,52 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
         			replacementString.toString(), replacementOffset, replacementLength, 
         		    replacementString.length(), image, inputProperty.getName(), null, AntCompletionProposal.PROPERTY_PROPOSAL);
         	proposals.add(proposal);
+        	
         }
 		} catch (CoreException e) {
 			//FIXME handle error
 		}
 
-       
+		//add replacement properties
+    	for(String property: fRhqReplacementProperties){
+    		 if(property == null || !property.startsWith(prefix))
+        		 continue;
+        	 StringBuffer replacementString = new StringBuffer();
+             if (appendBraces) {
+             	replacementString.append("${"); //$NON-NLS-1$
+             }
+             replacementString.append(property);
+             if (appendBraces) {
+             	replacementString.append('}');
+             }
+    		ICompletionProposal proposal = new AntCompletionProposal(
+        			replacementString.toString(), replacementOffset, replacementLength, 
+        		    replacementString.length(), image, property, null, AntCompletionProposal.PROPERTY_PROPOSAL);
+        	proposals.add(proposal);
+    	}
        
 		return (ICompletionProposal[])proposals.toArray(new ICompletionProposal[proposals.size()]);          
     }
-
+//ADDED
+    private static ArrayList<String> fRhqReplacementProperties = new ArrayList<>(Arrays.asList(new String[] {
+    		"rhq.system.sysprop.java.io.tmpdir",
+    		"rhq.system.sysprop.file.separator",
+    		"rhq.system.sysprop.line.separator",
+    		"rhq.system.sysprop.path.separator",
+    		"rhq.system.sysprop.java.home",
+    		"rhq.system.sysprop.java.version",
+    		"rhq.system.sysprop.user.timezone",
+    		"rhq.system.sysprop.user.region",
+    		"rhq.system.sysprop.user.country",
+    		"rhq.system.sysprop.user.language",
+    		"rhq.system.hostname",
+    		"rhq.system.os.name",
+    		"rhq.system.os.version",
+    		"rhq.system.os.type",
+    		"rhq.system.architecture",
+    		"rhq.system.cpu.count",
+    		"rhq.system.interfaces.java.address" 
+    } ));
 
     /**
      * Returns all possible proposals for the specified parent name.

@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: cz.muni.fi.rhqeditor.core
+Bundle-Name: Core
 Bundle-SymbolicName: cz.muni.fi.rhqeditor.core;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: cz.muni.fi.rhqeditor.core.Activator
@@ -11,7 +11,9 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.debug.core;bundle-version="3.7.100",
  org.eclipse.jface.text;bundle-version="3.8.1"
 Bundle-ActivationPolicy: lazy
-Import-Package: org.eclipse.core.resources
+Import-Package: org.eclipse.core.resources,
+ org.eclipse.jface.resource
 Export-Package: cz.muni.fi.rhqeditor.core,
+ cz.muni.fi.rhqeditor.core.launch,
  utils
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7

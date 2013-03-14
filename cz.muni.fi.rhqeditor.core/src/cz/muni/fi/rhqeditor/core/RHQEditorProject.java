@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspace;
@@ -14,11 +15,8 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchConfigurationType;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.debug.core.ILaunchManager;
+
+import cz.muni.fi.rhqeditor.core.launch.LaunchConfigurationsManager;
 
 import utils.RhqConstants;
 
@@ -45,21 +43,27 @@ public class RHQEditorProject {
 	
 		IProjectDescription description = project.getDescription();
 		String[] natures = description.getNatureIds();
-		String[] newNatures = new String[natures.length + 1];
 		
-		System.out.println("point 1");
-
-		System.arraycopy(natures, 0, newNatures, 0, natures.length);
-		newNatures[natures.length] = RhqConstants.RHQ_NATURE_ID;
+		boolean addRhqNature = true;
 		
-	
-		
-		IStatus status = workspace.validateNatureSet(newNatures);
-		if(!status.isOK()){
-			System.out.println(status.toString());
-			throw new CoreException(status);
+		//checks whether project already has rhq nature. 
+		//(In case of creating project which was deleted from workspace, not from file system)
+		for(String natrue: natures){
+			if(natrue.equals(RhqConstants.RHQ_NATURE_ID))
+				addRhqNature = false;
 		}
-	    description.setNatureIds(newNatures);
+		if(addRhqNature){
+			String[] newNatures = new String[natures.length + 1];
+			System.arraycopy(natures, 0, newNatures, 0, natures.length);
+			newNatures[natures.length] = RhqConstants.RHQ_NATURE_ID;
+		
+			IStatus status = workspace.validateNatureSet(newNatures);
+			if(!status.isOK()){
+				System.out.println(status.toString());
+				throw new CoreException(status);
+			}
+	    	description.setNatureIds(newNatures);
+		}
 	    project.setDescription(description, null);
 	    this.createDefaultRecipe(strProjectName);
 	    
@@ -67,7 +71,7 @@ public class RHQEditorProject {
 	    scanner.initProject(project);
 
 	    
-	    RhqLaunchConfigurationDelegate.createNewLaunchConfiguration(strProjectName);
+	    LaunchConfigurationsManager.createNewLaunchConfiguration(strProjectName);
 		
 	}
 	
@@ -83,13 +87,20 @@ public class RHQEditorProject {
 		IProject project = root.getProject(projectName);
 		
 		IFile recipe = project.getFile("deploy.xml");
+		if(!recipe.exists()){
 		
-		
-	    String str = "<?xml version=\"1.0\"?>"+ System.getProperty("line.separator")+
-	    "<project name=\"test-bundle\" default=\"main\" xmlns:rhq=\"antlib:org.rhq.bundle\">"+
-	    System.getProperty("line.separator")+"</project>";
-	    InputStream is = new ByteArrayInputStream(str.getBytes());
-	    recipe.create(is, true, null);
+			String str = "<?xml version=\"1.0\"?>"+ System.getProperty("line.separator")+
+					"<project name=\"test-bundle\" default=\"main\" xmlns:rhq=\"antlib:org.rhq.bundle\">"+
+					System.getProperty("line.separator")+"<target name=\"main\"/>"+  System.getProperty("line.separator")+
+					"</project>";
+			InputStream is = new ByteArrayInputStream(str.getBytes());
+			recipe.create(is, true, null);
+		}
+	    //create default deploy dir 
+	    IFolder folder = project.getFolder(".bin");
+	    if(!folder.exists())
+	    	folder.create(true, true, null);
+	    
 	    
 
 	}

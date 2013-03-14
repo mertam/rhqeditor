@@ -4,13 +4,13 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import utils.RhqConstants;
+
 /**
  * The activator class controls the plug-in life cycle
  */
 public class UiActivator extends AbstractUIPlugin {
 
-	// The plug-in ID
-	public static final String PLUGIN_ID = "cz.muni.fi.rhqeditor.ui"; //$NON-NLS-1$
 
 	// The shared instance
 	private static UiActivator plugin;
@@ -58,7 +58,7 @@ public class UiActivator extends AbstractUIPlugin {
 	*/
 	public static ImageDescriptor getImageDescriptor(String path) {
 		
-		return imageDescriptorFromPlugin(PLUGIN_ID, path);
+		return imageDescriptorFromPlugin(RhqConstants.PLUGIN_UI_ID, path);
 	}
 
 }

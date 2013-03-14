@@ -1,132 +1,86 @@
 package cz.muni.fi.rhqeditor.ui.launch;
 
-import java.io.IOException;
-
 import org.eclipse.core.internal.resources.File;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.ui.ILaunchShortcut2;
+import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.ui.ILaunchShortcut;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.console.ConsolePlugin;
-import org.eclipse.ui.console.IConsole;
-import org.eclipse.ui.console.IConsoleConstants;
-import org.eclipse.ui.console.IConsoleManager;
-import org.eclipse.ui.console.IConsoleView;
-import org.eclipse.ui.console.MessageConsole;
-import org.eclipse.ui.console.MessageConsoleStream;
 
-import utils.StandaloneDeployer;
-
-
+import utils.RhqConstants;
+import cz.muni.fi.rhqeditor.core.launch.LaunchConfigurationsManager;
+import cz.muni.fi.rhqeditor.ui.RhqEditor;
 
 /**
  * 
  * @author syche
- *
+ * 
  */
-public class LunchShortcut implements ILaunchShortcut2{
+public class LunchShortcut implements ILaunchShortcut {
 
 	@Override
 	public void launch(ISelection selection, String mode) {
-
-		MessageConsole mc = findConsole("std");
-		mc.clearConsole();
-		MessageConsoleStream out = mc.newMessageStream();
-		
-		IWorkbench wb = PlatformUI.getWorkbench();
-		IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
-		IWorkbenchPage page = win.getActivePage();
-		
-
-		String id = IConsoleConstants.ID_CONSOLE_VIEW;
-		IConsoleView view;
-		try {
-			view = (IConsoleView) page.showView(id);
-			view.display(mc);
-		} catch (PartInitException e1) {
-			e1.printStackTrace();
-		}
-		
-        
-		IProject project = null;
-        if(selection instanceof IStructuredSelection){
-        	IStructuredSelection structuredSelection = (IStructuredSelection) selection;
-        	Object firstElement = structuredSelection.getFirstElement();
-        	
-        	if(firstElement instanceof File) {
-        		File file = (File) firstElement;
-        		project = file.getProject();
-        	}else if (firstElement instanceof IAdaptable) {
-        		project = (IProject)((IAdaptable)firstElement).getAdapter(IProject.class);
-        	}
-        }
-        
-        System.out.println("");
-        StandaloneDeployer sd = new StandaloneDeployer();
-        sd.setProject(project);
-        sd.setMessageConsoleStream(out);
-//        sd.deploy();
-//        try {
-//			out.close();
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-		
+		IProject project = getProjectFromSelection(selection);
+		launch(project);
 	}
 
 	@Override
 	public void launch(IEditorPart editor, String mode) {
-		// TODO Auto-generated method stub
-		
+		if (editor instanceof RhqEditor) {
+			IProject project = ((RhqEditor) editor).getProject();
+			launch(project);
+		}
+
 	}
 
-	@Override
-	public ILaunchConfiguration[] getLaunchConfigurations(ISelection selection) {
-		// TODO Auto-generated method stub
-		return null;
+	private ILaunchConfiguration[] getLaunchConfigurations(IProject project) {
+		return LaunchConfigurationsManager.getConfigurationsForProject(project);
 	}
 
-	@Override
-	public ILaunchConfiguration[] getLaunchConfigurations(IEditorPart editorpart) {
-		// TODO Auto-generated method stub
-		return null;
+	private void launch(IProject proj) {
+		ILaunchConfiguration configs[] = getLaunchConfigurations(proj);
+		if (configs.length < 1) {
+			ErrorDialog errorDialog = new ErrorDialog(new Shell(),
+					"Launch error",
+					"No launch configuration attached to project", new Status(
+							IStatus.ERROR, RhqConstants.PLUGIN_UI_ID, 
+							"No launch configuration attached to project "+proj.getName()),
+					IStatus.ERROR);
+			errorDialog.create();
+			errorDialog.open();
+
+		} else {
+			try {
+				configs[0].launch(ILaunchManager.RUN_MODE, null);
+			} catch (CoreException e) {
+				e.printStackTrace();
+			}
+		}
+
 	}
 
-	@Override
-	public IResource getLaunchableResource(ISelection selection) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	private IProject getProjectFromSelection(ISelection selection) {
+		IProject project = null;
+		if (selection instanceof IStructuredSelection) {
+			IStructuredSelection structuredSelection = (IStructuredSelection) selection;
+			Object firstElement = structuredSelection.getFirstElement();
 
-	@Override
-	public IResource getLaunchableResource(IEditorPart editorpart) {
-		// TODO Auto-generated method stub
-		return null;
+			if (firstElement instanceof File) {
+				File file = (File) firstElement;
+				project = file.getProject();
+			} else if (firstElement instanceof IAdaptable) {
+				project = (IProject) ((IAdaptable) firstElement)
+						.getAdapter(IProject.class);
+			}
+		}
+		return project;
 	}
-	
-   private MessageConsole findConsole(String name) {
-	      ConsolePlugin plugin = ConsolePlugin.getDefault();
-	      IConsoleManager conMan = plugin.getConsoleManager();
-	      IConsole[] existing = conMan.getConsoles();
-	      for (int i = 0; i < existing.length; i++)
-	         if (name.equals(existing[i].getName()))
-	            return (MessageConsole) existing[i];
-	      //no console found, so create a new one
-	      MessageConsole myConsole = new MessageConsole(name, null);
-	      conMan.addConsoles(new IConsole[]{myConsole});
-	      return myConsole;
-	   }
-
 }

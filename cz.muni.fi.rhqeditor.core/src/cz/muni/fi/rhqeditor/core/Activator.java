@@ -8,7 +8,6 @@ import org.osgi.framework.BundleContext;
 public class Activator implements BundleActivator {
 
 	private static BundleContext context;
-	public static final String UI_PLUGIN_ID = "cz.muni.fi.rhqeditor.ui";
 
 	static BundleContext getContext() {
 		return context;

@@ -157,7 +157,7 @@ public class LaunchMainTab extends AbstractLaunchConfigurationTab {
 
 			flocalDeployer = configuration.getAttribute(
 					RhqConstants.RHQ_LAUNCH_ATTR_LOCAL_DEPLOYER,
-					RhqConstants.NOT_FOUND);
+					"");
 			fUseDefault = configuration.getAttribute(
 					RhqConstants.RHQ_LAUNCH_ATTR_USE_DEFAULT_DEPLOYER, true);
 
@@ -171,10 +171,7 @@ public class LaunchMainTab extends AbstractLaunchConfigurationTab {
 					selectedIndex = i;
 			}
 
-			if (flocalDeployer.equals(RhqConstants.NOT_FOUND))
-				fTextDeployerPath.setText("");
-			else
-				fTextDeployerPath.setText(flocalDeployer);
+			fTextDeployerPath.setText(flocalDeployer);
 
 			fComboProject.select(selectedIndex);
 			fBtnUseDafaultDeployer.setSelection(fUseDefault);

@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Stack;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -45,9 +46,10 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 	//contains all rhq tasks and required atts
 	private static HashMap<String, ArrayList<String> >   fRequiredAtts = null;
 	
+	private static final String EMPTY_STRING = "";
+	private Stack<String> openElements;
 	Locator locator;
 	
-	private final String EMPTY_STRING = "";
 	
 	
 	/**
@@ -58,6 +60,7 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 	 */
 	public RhqRecipeValidator() {
 		setRequiredAtts();
+		openElements = new Stack<>();
 		fRequiredTargets = new HashMap<String, Integer>();
 		fExistingTargets = new HashMap<String, Integer>();
 		try {			
@@ -100,7 +103,7 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 			}
 			
 		} catch (SAXException e) {
-			//do nothing
+			//do nothing if document isn't well formed
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
 			// TODO Auto-generated catch block
@@ -119,6 +122,7 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 			fOpenArchiveName = null;
 			fExistingTargets.clear();
 			fRequiredTargets.clear();
+			
 
 	}
 	
@@ -130,6 +134,8 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 	@Override
 	public void startElement(String uri, String localName, String qName,
 			Attributes attributes) throws SAXException {
+		
+		
 		//managing targets
 		String attrValue;
 		IPath attrPath ;
@@ -148,6 +154,14 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 			
 		case RhqConstants.RHQ_TYPE_ARCHIVE:
 			manageAttributesAndSetMarkers(qName, attributes);
+			
+			attrValue = attributes.getValue("name");
+			if(attrValue == null)
+				break;
+			attrPath = new Path(attrValue);
+			
+			if(!fRhqPathExtractor.isPathToArchiveValid(attrPath))
+				fRhqAnnotationModel.addMarker(locator.getLineNumber(), "Archive not found", IMarker.SEVERITY_WARNING);
  			fOpenArchiveName = null;
 			attrValue = attributes.getValue(RhqConstants.RHQ_ATTRIBUTE_NAME);
 			if(attrValue == null){
@@ -161,6 +175,11 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 		
 		case RhqConstants.RHQ_TYPE_FILESET:
 			manageAttributesAndSetMarkers(qName, attributes);
+			if(!openElements.peek().equals(RhqConstants.RHQ_TYPE_IGNORE) &&
+					!openElements.peek().equals(RhqConstants.RHQ_TYPE_REPLACE)){
+				fRhqAnnotationModel.addMarker(locator.getLineNumber(), "Misplaced element "+RhqConstants.RHQ_TYPE_FILESET, IMarker.SEVERITY_WARNING);
+				break;
+			}
 		
 			attrValue = attributes.getValue("includes");
 			//includes not found or no parent archive open
@@ -175,14 +194,8 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 					fRhqAnnotationModel.addMarker(locator.getLineNumber(), "There's no such file in archive", IMarker.SEVERITY_WARNING);
 			}
 			
-			
-			
-			
-			
-//				if(!fRhqPathExtractor.isPathToArchiveFileValid(attrPath, fOpenArchiveName))
-//					fRhqAnnotationModel.addMarker(locator.getLineNumber(), "There's no such file in archive", IMarker.SEVERITY_WARNING);
-//			}
 			break;
+		
 		
 			
 		case RhqConstants.RHQ_ELEMENT_TARGET:
@@ -203,21 +216,35 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 			
 			attrPath = new Path(attrValue);
 
-			if(fOpenArchiveName == null){
-				//handling simple <rhq:file name=".."
-				if(!fRhqPathExtractor.isPathToFileValid(attrPath))
-					fRhqAnnotationModel.addMarker(locator.getLineNumber(), "File not found", IMarker.SEVERITY_WARNING);
-				break;
+			//file can have only one of following
+			if(attributes.getIndex("destinationFile") > -1 && attributes.getIndex("destinationDir") > -1){
+				fRhqAnnotationModel.addMarker(locator.getLineNumber(), 
+						"File can't have specified destinationFile and destinationDir at the same time", IMarker.SEVERITY_WARNING);
 			}
-			
-			if(fOpenArchiveName.equals(EMPTY_STRING)){
-					fRhqAnnotationModel.addMarker(locator.getLineNumber(), "Unrecognized path to archive", IMarker.SEVERITY_WARNING);
-			}else{
-				if(!fRhqPathExtractor.isPathToArchiveFileValid(attrPath, fOpenArchiveName))
-					fRhqAnnotationModel.addMarker(locator.getLineNumber(), "File not found in archive", IMarker.SEVERITY_WARNING);
-			}
+				
+			if(!fRhqPathExtractor.isPathToFileValid(attrPath))
+				fRhqAnnotationModel.addMarker(locator.getLineNumber(), "File not found", IMarker.SEVERITY_WARNING);			
 			break;
+
 			
+		case RhqConstants.RHQ_TYPE_URL_FILE:
+			manageAttributesAndSetMarkers(qName, attributes);
+			
+			if(attributes.getIndex("destinationFile") > -1 && attributes.getIndex("destinationDir") > -1){
+				fRhqAnnotationModel.addMarker(locator.getLineNumber(), 
+						"File can't have specified destinationFile and destinationDir at the same time", IMarker.SEVERITY_WARNING);
+			}
+			
+			break;
+		case RhqConstants.RHQ_TYPE_REPLACE:
+			manageAttributesAndSetMarkers(qName, attributes);
+			//replace must be direct descendant of archive
+			if(!openElements.peek().equals(RhqConstants.RHQ_TYPE_ARCHIVE) &&
+					!openElements.peek().equals(RhqConstants.RHQ_TYPE_URL_ARCHIVE)){
+				fRhqAnnotationModel.addMarker(locator.getLineNumber(), "Misplaced element "+RhqConstants.RHQ_TYPE_REPLACE, IMarker.SEVERITY_WARNING);
+			} 
+			break;
+		
 		case "include" :
 		case "exclude" :
 			
@@ -236,11 +263,17 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 			
 		    break;
 		}
+		openElements.push(qName);
 		super.startElement(uri, localName, qName, attributes);
 	}
 	
 	@Override
 	public void endElement(String uri, String localName, String qName) {
+		if(openElements.peek() != qName){
+			//this means not well formed document which will cause SAX exception anyway
+			return;
+		}
+		openElements.pop();
 		if(qName.equals(RhqConstants.RHQ_TYPE_ARCHIVE)){
 			fOpenArchiveName = null;
 		}
@@ -354,9 +387,9 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 		ArrayList<String> include = new ArrayList<>();
 		include.add("name");
 		fRequiredAtts.put("include", include);
-		fRequiredAtts.put("exclude", include);
-	
-		
+		fRequiredAtts.put("exclude", include);	
 	}
+	
+
 
 }

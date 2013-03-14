@@ -109,7 +109,7 @@
       <launchConfigurationType
             id="cz.muni.fi.rhqeditor.core.launchconfigurationtype"
             name="RHQ Bundle"
-            delegate="cz.muni.fi.rhqeditor.core.RhqLaunchConfigurationDelegate"
+            delegate="cz.muni.fi.rhqeditor.core.launch.RhqLaunchConfigurationDelegate"
             public="true"
             delegateName="delegateName"
             modes="run"
@@ -134,8 +134,32 @@
             type="cz.muni.fi.rhqeditor.core.launchconfigurationtype">
       </launchConfigurationTabGroup>
    </extension>
-   
- 
+
+
+<extension point="org.eclipse.ui.navigator.navigatorContent">
+    <commonFilter
+        description="Hides *.pj resources"
+        id="com.xyz.commonFilter.hidePj"
+        name="*.pj resources"
+        activeByDefault="true">
+        <filterExpression>
+            <and>
+                <adapt type="org.eclipse.core.resources.IResource">
+                    <test property="org.eclipse.core.resources.name" value="*.pj"/>
+                </adapt>
+            </and>
+        </filterExpression>
+    </commonFilter>
+</extension>
+<extension point="org.eclipse.ui.navigator.viewer">
+    <viewerContentBinding
+          viewerId="org.eclipse.ui.navigator.ProjectExplorer">
+          <includes>
+            <contentExtension pattern="com.xyz.commonFilter.hidePj"/> 
+          </includes>
+    </viewerContentBinding>
+</extension>
+
     
    
 </plugin>

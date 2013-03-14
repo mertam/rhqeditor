@@ -8,9 +8,10 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.internal.ui.MultipleInputDialog;
 import org.eclipse.debug.internal.ui.SWTFactory;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -26,14 +27,10 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
-
-import utils.DocumentProvider;
 import utils.InputPropertiesManager;
 import utils.InputProperty;
 import utils.RecipeReader;
 import utils.RhqConstants;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.ModifyEvent;
 
 public class LaunchPropertiesTab extends AbstractLaunchConfigurationTab{
 	
@@ -48,6 +45,7 @@ public class LaunchPropertiesTab extends AbstractLaunchConfigurationTab{
 	
 	private String		fProjectName;
 	private boolean 	fUseDefaultDir;
+	private String 		fLocalDirPath;
 	private final String EMPTY_VALUE = "";
 	/**
 	 * @wbp.parser.entryPoint
@@ -178,16 +176,23 @@ public class LaunchPropertiesTab extends AbstractLaunchConfigurationTab{
 					RhqConstants.NOT_FOUND);
 			
 			fUseDefaultDir = configuration.getAttribute(
-					RhqConstants.RHQ_LAUNCH_ATTR_USE_LOCAL_DIRECTORY,
-					false);
+					RhqConstants.RHQ_LAUNCH_ATTR_USE_DEFAULT_DIRECTORY,
+					true);
 					
 			if(fProjectName.equals(RhqConstants.NOT_FOUND))
 				return;
 			
+			fLocalDirPath = configuration.getAttribute(
+					RhqConstants.RHQ_LAUNCH_ATTR_LOCAL_DIRECTORY,
+					EMPTY_VALUE);
+			
 			fBtnUseDefaultRhqdeploydir.setText("Use default rhq.deploy.dir "+
 		        		fProjectName + System.getProperty("file.separator") + RhqConstants.RHQ_DEFAULT_DEPLOY_DIR_PATH);
 			fBtnUseDefaultRhqdeploydir.setSelection(fUseDefaultDir);
+			
+			fTxtDeployDir.setText(fLocalDirPath);
 			enableCustomDeployDirWidgets(!fUseDefaultDir);
+			fBtnUseDefaultRhqdeploydir.setSelection(fUseDefaultDir);
 			initializeTable(configuration);
 			
 			
@@ -199,7 +204,7 @@ public class LaunchPropertiesTab extends AbstractLaunchConfigurationTab{
 
 	@Override
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-		configuration.setAttribute(RhqConstants.RHQ_LAUNCH_ATTR_USE_LOCAL_DIRECTORY, fUseDefaultDir);
+		configuration.setAttribute(RhqConstants.RHQ_LAUNCH_ATTR_USE_DEFAULT_DIRECTORY, fBtnUseDefaultRhqdeploydir.getSelection());
 		configuration.setAttribute(RhqConstants.RHQ_LAUNCH_ATTR_LOCAL_DIRECTORY, fTxtDeployDir.getText());
 		applyInputProperties(configuration);
 		
