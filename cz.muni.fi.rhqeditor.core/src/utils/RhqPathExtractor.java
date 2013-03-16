@@ -73,6 +73,9 @@ public class RhqPathExtractor {
 		return (fProject != null ? true : false);
 	}
 	
+	public IProject getProject(){
+		return fProject;
+	}
 	/**
 	 * returns sorted list of Paths to all no-archives files in project
 	 * @return

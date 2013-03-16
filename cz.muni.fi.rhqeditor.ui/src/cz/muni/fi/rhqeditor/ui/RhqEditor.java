@@ -189,7 +189,6 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
 				fRhqRecipeValidator.setInputDocument(getSourceViewer().getDocument());
 				DocumentProvider provider = DocumentProvider.getInstance();
 				provider.attachDocumentToProject(getAntModel().getFile().getProject().getName(), getSourceViewer().getDocument());
-				
 			}
 			
 //			fRhqRecipeValidator.setCoursorPosition(cursorPosition);

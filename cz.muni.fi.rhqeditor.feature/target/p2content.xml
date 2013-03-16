@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <units size='2'>
-  <unit id='cz.muni.fi.rhqeditor.feature.feature.group' version='0.0.1' singleton='false'>
-    <update id='cz.muni.fi.rhqeditor.feature.feature.group' range='[0.0.0,0.0.1)' severity='0'/>
+  <unit id='cz.muni.fi.rhqeditor.feature.feature.group' version='1.0.0.201303161615' singleton='false'>
+    <update id='cz.muni.fi.rhqeditor.feature.feature.group' range='[0.0.0,1.0.0.201303161615)' severity='0'/>
     <properties size='7'>
       <property name='org.eclipse.equinox.p2.name' value='RHQ Editor'/>
       <property name='org.eclipse.equinox.p2.description' value='Add description.'/>
@@ -9,15 +9,15 @@
       <property name='org.eclipse.equinox.p2.type.group' value='true'/>
       <property name='maven-groupId' value='cz.muni.fi.rhqeditor'/>
       <property name='maven-artifactId' value='cz.muni.fi.rhqeditor.feature'/>
-      <property name='maven-version' value='0.0.1'/>
+      <property name='maven-version' value='1.0.0-SNAPSHOT'/>
     </properties>
     <provides size='1'>
-      <provided namespace='org.eclipse.equinox.p2.iu' name='cz.muni.fi.rhqeditor.feature.feature.group' version='0.0.1'/>
+      <provided namespace='org.eclipse.equinox.p2.iu' name='cz.muni.fi.rhqeditor.feature.feature.group' version='1.0.0.201303161615'/>
     </provides>
     <requires size='3'>
-      <required namespace='org.eclipse.equinox.p2.iu' name='cz.muni.fi.rhqeditor.ui' range='[1.0.0.201303041639,1.0.0.201303041639]'/>
-      <required namespace='org.eclipse.equinox.p2.iu' name='cz.muni.fi.rhqeditor.core' range='[0.0.3,0.0.3]'/>
-      <required namespace='org.eclipse.equinox.p2.iu' name='cz.muni.fi.rhqeditor.feature.feature.jar' range='[0.0.1,0.0.1]'>
+      <required namespace='org.eclipse.equinox.p2.iu' name='cz.muni.fi.rhqeditor.ui' range='[1.0.0.201303161615,1.0.0.201303161615]'/>
+      <required namespace='org.eclipse.equinox.p2.iu' name='cz.muni.fi.rhqeditor.core' range='[1.0.0.201303161615,1.0.0.201303161615]'/>
+      <required namespace='org.eclipse.equinox.p2.iu' name='cz.muni.fi.rhqeditor.feature.feature.jar' range='[1.0.0.201303161615,1.0.0.201303161615]'>
         <filter>
           (org.eclipse.update.install.features=true)
         </filter>
@@ -33,25 +33,25 @@
       Add copyright
     </copyright>
   </unit>
-  <unit id='cz.muni.fi.rhqeditor.feature.feature.jar' version='0.0.1'>
+  <unit id='cz.muni.fi.rhqeditor.feature.feature.jar' version='1.0.0.201303161615'>
     <properties size='6'>
       <property name='org.eclipse.equinox.p2.name' value='RHQ Editor'/>
       <property name='org.eclipse.equinox.p2.description' value='Add description.'/>
       <property name='org.eclipse.equinox.p2.description.url' value='http://www.example.com/description'/>
       <property name='maven-groupId' value='cz.muni.fi.rhqeditor'/>
       <property name='maven-artifactId' value='cz.muni.fi.rhqeditor.feature'/>
-      <property name='maven-version' value='0.0.1'/>
+      <property name='maven-version' value='1.0.0-SNAPSHOT'/>
     </properties>
     <provides size='3'>
-      <provided namespace='org.eclipse.equinox.p2.iu' name='cz.muni.fi.rhqeditor.feature.feature.jar' version='0.0.1'/>
+      <provided namespace='org.eclipse.equinox.p2.iu' name='cz.muni.fi.rhqeditor.feature.feature.jar' version='1.0.0.201303161615'/>
       <provided namespace='org.eclipse.equinox.p2.eclipse.type' name='feature' version='1.0.0'/>
-      <provided namespace='org.eclipse.update.feature' name='cz.muni.fi.rhqeditor.feature' version='0.0.1'/>
+      <provided namespace='org.eclipse.update.feature' name='cz.muni.fi.rhqeditor.feature' version='1.0.0.201303161615'/>
     </provides>
     <filter>
       (org.eclipse.update.install.features=true)
     </filter>
     <artifacts size='1'>
-      <artifact classifier='org.eclipse.update.feature' id='cz.muni.fi.rhqeditor.feature' version='0.0.1'/>
+      <artifact classifier='org.eclipse.update.feature' id='cz.muni.fi.rhqeditor.feature' version='1.0.0.201303161615'/>
     </artifacts>
     <touchpoint id='org.eclipse.equinox.p2.osgi' version='1.0.0'/>
     <touchpointData size='1'>

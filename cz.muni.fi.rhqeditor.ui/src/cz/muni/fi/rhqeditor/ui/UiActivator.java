@@ -1,5 +1,7 @@
 package cz.muni.fi.rhqeditor.ui;
 
+import java.net.URL;
+
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -59,6 +61,10 @@ public class UiActivator extends AbstractUIPlugin {
 	public static ImageDescriptor getImageDescriptor(String path) {
 		
 		return imageDescriptorFromPlugin(RhqConstants.PLUGIN_UI_ID, path);
+	}
+
+	public static URL getFileURL(String file){
+		return  plugin.getBundle().getEntry(file);
 	}
 
 }

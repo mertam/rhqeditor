@@ -1,5 +1,11 @@
 package cz.muni.fi.rhqeditor.ui;
 
+import cz.muni.fi.rhqeditor.ui.rhqmodel.RhqAttribute;
+import cz.muni.fi.rhqeditor.ui.rhqmodel.RhqAttributeNameComparator;
+import cz.muni.fi.rhqeditor.ui.rhqmodel.RhqEntity;
+import cz.muni.fi.rhqeditor.ui.rhqmodel.RhqModelReader;
+import cz.muni.fi.rhqeditor.ui.rhqmodel.RhqTask;
+
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
@@ -17,6 +23,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -116,6 +123,7 @@ import utils.RhqPathExtractor;
 import com.ibm.icu.text.MessageFormat;
 
 import cz.muni.fi.rhqeditor.ui.TaskDescriptionProvider.ProposalNode;
+import cz.muni.fi.rhqeditor.ui.rhqmodel.RhqModel;
 
 public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
 	
@@ -238,6 +246,9 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
     
 //ADDED
     private RhqPathExtractor fRhqpathExtractor;
+    
+    
+    private RhqModelReader fRhqModelReader;
 	
 	public RhqEditorCompletionProcessor(AntModel model) {
 	//-------------------------------------------------------------------------
@@ -450,9 +461,12 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
      * Returns the proposals for the specified document.
      */
     protected ICompletionProposal[] getProposalsFromDocument(IDocument document, String prefix) {
-		ICompletionProposal[] proposals= null;
+//Added 
+//    	fRhqNamespacePrefix = getRhqNamespacePrefix(document);
+    	ICompletionProposal[] proposals= null;
 		currentProposalMode= determineProposalMode(document, cursorPosition, prefix);
 		if(fRhqpathExtractor == null){
+			System.out.println("");
 			fRhqpathExtractor = ExtractorProvider.getInstance().getMap().get(antModel.getFile().getProject());
 		}
         switch (currentProposalMode) {
@@ -471,67 +485,6 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
             		 currentProposalMode= PROPOSAL_MODE_NONE;
             	} else {
             		proposals= getTaskProposals(document, parentName, prefix);
-            		System.out.println("+++++++++++++");
-            		
-//            		DocumentProvider dp = DocumentProvider.getInstance();
-//            		dp.setDoc(viewer.getDocument());
-//            		
-            		Object obj = antModel.getProjectNode();
-            		try {
-            			int m= antModel.getFile().findMaxProblemSeverity(AntUIPlugin.PI_ANTUI + ".buildFileProblem", true, 100);
-            			switch(m){
-            			case IMarker.SEVERITY_ERROR:
-            				System.out.println("error");break;
-            			case IMarker.SEVERITY_WARNING:
-            				System.out.println("warning");break;
-            			case IMarker.SEVERITY_INFO:
-            				System.out.println("info");break;
-            			case -1:
-            				System.out.println("-1");
-            			}
-            			IMarker mm[] = antModel.getFile().findMarkers(AntUIPlugin.PI_ANTUI + ".buildFileProblem", true, 100);
-            			for(IMarker marker:mm){
-            				System.out.println(marker.getType());
-            			}
-					} catch (CoreException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-//            		if(obj instanceof AntElementNode){
-//            			System.out.println("instance");
-//            			AntElementNode node =(AntElementNode) obj;
-//            			System.out.println(node.getName());
-//            			for(Object o : node.getChildNodes()){
-//            				
-//            			}
-//            		}
-//            		File file = antModel.getEditedFile();
-//            		try {
-//						BufferedReader reader = new BufferedReader( new InputStreamReader(new  DataInputStream(new FileInputStream(file))));
-//						String line;
-//						while((line = reader.readLine()) != null)
-//							System.out.println(line);
-//            		} catch (IOException ex) {
-//            			System.out.println(ex.getMessage());
-//						System.out.println("read error");
-//					}
-            		System.out.println("[[[[[[[[[[[[[");
-//            		printPaths();
-//            		proposals = addRhqTasks(document, proposals, prefix);
-//            		List<ICompletionProposal> xxx = new ArrayList<ICompletionProposal>();
-//            		xxx.add(new CompletionProposal("rhq:input-property", this.cursorPosition-prefix.length(),"rhq:input-property".length() , cursorPosition));
-//            		xxx.add(new CompletionProposal("rhq:bundle", this.cursorPosition-prefix.length(),"rhq:bundle".length() , cursorPosition));
-//            		xxx.add(newCompletionProposalRhq(document, prefix, "<rhq:input-property>"));
-//            		xxx.add(newCompletionProposalRhq(document, prefix, "<rhq:input-bundle>"));
-            		
-//            		for(ICompletionProposal icp : proposals){
-//            			xxx.add(icp);
-//            		}
-//            		proposals = (ICompletionProposal[])xxx.toArray(new ICompletionProposal[xxx.size()]);
-//            		System.out.println("vypis");
-//            		for(ICompletionProposal icp : proposals){
-//            			System.out.println(icp.getDisplayString());
-//            		}
             	}
             	if (proposals.length == 0) {
         			errorMessage= AntEditorMessages.getString("AntEditorCompletionProcessor.29"); //$NON-NLS-1$
@@ -559,21 +512,26 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
                 String attributeString = getAttributeStringFromDocumentStringToPrefix(textToSearch);
                 
 //------------------
-
-                if(currentTaskString.equals(RhqConstants.RHQ_TYPE_FILE) && attributeString.equals("name")){
+                //find task, if not null then add proposals
+                RhqTask task = getReader().getTask(currentTaskString);
+                if(task != null && task.getName().equals("file") && attributeString.equals("name")){
                 	String archiveName = RhqRecipeValidator.getParentArchiveFilename(document, cursorPosition);
                 	if(archiveName.equals("")){
             				proposals = addFilesProposals(document,textToSearch,prefix,attributeString);
-                		}else{
-                			proposals = addArchiveContentProposals(document,prefix,archiveName);
                 		}
                 	break;
                 } 
-                if (currentTaskString.equals(RhqConstants.RHQ_TYPE_ARCHIVE) && attributeString.equals("name")){
+                if (task != null && task.getName().equals("archive") && attributeString.equals("name")){
                 	proposals = addArchivesProposals(document,textToSearch,prefix,attributeString);
-//                	if(prop == null)
-//                		proposals = NO_PROPOSALS;
                 	break;
+                }
+                //proposals from entities
+                if(task != null && task.getAttribute(attributeString) != null){
+                	RhqEntity entity = task.getAttribute(attributeString).getEntity();
+                	if(entity != null){
+                		proposals = addRhqEntityProposals(document,prefix,entity);
+                		break;
+                	}
                 }
 //------------------
                 
@@ -814,7 +772,6 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
     	System.out.println("ATTRIBUTE" + taskName);
         List proposals = new ArrayList();
         IElement element = getDtd().getElement(taskName);
-        System.out.println(element.getName());
         if (element != null) {
         	Iterator keys = element.getAttributes().keySet().iterator();
         	while (keys.hasNext()) {
@@ -841,6 +798,7 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
                     addAttributeProposal(taskName, prefix, proposals, attrName, replacementString, displayString, true);
                 }       
             }
+        	
         } else { //possibly a user defined task or type
         	Class taskClass= getTaskClass(taskName);
         	if (taskClass != null) {
@@ -862,6 +820,19 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
 	    		}
         	}
         }
+        
+    	//++++++++++++++++++++++++++++++++++
+        //find task and add proposals if not null
+    	RhqTask task = getReader().getTask(taskName);
+    	if(task != null){
+    		for(RhqAttribute attr: task.getAttributes()){
+    			String replacementString = attr.getName()+"=\"\""; //$NON-NLS-1$
+				String displayString = attr.getName();
+                
+                addRhqAttributeProposal(taskName, prefix, proposals, attr.getName(), replacementString, displayString, true);
+    		}
+    	}
+    	//++++++++++++++++++++++++++++++++++
         return (ICompletionProposal[])proposals.toArray(new ICompletionProposal[proposals.size()]);
     }
     
@@ -1195,7 +1166,7 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
 		}
 
 		//add replacement properties
-    	for(String property: fRhqReplacementProperties){
+    	for(String property: getReader().getReplacements()){
     		 if(property == null || !property.startsWith(prefix))
         		 continue;
         	 StringBuffer replacementString = new StringBuffer();
@@ -1214,26 +1185,6 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
        
 		return (ICompletionProposal[])proposals.toArray(new ICompletionProposal[proposals.size()]);          
     }
-//ADDED
-    private static ArrayList<String> fRhqReplacementProperties = new ArrayList<>(Arrays.asList(new String[] {
-    		"rhq.system.sysprop.java.io.tmpdir",
-    		"rhq.system.sysprop.file.separator",
-    		"rhq.system.sysprop.line.separator",
-    		"rhq.system.sysprop.path.separator",
-    		"rhq.system.sysprop.java.home",
-    		"rhq.system.sysprop.java.version",
-    		"rhq.system.sysprop.user.timezone",
-    		"rhq.system.sysprop.user.region",
-    		"rhq.system.sysprop.user.country",
-    		"rhq.system.sysprop.user.language",
-    		"rhq.system.hostname",
-    		"rhq.system.os.name",
-    		"rhq.system.os.version",
-    		"rhq.system.os.type",
-    		"rhq.system.architecture",
-    		"rhq.system.cpu.count",
-    		"rhq.system.interfaces.java.address" 
-    } ));
 
     /**
      * Returns all possible proposals for the specified parent name.
@@ -1261,19 +1212,8 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
 				if ("extension-point".startsWith(prefix)) { //$NON-NLS-1$
 					proposals.add(newCompletionProposal(document, prefix, "extension-point")); //$NON-NLS-1$
 				}
-//ADDED rhq:bundle can be also child of <project>
-				if ("rhq:bundle".startsWith(prefix)) { //$NON-NLS-1$
-					proposals.add(newCompletionProposal(document, prefix, "rhq:bundle")); //$NON-NLS-1$
-				}
 			}
-//ADDED rhq:audit can doesn't have to be only child of RHQ task or type, it has to be included separately
-			if(prefix.length() == 0 || "rhq:audit".toLowerCase().startsWith(prefix)) {
-				proposal = newCompletionProposal(document, prefix, "rhq:audit");
-				proposals.add(proposal);
-			}
-				
 		} else {
-//ALL RHQ tasks or types are added into proposals via parsing DTD
 			IElement parent = getDtd().getElement(parentName);
 			if (parent != null) {
 				IDfm dfm = parent.getDfm();
@@ -1314,6 +1254,18 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
 	        	}
 			}
         }
+       //-------------
+//ADDED rhq task proposals
+       String noPrefix = getReader().removeNamespacePrefix(parentName);
+       for(RhqTask task: getReader().getMapOfTasks().values()){
+    	   //add task to proposal if (child of given RHQ task || child of given Ant task) && given prefix is prefix of namespace+taskname 
+    	   if(  (getReader().getRhqNamespacePrefix()+task.getName()).startsWith(prefix) &&
+    			   (task.getParents().contains(new RhqTask(noPrefix)) || task.getAntParents().contains(noPrefix))) {
+    		   proposal = newCompletionProposal(document, prefix, getReader().getRhqNamespacePrefix()+task.getName());
+    		   proposals.add(proposal);
+    	   }
+       }
+       //-------------
         
         proposal= getClosingTaskProposal(getOpenElementName(), prefix, false);
         if (proposal != null) {
@@ -1357,6 +1309,7 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
 		String key;
 		while (keys.hasNext()) {
 			key= antModel.getUserNamespaceCorrectName((String) keys.next());
+//			System.out.println(key);
 			if (prefix.length() == 0 || key.toLowerCase().startsWith(prefix)) {
 				proposal = newCompletionProposal(document, prefix, key);
 				proposals.add(proposal);
@@ -1369,12 +1322,19 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
 		Image proposalImage = AntUIImages.getImage(IAntUIConstants.IMG_TASK_PROPOSAL);
 		String proposalInfo = getDescriptionProvider().getDescriptionForTask(elementName);
 		boolean hasNestedElements= hasNestedElements(elementName);
-//ADDED	
-		if(elementName.startsWith(RhqConstants.RHQ_PREFIX))
-			hasNestedElements = RhqConstants.RHQ_PAIRED_TAGS.contains(elementName);
-			
-		String replacementString = getTaskProposalReplacementString(elementName, hasNestedElements);
-		int replacementOffset = cursorPosition - aPrefix.length();
+		String replacementString;
+//ADDED	handling rhq tasks
+		if(elementName.startsWith(getReader().getRhqNamespacePrefix())){
+//			RhqTask task = fRhqModel.get(removeNamespacePrefix(elementName));
+			RhqTask task = getReader().getTask(elementName);
+			hasNestedElements = (task == null ? false : task.isPaired());
+			replacementString = getRhqReplacementString(elementName,hasNestedElements);
+			proposalInfo = task.getDescription();	
+		}else{
+	    	replacementString = getTaskProposalReplacementString(elementName, hasNestedElements);
+		}
+		
+	    int replacementOffset = cursorPosition - aPrefix.length();
 		int replacementLength = aPrefix.length();
 		if (replacementOffset > 0 && document.get().charAt(replacementOffset - 1) == '<') {
 			replacementOffset--;
@@ -1585,7 +1545,7 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
     /**
      * Returns the current proposal mode.
      */
-    protected int determineProposalMode(IDocument document, int aCursorPosition, String aPrefix) {
+    protected int determineProposalMode(IDocument document, int aCursorPosition, String aPrefix) { 
     	if (currentProposalMode != -1) {
     		return currentProposalMode;
     	}
@@ -1628,7 +1588,8 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
                currentTaskString= getTaskStringFromDocumentStringToPrefix(trimmedString);
 //ADDED currentTaskString can be also RHQ task
                 if(currentTaskString != null && 
-                		(isKnownElement(currentTaskString) || RhqConstants.RHQ_TASK_SET.contains(currentTaskString) )) {
+                		(isKnownElement(currentTaskString) ||
+                				getReader().getTask(currentTaskString) != null)) {
                     return PROPOSAL_MODE_ATTRIBUTE_PROPOSAL;
                 }
             }                
@@ -1639,7 +1600,8 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
         	currentTaskString= getTaskStringFromDocumentStringToPrefix(trimmedString);
 //ADDED currentTaskString can be also RHQ task
         	if (currentTaskString != null && 
-            		(isKnownElement(currentTaskString) ||  RhqConstants.RHQ_TASK_SET.contains(currentTaskString) )) {
+        			(isKnownElement(currentTaskString) ||
+            				getReader().getTask(currentTaskString) != null)) {
                 return PROPOSAL_MODE_ATTRIBUTE_VALUE_PROPOSAL;
             }
         } else {  // Possibly a Task proposal
@@ -1674,6 +1636,7 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
         }
         	            
         return PROPOSAL_MODE_NONE;
+
     }
 
 
@@ -2178,5 +2141,72 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
     	return (ICompletionProposal[])proposals.toArray(new ICompletionProposal[proposals.size()]);
     	
     }
+    
+	private void addRhqAttributeProposal(String taskName, String prefix, List proposals, String attrName, String replacementString, String displayString, boolean lookupDescription) {
+    	
+		String proposalInfo = "";
+		RhqTask task = getReader().getTask(taskName);
+		if(task == null)
+			return;
+		String description;
+		RhqAttribute attr = task.getAttribute(attrName);
+		if(attr == null)
+			description = null;
+		else
+			description = attr.getDescription();
+		
+		if(description != null || !description.equals("")) {
+		    proposalInfo = (proposalInfo == null ? IAntCoreConstants.EMPTY_STRING : proposalInfo);
+		    proposalInfo += description;
+			}
+		
+		ICompletionProposal proposal = new AntCompletionProposal(replacementString, cursorPosition - prefix.length(), prefix.length(), attrName.length()+2, null, displayString, proposalInfo, AntCompletionProposal.TASK_PROPOSAL);
+		proposals.add(proposal);
+	}
+	
+	private ICompletionProposal[] addRhqEntityProposals(IDocument document, String prefix, RhqEntity entity){
+		List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
+		for(String entityName : entity.getValues()){
+			 proposals.add(attributeValueProposal(document, prefix, entityName));
+		}
+		return (ICompletionProposal[])proposals.toArray(new ICompletionProposal[proposals.size()]);
+	}
+    
+   
+    
+    private String getRhqReplacementString(String taskName, boolean nested){
+    	RhqTask task = getReader().getTask(taskName);
+    	if(task == null)
+    		return "";
+    	List<String> atts = new ArrayList<>();
+    	for(RhqAttribute att: task.getAttributes()){
+    		if(att.isVisible())
+    			atts.add(att.getName());
+    	}
+    	StringBuilder builder = new StringBuilder("<");
+    	builder.append(taskName);
+    	Collections.sort(atts,	new RhqAttributeNameComparator());
+    	for(String att:atts){
+    		builder.append(" "+att+"=\"\"");
+    	}
+    	 if (nested) {
+		 builder.append("></"); //$NON-NLS-1$
+		 builder.append(taskName);
+		 builder.append('>');
+        } else {
+        	builder.append("/>"); //$NON-NLS-1$
+        }
+    	return builder.toString();
+    }
+        
+    
+    private RhqModelReader getReader(){
+    	if(fRhqModelReader != null)
+    		return fRhqModelReader;
+    	fRhqModelReader = new RhqModelReader(antModel.getFile().getProject(), 0);
+    	return fRhqModelReader;
+    }
+
+    
 }
     

@@ -42,27 +42,29 @@ public class RhqConstants {
 	public static final String RHQ_ELEMENT_TARGET 		= "target";
 	
 	
-	public static final Set<String> RHQ_TASK_SET = new HashSet<String>(Arrays.asList(new String[] { 
-			RHQ_TYPE_FILE,
-			RHQ_TYPE_ARCHIVE, 
-			RHQ_TYPE_DEPLOYMENT_UNIT, 
-			RHQ_TYPE_INPUT_PROPERTY,
-			RHQ_TYPE_URL_ARCHIVE,
-			RHQ_TYPE_REPLACE,
-			RHQ_TYPE_IGNORE,
-			RHQ_TYPE_URL_FILE,
-			RHQ_TYPE_AUDIT,
-			RHQ_TYPE_FILESET}));
+//	public static final Set<String> RHQ_TASK_SET = new HashSet<String>(Arrays.asList(new String[] { 
+//			RHQ_TYPE_FILE,
+//			RHQ_TYPE_ARCHIVE, 
+//			RHQ_TYPE_DEPLOYMENT_UNIT, 
+//			RHQ_TYPE_INPUT_PROPERTY,
+//			RHQ_TYPE_URL_ARCHIVE,
+//			RHQ_TYPE_REPLACE,
+//			RHQ_TYPE_IGNORE,
+//			RHQ_TYPE_URL_FILE,
+//			RHQ_TYPE_AUDIT,
+//			RHQ_TYPE_FILESET}));
+//
+//	//following tags should be displayed as paired tags in editor
+//	public static final Set<String> RHQ_PAIRED_TAGS = new HashSet<String>(Arrays.asList(new String[] { 
+//			RHQ_TYPE_ARCHIVE, 
+//			RHQ_TYPE_BUNDLE,
+//			RHQ_TYPE_DEPLOYMENT_UNIT, 
+//			RHQ_TYPE_REPLACE,
+//			RHQ_TYPE_IGNORE,
+//			RHQ_TYPE_AUDIT}));
 
-	//following tags should be displayed as paired tags in editor
-	public static final Set<String> RHQ_PAIRED_TAGS = new HashSet<String>(Arrays.asList(new String[] { 
-			RHQ_TYPE_ARCHIVE, 
-			RHQ_TYPE_BUNDLE,
-			RHQ_TYPE_DEPLOYMENT_UNIT, 
-			RHQ_TYPE_REPLACE,
-			RHQ_TYPE_IGNORE,
-			RHQ_TYPE_AUDIT}));
-
+	
+	public static final String RHQ_NAMESPACE_URL = "\"antlib:org.rhq.bundle\"";
 	
 	public static final String RHQ_MARKER_TYPE = "cz.muni.fi.rhqeditor.ui.rhqproblemmarker";
 	

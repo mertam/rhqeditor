@@ -2,7 +2,7 @@
 <feature
       id="cz.muni.fi.rhqeditor.feature"
       label="RHQ Editor"
-      version="0.0.1">
+      version="1.0.0.201303161615">
 
    <description url="http://www.example.com/description">
       Add description.
@@ -18,11 +18,11 @@
       
    <plugin
      id="cz.muni.fi.rhqeditor.ui"
-     version="1.0.0.201303041639" download-size="179" install-size="802"/>
+     version="1.0.0.201303161615" download-size="202" install-size="840"/>
       
    <plugin
      id="cz.muni.fi.rhqeditor.core"
-     version="0.0.3" download-size="30" install-size="53"/>  
+     version="1.0.0.201303161615" download-size="4571" install-size="4604"/>  
 
 
 </feature>
