@@ -11,8 +11,8 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWizard;
 
-import utils.RhqConstants;
 import cz.muni.fi.rhqeditor.core.BundleExport;
+import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
 
 public class ExportWizzard extends Wizard implements IWorkbenchWizard {
 

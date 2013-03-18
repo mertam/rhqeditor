@@ -105,9 +105,10 @@ import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.ContentOutline;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
-import utils.DocumentProvider;
-import utils.ExtractorProvider;
-import utils.RhqPathExtractor;
+import cz.muni.fi.rhqeditor.core.utils.DocumentProvider;
+import cz.muni.fi.rhqeditor.core.utils.ExtractorProvider;
+import cz.muni.fi.rhqeditor.core.utils.RhqPathExtractor;
+
 
 
 
@@ -195,7 +196,6 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
 			fRhqRecipeValidator.validateRecipe();
 //---------------------
 
-			System.out.println("selection changed");
 			AntModel model= getAntModel();
 			ISelection selection= event.getSelection();
 			AntElementNode node= null;
@@ -279,7 +279,6 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
 		 * @see Job#run(org.eclipse.core.runtime.IProgressMonitor)
 		 */
 		public IStatus run(IProgressMonitor progressMonitor) {
-			System.out.println("occurence");
 			fProgressMonitor= progressMonitor;
 			
 			if (isCanceled())

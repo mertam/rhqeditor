@@ -1,20 +1,10 @@
 package cz.muni.fi.rhqeditor.ui.wizards;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-
-import org.apache.tools.ant.taskdefs.Sync.MyCopy;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Plugin;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWizard;
 
@@ -51,10 +41,10 @@ public class NewProjectWizard extends Wizard implements IWorkbenchWizard{
 			RHQEditorProject project;
 			
 			if(page1.getNewProjectPath() == null){
-				project = new RHQEditorProject(page1.getNewProjectName());
+				project = new RHQEditorProject(page1.getNewProjectName(),page1.getBundleName(),page1.getBundleVersion());
 			}else{
 				IPath path = Path.fromOSString(page1.getNewProjectPath());
-				project = new RHQEditorProject(page1.getNewProjectName(),path);
+				project = new RHQEditorProject(page1.getNewProjectName(),path, page1.getBundleName(), page1.getBundleVersion());
 			}
 		
 		}catch(CoreException ex)

@@ -17,8 +17,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import cz.muni.fi.rhqeditor.core.launch.LaunchConfigurationsManager;
+import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
 
-import utils.RhqConstants;
 
 
 
@@ -30,7 +30,7 @@ public class RHQEditorProject {
 	 * @param strProjectName - name of project
 	 * @throws CoreException - if some error occures during creating
 	 */
-	public RHQEditorProject(String strProjectName) throws CoreException {
+	public RHQEditorProject(String strProjectName, String bundleName, String bundleVersion) throws CoreException {
 		
 		IProgressMonitor progressMonitor = new NullProgressMonitor();
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
@@ -65,7 +65,7 @@ public class RHQEditorProject {
 	    	description.setNatureIds(newNatures);
 		}
 	    project.setDescription(description, null);
-	    this.createDefaultRecipe(strProjectName);
+	    this.createDefaultRecipe(strProjectName, bundleName, bundleVersion);
 	    
 	    ProjectScanner scanner = new ProjectScanner();
 	    scanner.initProject(project);
@@ -76,22 +76,27 @@ public class RHQEditorProject {
 	}
 	
 	
-	public RHQEditorProject(String strProjectName, IPath pathProjectPath) throws CoreException{
-		this(strProjectName);
+	public RHQEditorProject(String strProjectName, IPath pathProjectPath,String bundleName, String bundleVersion) throws CoreException{
+		this(strProjectName, bundleName, bundleVersion);
 		//TODO dokoncit presun projektu
 	}
 	
 	
-	private void createDefaultRecipe(String projectName) throws CoreException{
+	private void createDefaultRecipe(String projectName, String bundleName, String bundleVersion) throws CoreException{
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		IProject project = root.getProject(projectName);
+		
+		String name = (bundleName == null || bundleName.equals("") ? "bundle" : bundleName);
+		String version = (bundleVersion == null || bundleVersion.equals("") ? "1.0.0" : bundleVersion);
 		
 		IFile recipe = project.getFile("deploy.xml");
 		if(!recipe.exists()){
 		
 			String str = "<?xml version=\"1.0\"?>"+ System.getProperty("line.separator")+
-					"<project name=\"test-bundle\" default=\"main\" xmlns:rhq=\"antlib:org.rhq.bundle\">"+
-					System.getProperty("line.separator")+"<target name=\"main\"/>"+  System.getProperty("line.separator")+
+					"<project name=\""+projectName+"\" default=\"main\" xmlns:rhq=\"antlib:org.rhq.bundle\">"+
+					System.getProperty("line.separator")+"\t<target name=\"main\"/>"+  System.getProperty("line.separator")+
+					"\t<rhq:bundle name=\""+name+"\" version=\""+version+"\">"+System.getProperty("line.separator") +
+					"\t</rhq:bundle>" + System.getProperty("line.separator")+
 					"</project>";
 			InputStream is = new ByteArrayInputStream(str.getBytes());
 			recipe.create(is, true, null);

@@ -12,11 +12,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
-import utils.ExtractorProvider;
-import utils.RhqConstants;
-import utils.RhqPathExtractor;
 import cz.muni.fi.rhqeditor.core.ProjectScanner;
 import cz.muni.fi.rhqeditor.core.launch.LaunchConfigurationsManager;
+import cz.muni.fi.rhqeditor.core.utils.ExtractorProvider;
+import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
+import cz.muni.fi.rhqeditor.core.utils.RhqPathExtractor;
 
 /**
  * listener used to tracking changes of resources in project
@@ -126,7 +126,6 @@ public class RecipeChangeListener implements IResourceChangeListener {
 
 							extractor.addArchive(path);
 						}
-						System.out.println("archive should be added");
 					} else {
 						extractor.addFile(path);
 					}
@@ -140,7 +139,6 @@ public class RecipeChangeListener implements IResourceChangeListener {
 				break;
 
 			case IResourceDelta.CHANGED:
-				System.out.println("changed");
 				// ingnore changes in proect/.bin
 				if (currentDelta.getResource().getFullPath()
 						.removeFirstSegments(1).toString().startsWith(".bin")) {
@@ -157,7 +155,6 @@ public class RecipeChangeListener implements IResourceChangeListener {
 				break;
 
 			case IResourceDelta.REMOVED:
-				System.out.println("removed");
 				if(currentDelta.getResource().getFullPath().removeFirstSegments(1).toString().startsWith(".bin")){
 					break;
 				}
@@ -173,8 +170,6 @@ public class RecipeChangeListener implements IResourceChangeListener {
 
 				break;
 
-			default:
-				System.out.println("def");
 			}
 
 		}

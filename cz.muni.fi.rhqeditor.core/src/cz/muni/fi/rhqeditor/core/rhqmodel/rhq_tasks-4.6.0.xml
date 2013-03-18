@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- RHQ task definitions -->
+<tasks>
+	<task name="bundle" paired="true">
+		<rhqparents>
+		</rhqparents>
+		<antparents>
+			<parent name="project"/>
+		</antparents>
+		<attributes>
+			<attribute name="name" visible="true" required="true">
+				The name given to the bundle.
+			</attribute>
+			<attribute  name="version" visible="false" required="false">
+				The version string for this specific bundle. Bundles can have the same name - they are differentiated by their version strings. These version strings normally conform to an OSGi style of versioning (e.g. "1.0.0" or "2.4.1.GA")
+			</attribute>
+			<attribute  name="description" visible="false" required="false">
+				A human readable description of this specific bundle version. (optional)
+			</attribute>
+		</attributes>
+		<description>
+		 Sample RHQ bundle description.
+		</description>
+	</task>
+	<task name="deployment-unit" paired="true">
+		<rhqparents>
+			<parent name="bundle"/>
+		</rhqparents>
+		<antparents></antparents>
+		<attributes>
+			<attribute name="name" 	visible="true"	required="true">
+				The name of the deployment unit (e.g. "appserver" or "database")
+			</attribute>
+			<attribute  name="manageRootDir" visible="false" required="false" entity="boolean">
+				A boolean (true,false) that specifies if RHQ is to manage all files in the top root directory where the bundle is deployed. If false, any unrelated files found in the top destination directory will be ignored. Default is true.
+			</attribute>
+			<attribute  name="postinstallTarget" visible="false" required="false">
+				If defined, this names the Ant target that will be invoked prior to the deployment unit getting installed.(optional)
+			</attribute>
+			<attribute  name="preinstallTarget" 	visible="false" required="false">
+				If defined, this names the Ant target that will be invoked after the deployment unit was installed.(optional)
+			</attribute>
+		</attributes>
+		<description>
+		 Add description.
+		</description>
+	</task>
+	<task name="input-property" paired="false">
+		<rhqparents>
+			<parent name="bundle"/>
+		</rhqparents>
+		<antparents></antparents>
+		<attributes>
+			<attribute name="name"	visible="true" 	required="true">
+				The name of the property. You can refer to this property in the recipe using the standard Ant syntax "${var}".
+			</attribute>
+			<attribute  name="required"	visible="false" required="false" entity="boolean">
+				If true, this property must be given a value; if false, it may be left undefined.
+			</attribute>
+			<attribute  name="description" 	visible="false" 	required="false">
+				A human readable description of this specific bundle version which the user will see when being asked to provide a value for this property.
+			</attribute>
+			<attribute  name="defaultValue"	visible="false" 	required="false">
+				If the user does not define a value for this property, this will be its default.
+			</attribute>
+			<attribute  name="type" visible="true" 	required="false" entity="inputpropertytype">
+				The type of value. Valid types are: string, longString, boolean, integer, long, float, double, password, file, directory
+			</attribute>
+		</attributes>
+	</task>
+	<task name="archive" paired="true">
+		<rhqparents>
+			<parent name="deployment-unit"/>
+		</rhqparents>
+		<antparents></antparents>
+		<attributes>
+			<attribute name="name" visible="true" required="true">
+				The name of the archive file. If the recipe and archive file are packaged together inside a bundle distribution zip file, this name must be the relative path name of the archive file found within the bundle distribution zip file. NOTE: You cannot use ${} property definitions in the value of this attribute..
+			</attribute>
+			<attribute  name="exploded"	visible="false" required="false" entity="boolean">
+				If true, the archive's contents will be extracted and stored into the bundle destination directory. If false, the zip file will
+be compressed and stored in the same relative location as the 'name' attribute indicates (relative to the bundle destination directory).
+			</attribute>
+		</attributes>
+	</task>
+	<task name="url-archive" paired="true">
+		<rhqparents>
+			<parent name="deployment-unit"/>
+		</rhqparents>
+		<antparents></antparents>
+		<attributes>
+			<attribute name="url" visible="true" required="true">
+				The location of the archive file. This will be downloaded and installed in the destination directory, optionally exploded.
+			</attribute>
+			<attribute  name="exploded"	visible="false" required="false" entity="boolean">
+				If true, the archive's contents will be extracted and stored into the bundle destination directory. If false, the zip file will
+be compressed and stored in the top level destination directory.
+			</attribute>
+		</attributes>
+	</task>
+	<task name="fileset" paired="true">
+		<rhqparents>
+			<parent name="ignore"/>
+			<parent name="replace"/>
+		</rhqparents>
+		<antparents></antparents>
+		<antchildren>
+			<antchild name="include"/>
+		</antchildren>
+		<attributes>
+			<attribute name="includes" visible="false" required="false">
+			</attribute>
+		</attributes>
+	</task>
+	<task name="replace" paired="true">
+		<rhqparents>
+			<parent name="archive"/>
+			<parent name="url-archive"/>
+		</rhqparents>
+		<antparents></antparents>
+	</task>
+	<task name="ignore" paired="true">
+		<rhqparents>
+			<parent name="bundle"/>
+		</rhqparents>
+		<antparents></antparents>
+	</task>
+	<task name="file" paired="false">
+		<rhqparents>
+			<parent name="deployment-unit"/>
+		</rhqparents>
+		<antparents></antparents>
+		<attributes>
+			<attribute name="name"	visible="true" 	required="true">
+				The name of the file. If this bundle file was packaged with the recipe in a bundle distribution file, this name must be the relative path of the file as it exists inside the bundle distribution file. NOTE: You cannot use ${} property definitions in the value of this attribute.
+			</attribute>
+			<attribute  name="destinationFile"	visible="false" required="false">
+				The path on the file system where this file is to be copied when being provisioned. If this is a relative path, it is relative to the deployment unit's "deployment directory" as defined by the rhq.deploy.dir property that is automatically set by RHQ and whose value is defined by the user provisioning the bundle. If this is an absolute path, that will be the location on the file system where the file will be copied. Note that this attribute is not just a directory name - it is a pathname that also defines the file's name as it will appear on the file system when it is copied. If 'destinationDir' is specified, you cannot specify 'destinationFile'.
+			</attribute>
+			<attribute  name="destinationDir"	visible="false" required="false">
+				The path on the file system where this file is to be copied when being provisioned. If this is a relative path, it is relative to the deployment unit's "deployment directory" as defined by the rhq.deploy.dir property that is automatically set by RHQ and whose value is defined by the user provisioning the bundle. If this is an absolute path, that will be the location on the file system where the file will be copied. Note that this attribute is just a directory name - the name of the file will be the same as the 'name' attribute. If 'destinationFile' is specified, you cannot specify 'destinationDir'.
+			</attribute>
+			<attribute  name="replace"	visible="false" required="false" entity="boolean">
+				If true, this file is to be considered a templatized file and therefore will need its replacement variables replaced.
+			</attribute>
+		</attributes>
+	</task>
+	<task name="url-file" paired="false">
+		<rhqparents>
+			<parent name="deployment-unit"/>
+		</rhqparents>
+		<antparents></antparents>
+		<attributes>
+			<attribute name="url"	visible="true" 	required="true">
+				The location of the remote file.
+			</attribute>
+			<attribute  name="destinationFile"	visible="false" required="false">
+				The path on the file system where this file is to be copied when being provisioned. If this is a relative path, it is relative to the deployment unit's "deployment directory" as defined by the rhq.deploy.dir property that is automatically set by RHQ and whose value is defined by the user provisioning the bundle. If this is an absolute path, that will be the location on the file system where the file will be copied. Note that this attribute is not just a directory name - it is a pathname that also defines the file's name as it will appear on the file system when it is copied. If 'destinationDir' is specified, you cannot specify 'destinationFile'.
+			</attribute>
+			<attribute  name="destinationDir"	visible="false" required="false">
+				The path on the file system where this file is to be copied when being provisioned. If this is a relative path, it is relative to the deployment unit's "deployment directory" as defined by the rhq.deploy.dir property that is automatically set by RHQ and whose value is defined by the user provisioning the bundle. If this is an absolute path, that will be the location on the file system where the file will be copied. Note that this attribute is just a directory name - the name of the file will be the same as the 'name' attribute. If 'destinationFile' is specified, you cannot specify 'destinationDir'.
+			</attribute>
+			<attribute  name="replace"	visible="false" required="false" entity="boolean">
+				If true, this file is to be considered a templatized file and therefore will need its replacement variables replaced.
+			</attribute>
+		</attributes>
+	</task>
+	<task name="audit" paired="true">
+		<rhqparents>
+			<parent name="deployment-unit"/>
+		</rhqparents>
+		<antparents></antparents>
+		<attributes>
+			<attribute name="status"	visible="true" 	required="true" entity="auditstatus">
+				The status of your custom processing. Values are: SUCCESS, WARN, FAILURE. Default is SUCCESS
+			</attribute>
+			<attribute  name="action"	visible="false" required="false">
+				The name of your custom processing step
+			</attribute>
+			<attribute  name="info"	visible="false" required="false">
+				A short summary of what your action is doing or did. Sometimes its the name of the target of the action (like a filename)
+			</attribute>
+			<attribute  name="message"	visible="false" required="false">
+				A brief one or two line message indicating more information about your processing
+			</attribute>
+		</attributes>
+	</task>
+	
+	<!-- entities -->
+	<entity name="boolean">
+		<value name="true"/>
+		<value name="false"/>
+	</entity>
+	<entity name="inputpropertytype">
+		<value name="string"/>  
+		<value name="longString"/> 
+		<value name="boolean"/>
+		<value name="integer"/>
+		<value name="long"/>
+		<value name="float"/>
+		<value name="double"/>
+		<value name="password"/>
+		<value name="file"/>
+		<value name="directory"/>
+	</entity>
+	<entity name="auditstatus">
+		<value name="SUCCESS"/>
+		<value name="WARN"/>
+		<value name="FAILURE"/>
+	</entity>
+	
+	<!-- Built-in Replacement Variables -->
+	<replacements>
+		<replacemnet name="rhq.system.sysprop.java.io.tmpdir"/>
+		<replacemnet name="rhq.system.sysprop.file.separator"/>
+		<replacemnet name="rhq.system.sysprop.line.separator"/>
+		<replacemnet name="rhq.system.sysprop.path.separator"/>
+		<replacemnet name="rhq.system.sysprop.java.home"/>
+		<replacemnet name="rhq.system.sysprop.java.version"/>
+		<replacemnet name="rhq.system.sysprop.user.timezone"/>
+		<replacemnet name="rhq.system.sysprop.user.region"/>
+		<replacemnet name="rhq.system.sysprop.user.country"/>
+		<replacemnet name="rhq.system.sysprop.user.language"/>
+		<replacemnet name="rhq.system.hostname"/>
+		<replacemnet name="rhq.system.os.name"/> 
+		<replacemnet name="rhq.system.os.version"/>
+		<replacemnet name="rhq.system.os.type"/> 
+		<replacemnet name="rhq.system.architecture"/>
+		<replacemnet name="rhq.system.cpu.count"/>
+		<replacemnet name="rhq.system.interfaces.java.address"/> 
+		<replacemnet name="rhq.system.interfaces.(network-adapter-name).mac"/>
+		<replacemnet name="rhq.system.interfaces.(network-adapter-name).type"/>
+		<replacemnet name="rhq.system.interfaces.(network-adapter-name).flags"/>
+		<replacemnet name="rhq.system.interfaces.(network-adapter-name).address"/>
+		<replacemnet name="rhq.system.interfaces.(network-adapter-name).multicast.address"/>
+	</replacements>
+	
+
+</tasks>

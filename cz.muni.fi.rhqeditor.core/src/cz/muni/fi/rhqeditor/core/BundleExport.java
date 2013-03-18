@@ -14,8 +14,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
-import utils.ExtractorProvider;
-import utils.RhqPathExtractor;
+import cz.muni.fi.rhqeditor.core.utils.ExtractorProvider;
+import cz.muni.fi.rhqeditor.core.utils.RhqPathExtractor;
+
 
 public class BundleExport {
 

@@ -27,10 +27,11 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
-import utils.InputPropertiesManager;
-import utils.InputProperty;
-import utils.RecipeReader;
-import utils.RhqConstants;
+import cz.muni.fi.rhqeditor.core.utils.InputPropertiesManager;
+import cz.muni.fi.rhqeditor.core.utils.InputProperty;
+import cz.muni.fi.rhqeditor.core.utils.RecipeReader;
+import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
+
 
 public class LaunchPropertiesTab extends AbstractLaunchConfigurationTab{
 	

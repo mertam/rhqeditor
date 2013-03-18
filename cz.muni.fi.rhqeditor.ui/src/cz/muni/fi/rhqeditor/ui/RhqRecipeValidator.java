@@ -19,11 +19,11 @@ import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.ext.DefaultHandler2;
 
-import utils.RhqConstants;
-import utils.RhqPathExtractor;
-import cz.muni.fi.rhqeditor.ui.rhqmodel.RhqAttribute;
-import cz.muni.fi.rhqeditor.ui.rhqmodel.RhqModelReader;
-import cz.muni.fi.rhqeditor.ui.rhqmodel.RhqTask;
+import cz.muni.fi.rhqeditor.core.rhqmodel.RhqAttribute;
+import cz.muni.fi.rhqeditor.core.rhqmodel.RhqModelReader;
+import cz.muni.fi.rhqeditor.core.rhqmodel.RhqTask;
+import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
+import cz.muni.fi.rhqeditor.core.utils.RhqPathExtractor;
 
 
 /**
@@ -146,9 +146,9 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 	public void startElement(String uri, String localName, String qName,
 			Attributes attributes) throws SAXException {
 		
-		//if task isn't rhq task do nothing
+		//if task isn't rhq task do nothing, except include
 		RhqTask currentTask = getReader().getTask(qName);
-		if(currentTask == null){
+		if(currentTask == null && !qName.equals("include")){
 			openElements.push(qName);
 			super.startElement(uri, localName, qName, attributes);
 			return;
@@ -161,12 +161,12 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 		IPath attrPath ;
 		checkAttributesAndSetMarkers(qName, attributes);
 		checkParentAndSetMarkers(currentTask,openElements.peek());
+		String currentTaskName = (currentTask == null ? qName : currentTask.getName());
 		
-		
-		switch(currentTask.getName()){
-		case "archive":
+		switch(currentTaskName){
+		case  RhqConstants.RHQ_TYPE_ARCHIVE:
 			
-			attrValue = attributes.getValue("name");
+			attrValue = attributes.getValue(RhqConstants.RHQ_ATTRIBUTE_NAME);
 			if(attrValue == null)
 				break;
 			attrPath = new Path(attrValue);
@@ -181,135 +181,61 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 			}
 			fOpenArchiveName = attrValue;
 			break;
+			
+		case  RhqConstants.RHQ_TYPE_FILE:
+			
+			attrValue = attributes.getValue("name");
+			if(attrValue == null)
+				break;
+			
+			attrPath = new Path(attrValue);
+			//file can have only one only destinationDir or destinationFile, not both
+			if(attributes.getIndex("destinationFile") > -1 && attributes.getIndex("destinationDir") > -1){
+				fRhqAnnotationModel.addMarker(locator.getLineNumber(), 
+						"File can't have specified destinationFile and destinationDir at the same time", IMarker.SEVERITY_WARNING);
+			}
+				
+			if(!fRhqPathExtractor.isPathToFileValid(attrPath))
+				fRhqAnnotationModel.addMarker(locator.getLineNumber(), "File not found", IMarker.SEVERITY_WARNING);			
+
+			break;
+		
+		case RhqConstants.RHQ_TYPE_FILESET:
+			attrValue = attributes.getValue(RhqConstants.RHQ_ATTRIBUTE_INCLUDES);
+			//includes not found or no parent archive open
+			if(attrValue == null || fOpenArchiveName == null )
+				break;
+			
+			attrPath = new Path(attrValue);
+			if(fOpenArchiveName.equals(EMPTY_STRING)){
+				fRhqAnnotationModel.addMarker(locator.getLineNumber(), "Unrecognized path to archive", IMarker.SEVERITY_WARNING);
+			}else{
+				if(!fRhqPathExtractor.isPathToArchiveFileValid(attrPath, fOpenArchiveName))
+					fRhqAnnotationModel.addMarker(locator.getLineNumber(), "There's no such file in archive", IMarker.SEVERITY_WARNING);
+			}
+			
+			break;
+		
+		case "include":
+			attrValue = attributes.getValue(RhqConstants.RHQ_ATTRIBUTE_NAME);
+			//only include with parent archive matters
+			if(attrValue == null || fOpenArchiveName == null){
+				return;
+			}
+			
+		    attrPath = new Path(attrValue);
+		    if(fOpenArchiveName.equals(EMPTY_STRING)){
+				fRhqAnnotationModel.addMarker(locator.getLineNumber(), "Unrecognized path to archive", IMarker.SEVERITY_WARNING);
+			}else{
+				if(!fRhqPathExtractor.isPathToArchiveFileValid(attrPath, fOpenArchiveName))
+					fRhqAnnotationModel.addMarker(locator.getLineNumber(), "There's no such file in archive", IMarker.SEVERITY_WARNING);
+			}
+			
+		    break;
+			
 		}
 		
 		
-		
-		
-		
-		
-		
-//		switch(qName){
-//		
-//		case RhqConstants.RHQ_TYPE_BUNDLE:
-//			checkAttributesAndSetMarkers(qName, attributes);
-//			break;
-//			
-//		case RhqConstants.RHQ_TYPE_DEPLOYMENT_UNIT:
-//			checkAttributesAndSetMarkers(qName, attributes);
-//			break;
-//			
-//		case RhqConstants.RHQ_TYPE_ARCHIVE:
-//			checkAttributesAndSetMarkers(qName, attributes);
-//			
-//			attrValue = attributes.getValue("name");
-//			if(attrValue == null)
-//				break;
-//			attrPath = new Path(attrValue);
-//			
-//			if(!fRhqPathExtractor.isPathToArchiveValid(attrPath))
-//				fRhqAnnotationModel.addMarker(locator.getLineNumber(), "Archive not found", IMarker.SEVERITY_WARNING);
-// 			fOpenArchiveName = null;
-//			attrValue = attributes.getValue(RhqConstants.RHQ_ATTRIBUTE_NAME);
-//			if(attrValue == null){
-//				fOpenArchiveName = EMPTY_STRING;
-//				break;
-//			}
-//			fOpenArchiveName = attrValue;
-//			break;
-//		
-//		
-//		
-//		case RhqConstants.RHQ_TYPE_FILESET:
-//			checkAttributesAndSetMarkers(qName, attributes);
-//			if(!openElements.peek().equals(RhqConstants.RHQ_TYPE_IGNORE) &&
-//					!openElements.peek().equals(RhqConstants.RHQ_TYPE_REPLACE)){
-//				fRhqAnnotationModel.addMarker(locator.getLineNumber(), "Misplaced element "+RhqConstants.RHQ_TYPE_FILESET, IMarker.SEVERITY_WARNING);
-//				break;
-//			}
-//		
-//			attrValue = attributes.getValue("includes");
-//			//includes not found or no parent archive open
-//			if(attrValue == null || fOpenArchiveName == null )
-//				break;
-//			
-//			attrPath = new Path(attrValue);
-//			if(fOpenArchiveName.equals(EMPTY_STRING)){
-//				fRhqAnnotationModel.addMarker(locator.getLineNumber(), "Unrecognized path to archive", IMarker.SEVERITY_WARNING);
-//			}else{
-//				if(!fRhqPathExtractor.isPathToArchiveFileValid(attrPath, fOpenArchiveName))
-//					fRhqAnnotationModel.addMarker(locator.getLineNumber(), "There's no such file in archive", IMarker.SEVERITY_WARNING);
-//			}
-//			
-//			break;
-//		
-//		
-//			
-//		case RhqConstants.RHQ_ELEMENT_TARGET:
-//			checkAttributesAndSetMarkers(qName, attributes);
-//			
-//			attrValue = attributes.getValue("name");
-//		    if(attrValue == null)
-//		    	break;
-//		    fExistingTargets.put(attrValue, new Integer(locator.getLineNumber()));		
-//		    break;
-//		
-//		case RhqConstants.RHQ_TYPE_FILE:
-//			checkAttributesAndSetMarkers(qName, attributes);
-//			attrValue = attributes.getValue("name");
-//			
-//			if(attrValue == null)
-//				break;
-//			
-//			attrPath = new Path(attrValue);
-//
-//			//file can have only one of following
-//			if(attributes.getIndex("destinationFile") > -1 && attributes.getIndex("destinationDir") > -1){
-//				fRhqAnnotationModel.addMarker(locator.getLineNumber(), 
-//						"File can't have specified destinationFile and destinationDir at the same time", IMarker.SEVERITY_WARNING);
-//			}
-//				
-//			if(!fRhqPathExtractor.isPathToFileValid(attrPath))
-//				fRhqAnnotationModel.addMarker(locator.getLineNumber(), "File not found", IMarker.SEVERITY_WARNING);			
-//			break;
-//
-//			
-//		case RhqConstants.RHQ_TYPE_URL_FILE:
-//			checkAttributesAndSetMarkers(qName, attributes);
-//			
-//			if(attributes.getIndex("destinationFile") > -1 && attributes.getIndex("destinationDir") > -1){
-//				fRhqAnnotationModel.addMarker(locator.getLineNumber(), 
-//						"File can't have specified destinationFile and destinationDir at the same time", IMarker.SEVERITY_WARNING);
-//			}
-//			
-//			break;
-//		case RhqConstants.RHQ_TYPE_REPLACE:
-//			checkAttributesAndSetMarkers(qName, attributes);
-//			//replace must be direct descendant of archive
-//			if(!openElements.peek().equals(RhqConstants.RHQ_TYPE_ARCHIVE) &&
-//					!openElements.peek().equals(RhqConstants.RHQ_TYPE_URL_ARCHIVE)){
-//				fRhqAnnotationModel.addMarker(locator.getLineNumber(), "Misplaced element "+RhqConstants.RHQ_TYPE_REPLACE, IMarker.SEVERITY_WARNING);
-//			} 
-//			break;
-//		
-//		case "include" :
-//		case "exclude" :
-//			
-//			checkAttributesAndSetMarkers(qName, attributes);
-//			attrValue = attributes.getValue("name");
-//			//only include with parent archive matters
-//			System.out.println("include "+ fOpenArchiveName);
-//			if(attrValue == null || fOpenArchiveName == null){
-//				return;
-//			}
-//			
-//		    attrPath = new Path(attrValue);
-//			
-//			if(!fRhqPathExtractor.isPathToArchiveFileValid(attrPath, fOpenArchiveName))
-//				fRhqAnnotationModel.addMarker(locator.getLineNumber(), "File not found in archive", IMarker.SEVERITY_WARNING);
-//			
-//		    break;
-//		}
 		openElements.push(qName);
 		super.startElement(uri, localName, qName, attributes);
 	}
@@ -321,7 +247,7 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 			return;
 		}
 		openElements.pop();
-		if(qName.equals(RhqConstants.RHQ_TYPE_ARCHIVE)){
+		if(qName.equals(getReader().getRhqNamespacePrefix() + RhqConstants.RHQ_TYPE_ARCHIVE)){
 			fOpenArchiveName = null;
 		}
 	}
@@ -338,53 +264,7 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 		}
 	}
 	
-	/**
-	 * returns name of parent <rhq:archive name=".." tag in document. 
-	 * @return archive name or empty String
-	 */
-	public static  String getParentArchiveFilename(IDocument document, int position){
-		final String EMPTY_STRING = "";
-		if(position < 0)
-			return EMPTY_STRING;
-		String toSearch = document.get().substring(0, position);
 		
-    	
-		toSearch = toSearch.replaceAll("\\s","");
-    	//finds last occurence of tag <rhq:archive
-    	int lastArchiveIndex = toSearch.lastIndexOf("<" + RhqConstants.RHQ_TYPE_ARCHIVE);
-    	
-    	//there is no open <rhq:archive tag
-    	if(lastArchiveIndex == -1){
-    		return EMPTY_STRING;
-    	}
-    	toSearch =  toSearch.substring(lastArchiveIndex, toSearch.length());                	
-    	//finds whether there is also closing tag
-    	int closingIndex = toSearch.indexOf("</" + RhqConstants.RHQ_TYPE_ARCHIVE);
-//    	System.out.println("SUBSTR: " + toSearch.substring(lastArchiveIndex, toSearch.length()));
-    	
-    	if(closingIndex > -1){
-    		//rhq:archvive is closed, normal file proposal
-    		return EMPTY_STRING;
-    	}else{
-    		//cursor is inside of <rhq:archive tag, archvive file proposal
-    		int nameBegin = toSearch.indexOf("name=\"");
-    		if(nameBegin > -1){
-    			toSearch = toSearch.substring(nameBegin + "name=\"".length() , toSearch.length());
-    		}else{
-    			return EMPTY_STRING;
-    		}
-    		int nameEnd = toSearch.indexOf("\"");
-    		
-    		if(nameEnd > -1){
-    			String archiveName = toSearch.substring(0, nameEnd);
-    			return archiveName;
-    		}else{
-    			return EMPTY_STRING;
-    		}
-    	}
-
-	}
-	
 	/**
 	 * cheks whether element has all required attributes
 	 * @param elementName
@@ -392,19 +272,23 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 	 */
 	private void checkAttributesAndSetMarkers(String elementName, Attributes atts){
 		RhqTask task = getReader().getTask(elementName);
-		if(task == null)
+		if(task == null || atts == null)
 			return;
 		
 		for(RhqAttribute attr: task.getAttributes()){
-			if(attr.isRequired() && atts.getValue(attr.getName()) == null){
-				fRhqAnnotationModel.addMarker(locator.getLineNumber(), "Attribute is mandatory: "+attr.getName(), IMarker.SEVERITY_WARNING);
+			String attrValue =  atts.getValue(attr.getName());
+			if(attr.isRequired()){
+				if(attrValue == null || attrValue.equals(EMPTY_STRING))
+					fRhqAnnotationModel.addMarker(locator.getLineNumber(), "Attribute is mandatory: "+attr.getName(), IMarker.SEVERITY_WARNING);
+			} else {
+				if(attrValue != null && attrValue.equals(EMPTY_STRING))
+					fRhqAnnotationModel.addMarker(locator.getLineNumber(), "Empty attribute: "+attr.getName(), IMarker.SEVERITY_WARNING);
+				}
 			}
-			
-		}
 	}
 	
 	/**
-	 * checks whet
+	 * checks whether element parent is one of required parents
 	 */
 	private void checkParentAndSetMarkers(RhqTask child, String parentName){
 		if(child == null || parentName == null)

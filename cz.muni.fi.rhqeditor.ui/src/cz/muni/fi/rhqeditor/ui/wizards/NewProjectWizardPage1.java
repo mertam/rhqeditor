@@ -16,61 +16,42 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.GridData;
 
 
 public class NewProjectWizardPage1 extends WizardPage{
 
-	/**
-	 * @uml.property  name="container"
-	 * @uml.associationEnd  
-	 */
+
 	private Composite 			container;
-	/**
-	 * @uml.property  name="btnUseDeafultLocation"
-	 * @uml.associationEnd  
-	 */
+
 	private Button 				btnUseDeafultLocation;
-	/**
-	 * @uml.property  name="btnDirectoryDialog"
-	 * @uml.associationEnd  
-	 */
+
 	private Button 				btnDirectoryDialog;
-	/**
-	 * @uml.property  name="txtProjectName"
-	 * @uml.associationEnd  
-	 */
+
 	private Text 				txtProjectName;
-	/**
-	 * @uml.property  name="txtProjectLocation"
-	 * @uml.associationEnd  
-	 */
+
 	private Text 				txtProjectLocation;
-	/**
-	 * @uml.property  name="lblLocation"
-	 * @uml.associationEnd  
-	 */
+
 	private Label				lblLocation;
-	/**
-	 * @uml.property  name="lblProjectName"
-	 * @uml.associationEnd  
-	 */
+
 	private Label 				lblProjectName;
-	/**
-	 * @uml.property  name="lblProjectNameCheck"
-	 * @uml.associationEnd  
-	 */
+
 	private Label				lblProjectNameCheck;
 	
+	private Text				txtBundleName;
+	private Text 				txtBundleVersion;
+	
 	//deafult null, only DirectoryDialog can reset
-	/**
-	 * @uml.property  name="newProjectPath"
-	 */
+
 	private String				newProjectPath = null;
 	
-	/**
-	 * @uml.property  name="newProjectName"
-	 */
 	private String				newProjectName = null;
+	private Text text;
+	private Text text_1;
 
 	
 //	protected NewProjectWizardPage1(String pageName) {
@@ -78,6 +59,9 @@ public class NewProjectWizardPage1 extends WizardPage{
 //		// TODO Auto-generated constructor stub
 //	}
 
+	/**
+	 * @wbp.parser.constructor
+	 */
 	protected NewProjectWizardPage1(String pageName, String title,
 			ImageDescriptor titleImage) {
 		super(pageName, title, titleImage);
@@ -88,6 +72,9 @@ public class NewProjectWizardPage1 extends WizardPage{
 	}
 	
 
+	/**
+	 * @wbp.parser.constructor
+	 */
 	@Override
 	public void createControl(Composite parent) {
 		
@@ -96,16 +83,21 @@ public class NewProjectWizardPage1 extends WizardPage{
 
 		container = new Composite(parent, SWT.NONE);
 		container.setBounds(47, 39, 512, 213);
+		container.setLayout(new GridLayout(4, false));
+		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
 		lblProjectNameCheck = new Label(container, SWT.NONE);
-		lblProjectNameCheck.setBounds(118, 16, 100, 20);
 		setDescription("Enter project name.");
+		new Label(container, SWT.NONE);
 		
 		lblProjectName = new Label(container, SWT.NONE);
-		lblProjectName.setBounds(10, 43, 108, 17);
+		lblProjectName.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
 		lblProjectName.setText("Project name:");
 		
 		txtProjectName = new Text(container, SWT.BORDER);
-		txtProjectName.setBounds(118, 36, 334, 29);
+		GridData gd_txtProjectName = new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1);
+		gd_txtProjectName.widthHint = 217;
+		txtProjectName.setLayoutData(gd_txtProjectName);
 		txtProjectName.addModifyListener(new ModifyListener() {
 		
 			@Override
@@ -115,14 +107,29 @@ public class NewProjectWizardPage1 extends WizardPage{
 			}
 		});
 		
-		lblLocation = new Label(container, SWT.NONE);
-		lblLocation.setEnabled(false);
-		lblLocation.setBounds(10, 106, 65, 17);
-		lblLocation.setText("Location:");
+		Label lblBundleName = new Label(container, SWT.NONE);
+		lblBundleName.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+		lblBundleName.setText("Bundle name:");
+		
+		txtBundleName = new Text(container, SWT.BORDER);
+		GridData gd_text = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+		gd_text.widthHint = 150;
+		txtBundleName.setLayoutData(gd_text);
+		new Label(container, SWT.NONE);
+		
+		Label lblBundleVersion = new Label(container, SWT.NONE);
+		lblBundleVersion.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+		lblBundleVersion.setText("Bundle version:");
+		
+		txtBundleVersion = new Text(container, SWT.BORDER);
+		GridData gd_text_1 = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+		gd_text_1.widthHint = 100;
+		txtBundleVersion.setLayoutData(gd_text_1);
+		new Label(container, SWT.NONE);
 
 		btnUseDeafultLocation = new Button(container, SWT.CHECK);
+		btnUseDeafultLocation.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 3, 1));
 		btnUseDeafultLocation.setSelection(true);
-		btnUseDeafultLocation.setBounds(10, 78, 175, 22);
 		btnUseDeafultLocation.setText("Use deafult location");
 		btnUseDeafultLocation.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -143,16 +150,20 @@ public class NewProjectWizardPage1 extends WizardPage{
 				}
 			}
 		});
+		new Label(container, SWT.NONE);
+		
+		lblLocation = new Label(container, SWT.NONE);
+		lblLocation.setEnabled(false);
+		lblLocation.setText("Location:");
 
 
 		txtProjectLocation = new Text(container, SWT.BORDER);
+		txtProjectLocation.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
 		txtProjectLocation.setEnabled(false);
 		txtProjectLocation.setText(ResourcesPlugin.getWorkspace().getRoot().getLocation().toString());
-		txtProjectLocation.setBounds(86, 107, 291, 25);
 				
 		btnDirectoryDialog = new Button(container, SWT.BUTTON1);
 		btnDirectoryDialog.setText("Browse...");
-		btnDirectoryDialog.setBounds(394, 103, 108, 29);
 		btnDirectoryDialog.setEnabled(false);		
 		btnDirectoryDialog.addSelectionListener(new SelectionAdapter() {
 		      @Override
@@ -221,27 +232,22 @@ public class NewProjectWizardPage1 extends WizardPage{
 		}
 	}
 	
-//---------------------------------------------------------------------------------	
 
-//---------------------------------------------------------------------------------
-	/**
-	 * @return
-	 * @uml.property  name="newProjectName"
-	 */
 	public String getNewProjectName()
 	{
 		return newProjectName;
 	}
 	
-	/**
-	 * @return
-	 * @uml.property  name="newProjectPath"
-	 */
 	public String getNewProjectPath()
 	{
 		return newProjectPath;
 	}
 	
-
-
+	public String getBundleName(){
+		return txtBundleName.getText();
+	}
+	
+	public String getBundleVersion(){
+		return txtBundleVersion.getText();
+	}
 }

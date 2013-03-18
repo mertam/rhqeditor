@@ -4,10 +4,10 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 
-import utils.ExtractorProvider;
-import utils.RhqConstants;
-import utils.RhqPathExtractor;
 import cz.muni.fi.rhqeditor.core.listeners.RecipeChangeListener;
+import cz.muni.fi.rhqeditor.core.utils.ExtractorProvider;
+import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
+import cz.muni.fi.rhqeditor.core.utils.RhqPathExtractor;
 
 public class ProjectScanner {
 	

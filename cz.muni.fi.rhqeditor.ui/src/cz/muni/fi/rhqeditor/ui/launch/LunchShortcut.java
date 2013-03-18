@@ -15,8 +15,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
 
-import utils.RhqConstants;
 import cz.muni.fi.rhqeditor.core.launch.LaunchConfigurationsManager;
+import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
 import cz.muni.fi.rhqeditor.ui.RhqEditor;
 
 /**

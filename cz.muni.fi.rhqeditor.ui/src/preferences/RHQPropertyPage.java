@@ -28,9 +28,10 @@ import org.eclipse.ui.IWorkbenchPropertyPage;
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.osgi.service.prefs.BackingStoreException;
 
+import cz.muni.fi.rhqeditor.core.utils.InputPropertiesManager;
+import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
 
-import utils.InputPropertiesManager;
-import utils.RhqConstants;
+
 
 
 public class RHQPropertyPage  extends PropertyPage implements IWorkbenchPropertyPage{

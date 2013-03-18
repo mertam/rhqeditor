@@ -10,7 +10,8 @@ import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 
-import utils.RhqConstants;
+import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
+
 
 /**
  * class provides basic operations for manipulating with Launch configurations

@@ -16,7 +16,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import utils.RhqConstants;
+import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
+
 
 public class ExportWizzardPage1 extends WizardPage {
 

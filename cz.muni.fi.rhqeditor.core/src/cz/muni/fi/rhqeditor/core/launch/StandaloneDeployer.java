@@ -23,12 +23,11 @@ import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 
-import utils.InputPropertiesManager;
-import utils.InputProperty;
-import utils.RhqConstants;
 
 import cz.muni.fi.rhqeditor.core.Activator;
-import cz.muni.fi.rhqeditor.core.DeployerProider;
+import cz.muni.fi.rhqeditor.core.utils.InputPropertiesManager;
+import cz.muni.fi.rhqeditor.core.utils.InputProperty;
+import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
 
 
 public class StandaloneDeployer {
@@ -89,7 +88,7 @@ public class StandaloneDeployer {
 				return;
 			
 			fConsole = findConsole(fProject.getName()+"[RHQ Standalone deployment]"+ pathToDeployer);
-			
+			fConsole.clearConsole();
 			deployCommand.append(pathToDeployer+" ");
 			
 			//deploy dir
@@ -183,7 +182,7 @@ public class StandaloneDeployer {
 	 */
 	private String initializeLocalDeployer(){
 		DeployerProider provider = DeployerProider.getInstance();
-		provider.initializeDeployer(Activator.getFileURL(RhqConstants.RHQ_STANDALONE_DEPLOYER));
+		provider.initializeDeployer(Activator.getFileURL("cz/muni/fi/rhqeditor/core/launch/rhq-bundle-deployer-4.6.0.zip"));
 		Path path = provider.getDeployerPath();
 		if(path == null || !provider.isExexutable())
 		{
@@ -213,7 +212,6 @@ public class StandaloneDeployer {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println("");
 	}
 	
 	
@@ -226,9 +224,6 @@ public class StandaloneDeployer {
 	            return (MessageConsole) existing[i];
 	      //no console found, so create a new one
 	      MessageConsole myConsole = new MessageConsole(name, null);
-	      
-	      
-	      
 	      
 	      conMan.addConsoles(new IConsole[]{myConsole});
 	      return myConsole;

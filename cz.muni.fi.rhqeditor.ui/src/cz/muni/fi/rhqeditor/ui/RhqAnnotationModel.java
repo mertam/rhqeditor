@@ -8,7 +8,8 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModel;
 
-import utils.RhqConstants;
+import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
+
 
 public class RhqAnnotationModel extends ResourceMarkerAnnotationModel{
 
