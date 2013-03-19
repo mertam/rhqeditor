@@ -87,6 +87,10 @@ public class StandaloneDeployer {
 			if(pathToDeployer.equals(RhqConstants.NOT_FOUND))
 				return;
 			
+			if(System.getProperty("os.name").toLowerCase().contains("windows")){
+			      pathToDeployer = pathToDeployer+".bat";
+			}
+			
 			fConsole = findConsole(fProject.getName()+"[RHQ Standalone deployment]"+ pathToDeployer);
 			fConsole.clearConsole();
 			deployCommand.append(pathToDeployer+" ");
@@ -182,7 +186,7 @@ public class StandaloneDeployer {
 	 */
 	private String initializeLocalDeployer(){
 		DeployerProider provider = DeployerProider.getInstance();
-		provider.initializeDeployer(Activator.getFileURL("/cz/muni/fi/rhqeditor/core/launch/rhq-bundle-deployer-4.6.0.zip"));
+		provider.initializeDeployer(Activator.getFileURL("cz/muni/fi/rhqeditor/core/launch/rhq-bundle-deployer-4.6.0.zip"));
 		Path path = provider.getDeployerPath();
 		if(path == null || !provider.isExexutable())
 		{

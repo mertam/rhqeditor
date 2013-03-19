@@ -6,6 +6,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import cz.muni.fi.rhqeditor.core.ProjectScanner;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
 
 
@@ -23,6 +24,8 @@ public class UiActivator extends AbstractUIPlugin {
 	 */
 	public UiActivator() {
 		System.out.println("UI activator called");
+		ProjectScanner scan = new ProjectScanner();
+		scan.initAllProjects();
 	}
 
 	/*
