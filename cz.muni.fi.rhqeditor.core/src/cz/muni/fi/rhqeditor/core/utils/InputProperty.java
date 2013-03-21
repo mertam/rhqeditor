@@ -15,7 +15,7 @@ public class InputProperty {
 	private String defaultValue = null;
 	private String type = null;
 	private String description = null;
-	private boolean required = false;
+	private boolean required = true;
 	
 	
 	public String getName() {
@@ -31,8 +31,7 @@ public class InputProperty {
 	}
 
 	public void setValue(String value) {
-		if(value != null && InputPropertyType.contains(value.toLowerCase()))
-			this.defaultValue = value;
+		this.defaultValue = value;
 	}
 
 	public String getType() {

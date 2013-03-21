@@ -38,18 +38,21 @@ public class NewProjectWizard extends Wizard implements IWorkbenchWizard{
 	@Override
 	public boolean performFinish() {
 		try{
-			RHQEditorProject project;
+			RHQEditorProject project = new RHQEditorProject();
 			
 			if(page1.getNewProjectPath() == null){
-				project = new RHQEditorProject(page1.getNewProjectName(),page1.getBundleName(),page1.getBundleVersion());
+				project.createProject(page1.getNewProjectName());
+				project.createDefaultRecipe(page1.getNewProjectName(),page1.getBundleName(),page1.getBundleVersion());
+//				project = new RHQEditorProject(page1.getNewProjectName(),page1.getBundleName(),page1.getBundleVersion());
 			}else{
 				IPath path = Path.fromOSString(page1.getNewProjectPath());
-				project = new RHQEditorProject(page1.getNewProjectName(),path, page1.getBundleName(), page1.getBundleVersion());
+//				project = new RHQEditorProject(page1.getNewProjectName(),path, page1.getBundleName(), page1.getBundleVersion());
 			}
 		
 		}catch(CoreException ex)
 		{
 			System.err.println(ex);
+			ex.printStackTrace();
 		}
 		return true;
 	}

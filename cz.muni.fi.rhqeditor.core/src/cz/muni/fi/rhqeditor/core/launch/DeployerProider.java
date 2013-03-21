@@ -27,7 +27,7 @@ import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
 public class DeployerProider {
 	
     private static final DeployerProider instance = new DeployerProider();
-    private String deployerDirPath = null;
+    private Path deployerDirPath = null;
     private Path deployerPath = null;
     private static String FILE_SEPARATOR = System.getProperty("file.separator");
     
@@ -40,11 +40,12 @@ public class DeployerProider {
     }
     
     public String getDirectory(){
-    	return deployerDirPath;
+    	return deployerDirPath.toString();
     }
     
     public void setDirectory(String prefix) throws IOException{
-    	deployerDirPath = Files.createTempDirectory(prefix).toString();
+    	deployerDirPath = Files.createTempDirectory(prefix);
+    	deployerDirPath.toFile().deleteOnExit();
     }
     
     public Path getDeployerPath(){

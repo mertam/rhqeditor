@@ -3,20 +3,36 @@ package cz.muni.fi.rhqeditor.core.listeners;
 import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.core.refactoring.TextFileChange;
+import org.eclipse.ltk.core.refactoring.history.IRefactoringExecutionListener;
+import org.eclipse.ltk.core.refactoring.history.IRefactoringHistoryListener;
+import org.eclipse.ltk.core.refactoring.history.IRefactoringHistoryService;
+import org.eclipse.ltk.core.refactoring.history.RefactoringExecutionEvent;
+import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
+import org.eclipse.ltk.core.refactoring.history.RefactoringHistoryEvent;
+import org.eclipse.ltk.internal.core.refactoring.history.RefactoringHistoryService;
+import org.eclipse.swt.widgets.Display;
 
 import cz.muni.fi.rhqeditor.core.ProjectScanner;
 import cz.muni.fi.rhqeditor.core.launch.LaunchConfigurationsManager;
 import cz.muni.fi.rhqeditor.core.utils.ExtractorProvider;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
 import cz.muni.fi.rhqeditor.core.utils.RhqPathExtractor;
+import cz.muni.fi.rhqeditor.core.utils.RhqRecipeContentChange;
 
 /**
  * listener used to tracking changes of resources in project
@@ -110,6 +126,8 @@ public class RecipeChangeListener implements IResourceChangeListener {
 						.removeFirstSegments(1).toString().startsWith(".bin")) {
 					break;
 				}
+				
+				
 				IResource addedResource = currentDelta.getResource();
 				IPath path = currentDelta.getFullPath();
 
@@ -132,10 +150,28 @@ public class RecipeChangeListener implements IResourceChangeListener {
 					// handle refactoring file
 					addedResourcePath = path;
 					if (removedResourcePath != null) {
-						// renameFileInRecipe(addedResourcePath,
-						// removedResourcePath, project);
+						RhqRecipeContentChange change = new RhqRecipeContentChange("change", project.getFile(RhqConstants.RHQ_RECIPE_FILE));
+//						sampleRefactor();
+						change.refactorFileName(removedResourcePath.toString(), addedResourcePath.toString());
+						System.out.println("update " + addedResourcePath.toString());
+						System.out.println("removed " + removedResourcePath.toString());
 					}
 				}
+				
+				//foldername refactoring
+				if(addedResource instanceof IFolder){
+					addedResourcePath = currentDelta.getFullPath().removeFirstSegments(1);
+					if(removedResourcePath != null){
+						extractor.updatePaths(removedResourcePath.toString(), addedResourcePath.toString());
+						RhqRecipeContentChange change = new RhqRecipeContentChange("change", project.getFile(RhqConstants.RHQ_RECIPE_FILE));
+						change.refactorFileName(removedResourcePath.toString(), addedResourcePath.toString());
+					
+						
+					}
+				}
+				
+				
+				
 				break;
 
 			case IResourceDelta.CHANGED:
@@ -163,9 +199,21 @@ public class RecipeChangeListener implements IResourceChangeListener {
 				removedResourcePath = currentDelta.getFullPath();
 				removedResourcePath = removedResourcePath
 						.removeFirstSegments(1);
-				if (addedResourcePath != null) {
-					// renameFileInRecipe(addedResourcePath,
-					// removedResourcePath, project);
+				
+				IResource removedResource = currentDelta.getResource();
+				if (addedResourcePath != null && removedResource instanceof IFile) {
+					RhqRecipeContentChange change = new RhqRecipeContentChange("change", project.getFile(RhqConstants.RHQ_RECIPE_FILE));
+					change.refactorFileName(removedResourcePath.toString(), addedResourcePath.toString());
+					System.out.println("update " + addedResourcePath.toString());
+					System.out.println("removed " + removedResourcePath.toString());
+				}
+				
+				if (addedResourcePath != null && removedResource instanceof IFolder) {
+					RhqRecipeContentChange change = new RhqRecipeContentChange("change", project.getFile(RhqConstants.RHQ_RECIPE_FILE));
+					extractor.updatePaths(removedResourcePath.toString(), addedResourcePath.toString());
+					change.refactorFileName(removedResourcePath.toString(), addedResourcePath.toString());
+					System.out.println("update " + addedResourcePath.toString());
+					System.out.println("removed " + removedResourcePath.toString());
 				}
 
 				break;
@@ -175,7 +223,6 @@ public class RecipeChangeListener implements IResourceChangeListener {
 		}
 	}
 	
-
 
 	/**
 	 * 

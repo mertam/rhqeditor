@@ -36,7 +36,7 @@ import org.eclipse.core.runtime.jobs.Job;
 public class RhqPathExtractor {
 	
 	private ArrayList<IPath> 	fAbsolutePathsFiles 		= null;
-	private ArrayList<IPath> 	fAbsolutePathsArchives 		= null;
+//	private ArrayList<IPath> 	fAbsolutePathsArchives 		= null;
 	private ArrayList<IPath> 	fAbsolutePathsDirectories 	= null;
 	//resource 
 	private IProject 			fProject					= null;
@@ -58,7 +58,7 @@ public class RhqPathExtractor {
 		fPathComparator = new PathComparator();
 		fAbsolutePathsFiles = new ArrayList<IPath>();
 		fAbsolutePathsDirectories = new ArrayList<IPath>();
-		fAbsolutePathsArchives = new ArrayList<IPath>();
+//		fAbsolutePathsArchives = new ArrayList<IPath>();
 		fArchiveContent = new HashMap<String, ArrayList<IPath>>();
 		fShouldBeJobScheduled = new AtomicBoolean(true);
 	}
@@ -136,7 +136,8 @@ public class RhqPathExtractor {
 	 * @return
 	 */
 	public boolean shouldBeListed(){
-		return fAbsolutePathsFiles.isEmpty() && fAbsolutePathsArchives.isEmpty();
+		return fAbsolutePathsFiles.isEmpty() && fArchiveContent.isEmpty();
+		//		return fAbsolutePathsFiles.isEmpty() && fAbsolutePathsArchives.isEmpty();
 	}
 	
 	/**
@@ -178,7 +179,7 @@ public class RhqPathExtractor {
 	}
 	
 	public void addArchive(IPath path){
-		fAbsolutePathsArchives.add(path);
+//		fAbsolutePathsArchives.add(path);
 		manageArchive(path);
 	}
 	public boolean isPathToFileValid(IPath abslutePath){
@@ -203,7 +204,7 @@ public class RhqPathExtractor {
 	}
 	
 	public boolean isPathToArchiveValid(IPath absolutePath){
-		return fAbsolutePathsArchives.contains(absolutePath);
+		return fArchiveContent.containsKey(absolutePath.toString());
 	}
 	
 	public List<IPath> getAllFiles(){
@@ -213,6 +214,7 @@ public class RhqPathExtractor {
 		return all;
 		
 	}
+	
 
 	
 	
@@ -225,13 +227,12 @@ public class RhqPathExtractor {
 	 */
 	
 	public void listFiles() {
-		fAbsolutePathsArchives.clear();
+//		fAbsolutePathsArchives.clear();
 		fAbsolutePathsFiles.clear();
 		fAbsolutePathsDirectories.clear();
-		
+		fArchiveContent.clear();
 		
 		Job listingJob = new Job("listing"){
-
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				System.out.println("job for project starts "+ fProject.getName());
@@ -269,9 +270,9 @@ public class RhqPathExtractor {
 				}
 				
 				
-				for(IPath p: fAbsolutePathsArchives){
-					manageArchive(p);
-				}
+//				for(IPath p: fAbsolutePathsArchives){
+//					manageArchive(p);
+//				}
 				
 				System.out.println("job for project done "+ fProject.getName());
 				fShouldBeJobScheduled.compareAndSet(false, true);
@@ -302,7 +303,7 @@ public class RhqPathExtractor {
 			if(path.toString().endsWith(RhqConstants.RHQ_ARCHIVE_JAR_SUFFIX) ||
 				path.toString().endsWith(RhqConstants.RHQ_ARCHIVE_ZIP_SUFFIX))
 			{
-				fAbsolutePathsArchives.add(path);
+				manageArchive(path);
 			}else{
 				fAbsolutePathsFiles.add(path);
 			}
@@ -404,7 +405,7 @@ public class RhqPathExtractor {
 		if(file.toString().endsWith(RhqConstants.RHQ_ARCHIVE_JAR_SUFFIX) ||
 				file.toString().endsWith(RhqConstants.RHQ_ARCHIVE_ZIP_SUFFIX)){
 			fArchiveContent.remove(file.toString());
-			fAbsolutePathsArchives.remove(file);
+//			fAbsolutePathsArchives.remove(file);
 		}else{
 			fAbsolutePathsFiles.remove(file);
 		}
@@ -420,6 +421,31 @@ public class RhqPathExtractor {
 	}
 	
 	
+	/**
+	 * updates all paths starting with formerPath/... to newPath/...
+	 * @param formerPath
+	 * @param newPath
+	 */
+	public void updatePaths(String formerPath, String newPath){
+		//update archives
+		ArrayList<IPath> temp;
+		for(String name : fArchiveContent.keySet()){
+			String newName = name.replaceFirst(formerPath, newPath);
+			if(name.startsWith(formerPath)){
+				temp = fArchiveContent.get(name);
+				fArchiveContent.remove(name);
+				fArchiveContent.put(newName, temp);
+			}
+		}
+		
+		//update files
+		for(IPath path: fAbsolutePathsFiles){
+			if(path.toString().startsWith(formerPath)){
+				String newName = path.toString().replaceFirst(formerPath, newPath);
+				path = new Path(newName);
+			}
+		}
+	}
 		
 	
 }

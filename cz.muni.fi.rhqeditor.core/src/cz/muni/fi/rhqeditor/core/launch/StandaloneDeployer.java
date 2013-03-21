@@ -23,7 +23,6 @@ import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 
-
 import cz.muni.fi.rhqeditor.core.Activator;
 import cz.muni.fi.rhqeditor.core.utils.InputPropertiesManager;
 import cz.muni.fi.rhqeditor.core.utils.InputProperty;
@@ -93,6 +92,7 @@ public class StandaloneDeployer {
 			
 			fConsole = findConsole(fProject.getName()+"[RHQ Standalone deployment]"+ pathToDeployer);
 			fConsole.clearConsole();
+			fConsole.activate();
 			deployCommand.append(pathToDeployer+" ");
 			
 			//deploy dir
@@ -111,38 +111,51 @@ public class StandaloneDeployer {
 			
 			InputPropertiesManager propManager = new InputPropertiesManager(fProject.getName());
 			
+			fConsoleStream = fConsole.newMessageStream();
+			boolean continueDeploying = true;
 			
 			String inputPropertyValue;
 			for(InputProperty property: propManager.getInputPropertiesFromRecipe(false)){
 				inputPropertyValue = configuration.getAttribute(
 						RhqConstants.RHQ_LAUNCH_ATTR_INPUT_PROPERTY+"."+property.getName(), EMPTY_VALUE);
+				
+				
 				if(inputPropertyValue.equals(EMPTY_VALUE)){
-					if(property.isRequired()){
-						System.out.println("handle error");
-						return;
-					}else{
-						continue;
+					//has default value?
+					if(property.getValue() != null){
+						deployCommand.append("-D" + property.getName() + "=" + property.getValue() + " ");
+						//print error if property is required, filter rhq.deploy.dir
+					} else if (property.isRequired() && !property.getName().equals(RhqConstants.RHQ_DEPLOY_DIR)){
+						continueDeploying = false;
+						fConsoleStream.println("Input property \""+ property.getName()+"\" is neither set neither inicialized");
 					}
+				} else {
+					//add value from user
+					deployCommand.append("-D" + property.getName() + "=" +inputPropertyValue + " ");
 				}
-				deployCommand.append("-D" + property.getName() + "=" +inputPropertyValue + " ");
 				
 			}
+			
+			//undefined value of required property
+			if(!continueDeploying)
+				return;
+			
 			System.out.println(deployCommand);
+			
 			
 		} catch (CoreException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
-		System.out.println("standalone deployment");
 
 	
 	    final String cmd =deployCommand.toString();
 	    final File dir = new File(fProject.getFolder(RhqConstants.RHQ_DEFAULT_BUILD_DIR).getLocation().toString());
-	    fConsoleStream = fConsole.newMessageStream();
+	    
 //	    initializeStandaloneDeployment();
 	       
-	    Job deployment = new Job("deploy"){
+	    Job deployment = new Job("Standalone deployment"){
 	    	   
 	    	@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -203,9 +216,12 @@ public class StandaloneDeployer {
 			//delete content of previous deployment
 			if(folder.exists()){
 				folder.delete(true, null);
+			}else{
+				folder.create(true, true, null);
+			}
 			folder = fProject.getFolder(RhqConstants.RHQ_DEFAULT_BUILD_DIR);
 		    folder.create(true, true, null);
-			}
+			
 			for(IResource res:fProject.members())
 			{
 				if(res.getName().toString().startsWith("."))

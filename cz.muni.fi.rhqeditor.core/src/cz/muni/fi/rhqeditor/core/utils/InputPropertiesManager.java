@@ -66,7 +66,7 @@ public class InputPropertiesManager {
         			property.setRequired(true);
         		else
         			property.setRequired(false);
-        	property.setValue(getAttributeValue(toAdd, "default"));
+        	property.setValue(getAttributeValue(toAdd, "defaultValue"));
         	result.add(property);
         	
         }
@@ -85,7 +85,6 @@ public class InputPropertiesManager {
         	property = property.substring(matcher.start());
         	int startQuotes = property.indexOf("\"");
         	int endQuotes = property.indexOf("\"",startQuotes+1);
-        	
         	return property.substring(startQuotes+1,endQuotes);
         }
         return null;
@@ -96,8 +95,10 @@ public class InputPropertiesManager {
 		dir.setName(RhqConstants.RHQ_DEPLOY_DIR);
 		InputProperty id = new InputProperty();
 		id.setName(RhqConstants.RHQ_DEPLOY_ID);
+		id.setRequired(false);
 		InputProperty name = new InputProperty();
 		name.setName(RhqConstants.RHQ_DEPLOY_NAME);
+		name.setRequired(false);
 		properties.add(dir);
 		properties.add(id);
 		properties.add(name);

@@ -40,7 +40,8 @@
             id="cz.muni.fi.rhqeditor.ui.editor1"
             name="RHQ Editor"
             class="cz.muni.fi.rhqeditor.ui.RhqEditor"
-            icon="icons/rhq.gif">
+            icon="icons/rhq.gif"
+            filenames="deploy.xml">
       </editor>
    </extension>
 
@@ -60,12 +61,12 @@
       <shortcut
             class="cz.muni.fi.rhqeditor.ui.launch.LunchShortcut"
             id="cz.muni.fi.rhqeditor.ui.shortcut1"
-            label="shortcut"
+            label="RHQ bundle standalone deployment"
             modes="run">
             <contextualLaunch>
             <contextLabel
                   mode="run"
-                  label="RHQ standalone deployment">
+                  label="RHQ bundle standalone deployment">
             </contextLabel>
             <enablement>
             	<with variable="selection">
@@ -73,8 +74,7 @@
 			  <iterate>
 			  	  <or>
 			  	     <test property="org.eclipse.debug.ui.matchesPattern" value="deploy.xml"/>
-			  	  </or>
-			  	 
+			  	  </or> 	 
 			  </iterate>
 			 </with>
             </enablement>
@@ -153,6 +153,25 @@
           </includes>
     </viewerContentBinding>
 </extension>
+<extension
+      id="cz.muni.fi.rhqeditor.import.bundle.wizard"
+      point="org.eclipse.ui.importWizards"
+      name="RHQ"
+      >
+      <category
+            id="cz.muni.fi.rhqeditor.ui.import.wizard"
+            name="RHQ Bundle">
+      </category>
+      <wizard
+            id="cz.muni.fi.rhqeditor.ui.import.bundle"
+            name="Import bundle from archive"
+            icon="icons/rhq.gif"
+            class="cz.muni.fi.rhqeditor.ui.wizards.ImportBundleArchiveWizard"
+            category="cz.muni.fi.rhqeditor.ui.import.wizard"
+            >
+      </wizard>
+</extension>
+	
 
     
    

@@ -24,18 +24,36 @@ import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
 
 public class RHQEditorProject {
 			
+//	/**
+//	 * Constructor creates project of given name in workspace
+//	 * 
+//	 * @param strProjectName - name of project
+//	 * @throws CoreException - if some error occures during creating
+//	 */
+//	public RHQEditorProject(String strProjectName, String bundleName, String bundleVersio) throws CoreException {
+//		
+//		
+//	}
+	
+	
+//	public RHQEditorProject(String strProjectName, IPath pathProjectPath,String bundleName, String bundleVersion) throws CoreException{
+//		this(strProjectName, bundleName, bundleVersion);
+//		//TODO dokoncit presun projektu
+//	}
+	
 	/**
-	 * Constructor creates project of given name in workspace
-	 * 
-	 * @param strProjectName - name of project
-	 * @throws CoreException - if some error occures during creating
+	 * creates rhq project with given name
+	 * @param projectName project name
+	 * @param bundleName bundle name
+	 * @param bundleVersion bundle version
+	 * @throws CoreException
 	 */
-	public RHQEditorProject(String strProjectName, String bundleName, String bundleVersion) throws CoreException {
-		
+	public void createProject(String projectName) throws CoreException{
+
 		IProgressMonitor progressMonitor = new NullProgressMonitor();
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
-		IProject project = root.getProject(strProjectName);
+		IProject project = root.getProject(projectName);
 		
 		project.create(progressMonitor);
 		project.open(progressMonitor);
@@ -65,24 +83,26 @@ public class RHQEditorProject {
 	    	description.setNatureIds(newNatures);
 		}
 	    project.setDescription(description, null);
-	    this.createDefaultRecipe(strProjectName, bundleName, bundleVersion);
+//	    this.createDefaultRecipe(projectName, bundleName, bundleVersion);
 	    
 	    ProjectScanner scanner = new ProjectScanner();
 	    scanner.initProject(project);
 
 	    
-	    LaunchConfigurationsManager.createNewLaunchConfiguration(strProjectName);
+	    LaunchConfigurationsManager.createNewLaunchConfiguration(projectName);
+	}
+	
+	public void createProject(String projectName, IPath pathProjectPath ) throws CoreException{
+		 createProject(projectName);
+	}
+	
+	public void createProjectFromArchive(IPath pathToArchive) {
 		
 	}
 	
 	
-	public RHQEditorProject(String strProjectName, IPath pathProjectPath,String bundleName, String bundleVersion) throws CoreException{
-		this(strProjectName, bundleName, bundleVersion);
-		//TODO dokoncit presun projektu
-	}
 	
-	
-	private void createDefaultRecipe(String projectName, String bundleName, String bundleVersion) throws CoreException{
+	public void createDefaultRecipe(String projectName, String bundleName, String bundleVersion) throws CoreException{
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		IProject project = root.getProject(projectName);
 		
@@ -107,13 +127,11 @@ public class RHQEditorProject {
 	    	folder.create(true, true, null);
 	    
 	    
+	   
 
 	}
 	
 	
-    
-
-    
 	
 	
 	
