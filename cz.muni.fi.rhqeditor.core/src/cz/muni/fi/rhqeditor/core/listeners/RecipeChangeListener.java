@@ -1,5 +1,6 @@
 package cz.muni.fi.rhqeditor.core.listeners;
 
+import java.util.ArrayList;
 import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
@@ -29,6 +30,8 @@ import cz.muni.fi.rhqeditor.core.utils.RhqRecipeContentChange;
 
 public class RecipeChangeListener implements IResourceChangeListener {
 
+	
+	
 	/**
 	 * When resource is chan
 	 */
@@ -39,6 +42,7 @@ public class RecipeChangeListener implements IResourceChangeListener {
 		RhqPathExtractor extractor = null;
 		IResourceDelta rootDelta = event.getDelta();
 
+		
 		// do nothing if project is closing
 		if (event.getType() == IResourceChangeEvent.PRE_CLOSE)
 			return;
@@ -88,6 +92,12 @@ public class RecipeChangeListener implements IResourceChangeListener {
 			extractor.listFiles();
 		}
 
+		
+		//refactoring purposes
+		ArrayList<IPath> addedFolders = new ArrayList<>();
+		ArrayList<IPath> deletedFolders = new ArrayList<>();
+		
+		//------------
 		IResourceDelta projDelta = rootDelta.findMember(new Path(project
 				.getProject().getName()));
 		// stack used for storing delta tree
@@ -137,23 +147,13 @@ public class RecipeChangeListener implements IResourceChangeListener {
 					addedResourcePath = path;
 					if (removedResourcePath != null) {
 						RhqRecipeContentChange change = new RhqRecipeContentChange("change", project.getFile(RhqConstants.RHQ_RECIPE_FILE));
-//						sampleRefactor();
 						change.refactorFileName(removedResourcePath.toString(), addedResourcePath.toString());
-						System.out.println("update " + addedResourcePath.toString());
-						System.out.println("removed " + removedResourcePath.toString());
 					}
 				}
 				
 				//foldername refactoring
 				if(addedResource instanceof IFolder){
-					addedResourcePath = currentDelta.getFullPath().removeFirstSegments(1);
-					if(removedResourcePath != null){
-						extractor.updatePaths(removedResourcePath.toString(), addedResourcePath.toString());
-						RhqRecipeContentChange change = new RhqRecipeContentChange("change", project.getFile(RhqConstants.RHQ_RECIPE_FILE));
-						change.refactorFileName(removedResourcePath.toString(), addedResourcePath.toString());
-					
-						
-					}
+					addedFolders.add(addedResource.getFullPath());
 				}
 				
 				
@@ -188,28 +188,45 @@ public class RecipeChangeListener implements IResourceChangeListener {
 				
 				IResource removedResource = currentDelta.getResource();
 				if (addedResourcePath != null && removedResource instanceof IFile) {
+					//rename file
 					RhqRecipeContentChange change = new RhqRecipeContentChange("change", project.getFile(RhqConstants.RHQ_RECIPE_FILE));
 					change.refactorFileName(removedResourcePath.toString(), addedResourcePath.toString());
-					System.out.println("update " + addedResourcePath.toString());
-					System.out.println("removed " + removedResourcePath.toString());
 				}
 				
-				if (addedResourcePath != null && removedResource instanceof IFolder) {
-					RhqRecipeContentChange change = new RhqRecipeContentChange("change", project.getFile(RhqConstants.RHQ_RECIPE_FILE));
-					extractor.updatePaths(removedResourcePath.toString(), addedResourcePath.toString());
-					change.refactorFileName(removedResourcePath.toString(), addedResourcePath.toString());
-					System.out.println("update " + addedResourcePath.toString());
-					System.out.println("removed " + removedResourcePath.toString());
+				if (/*addedResourcePath != null && */removedResource instanceof IFolder) {
+					deletedFolders.add(removedResource.getFullPath());
 				}
 
 				break;
 
 			}
+			
 
 		}
+		
+		//moved part of resource tree
+		if(addedFolders.size() == 1 && deletedFolders.size() == 1){
+			//same project
+			IPath path1 = addedFolders.get(0).removeLastSegments(addedFolders.get(0).segmentCount() -1);
+			IPath path2 = deletedFolders.get(0).removeLastSegments(deletedFolders.get(0).segmentCount() -1);
+			if(path1.equals(path2)){
+//				extractor.updatePaths(deletedFolders.get(0).removeFirstSegments(1).toString(), addedFolders.get(0).removeFirstSegments(1).toString());
+				RhqRecipeContentChange change = new RhqRecipeContentChange("change", project.getFile(RhqConstants.RHQ_RECIPE_FILE));
+			    change.refactorFileName(deletedFolders.get(0).removeFirstSegments(1).toString(), addedFolders.get(0).removeFirstSegments(1).toString());
+			    extractor.updatePaths(deletedFolders.get(0).removeFirstSegments(1).toString(), addedFolders.get(0).removeFirstSegments(1).toString());
+			
+			}
+				
+		}
+		
+		
 	}
 	
+	
 
+
+	
+	
 	/**
 	 * 
 	 * @param addedResourcePath

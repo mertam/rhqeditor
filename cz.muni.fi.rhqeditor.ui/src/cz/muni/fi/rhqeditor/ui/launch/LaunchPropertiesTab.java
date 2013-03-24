@@ -10,17 +10,22 @@ import org.eclipse.debug.internal.ui.SWTFactory;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -31,6 +36,9 @@ import cz.muni.fi.rhqeditor.core.utils.InputPropertiesManager;
 import cz.muni.fi.rhqeditor.core.utils.InputProperty;
 import cz.muni.fi.rhqeditor.core.utils.RecipeReader;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
+import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormAttachment;
 
 
 public class LaunchPropertiesTab extends AbstractLaunchConfigurationTab{
@@ -54,24 +62,25 @@ public class LaunchPropertiesTab extends AbstractLaunchConfigurationTab{
 	@Override
 	public void createControl(Composite parent) {
 		System.out.println("create control");
-		Composite myComposite = SWTFactory.createComposite(parent, 2, 1, GridData.FILL_HORIZONTAL);
-		GridLayout gridLayout = (GridLayout) myComposite.getLayout();
-		gridLayout.horizontalSpacing = 7;
-		gridLayout.makeColumnsEqualWidth = true;
+		Composite myComposite = SWTFactory.createComposite(parent, 2, 1, GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
         setControl(myComposite);
+        myComposite.setLayout(new FormLayout());
         
-        Group grpInput = new Group(myComposite, SWT.NONE);
-        GridData gd_grpInput = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
-        gd_grpInput.widthHint = 471;
-        gd_grpInput.heightHint = 225;
-        grpInput.setLayoutData(gd_grpInput);
+        Group grpInput = new Group(myComposite, SWT.SHADOW_OUT);
+        FormData fd_grpInput = new FormData();
+        fd_grpInput.bottom = new FormAttachment(0, 249);
+        fd_grpInput.top = new FormAttachment(0, 5);
+        fd_grpInput.left = new FormAttachment(0, 5);
+        grpInput.setLayoutData(fd_grpInput);
         grpInput.setText("Input Properties");
         
         fViewer = new TableViewer(grpInput, SWT.BORDER | SWT.FULL_SELECTION);
         fTable = fViewer.getTable();
         fTable.setHeaderVisible(true);
         fTable.setLinesVisible(true);
-        fTable.setBounds(10, 20, 455, 163);
+        fTable.setBounds(10, 20, 515, 163);
+        
+        
        
         
         //create columns
@@ -80,7 +89,7 @@ public class LaunchPropertiesTab extends AbstractLaunchConfigurationTab{
         TableColumn columnType	 	= new TableColumn (fTable, SWT.NONE);
         TableColumn columnRequired 	= new TableColumn (fTable, SWT.NONE);
         
-        columnName.setWidth(100);
+        columnName.setWidth(120);
         columnName.setText("name");
         columnValue.setWidth(150);
         columnValue.setText("value");
@@ -88,6 +97,67 @@ public class LaunchPropertiesTab extends AbstractLaunchConfigurationTab{
         columnRequired.setText("required");
         columnType.setWidth(100);
         columnType.setText("type");
+        
+        
+        final TableEditor tableEditor = new TableEditor(fTable);
+        tableEditor.horizontalAlignment = SWT.LEFT;
+	    tableEditor.grabHorizontal = true;
+        fTable.addListener(SWT.MouseDown, new Listener() {
+			
+			@Override
+			public void handleEvent(Event event) {
+				 Rectangle clientArea = fTable.getClientArea();
+		         Point pt = new Point(event.x, event.y);
+		         int index = fTable.getTopIndex();
+		         while (index < fTable.getItemCount()) {
+		           boolean visible = false;
+		           final TableItem item = fTable.getItem(index);
+		           
+		             Rectangle rect = item.getBounds(1);
+		             if (rect.contains(pt)) {
+		               final int column = 1;
+		               final Text text = new Text(fTable, SWT.NONE);
+		               Listener textListener = new Listener() {
+		                 public void handleEvent(final Event e) {
+		                   switch (e.type) {
+		                   case SWT.FocusOut:
+		                     item.setText(column, text.getText());
+		                     text.dispose();
+		                     break;
+		                   case SWT.Traverse:
+		                     switch (e.detail) {
+		                     case SWT.TRAVERSE_RETURN:
+		                       item
+		                           .setText(column, text
+		                               .getText());
+		                     // FALL THROUGH
+		                     case SWT.TRAVERSE_ESCAPE:
+		                       text.dispose();
+		                       e.doit = false;
+		                     }
+		                     break;
+		                   }
+		                 }
+		               };
+		               text.addListener(SWT.FocusOut, textListener);
+		               text.addListener(SWT.Traverse, textListener);
+		               tableEditor.setEditor(text, item, 1);
+		               text.setText(item.getText(1));
+		               text.selectAll();
+		               text.setFocus();
+		               return;
+		             }
+		             if (!visible && rect.intersects(clientArea)) {
+		               visible = true;
+		             }
+		           
+		           if (!visible)
+		             return;
+		           index++;
+		         }
+		         updateLaunchConfigurationDialog();
+		       }
+		     });
         
         
         fBtnSelect = new Button(grpInput, SWT.NONE);
@@ -119,9 +189,12 @@ public class LaunchPropertiesTab extends AbstractLaunchConfigurationTab{
         });
         fBtnSelect.setBounds(10, 189, 45, 29);
         fBtnSelect.setText("Edit");
-        new Label(myComposite, SWT.NONE);
         
         fBtnUseDefaultRhqdeploydir = new Button(myComposite, SWT.CHECK);
+        FormData fd_fBtnUseDefaultRhqdeploydir = new FormData();
+        fd_fBtnUseDefaultRhqdeploydir.top = new FormAttachment(0, 254);
+        fd_fBtnUseDefaultRhqdeploydir.left = new FormAttachment(0, 5);
+        fBtnUseDefaultRhqdeploydir.setLayoutData(fd_fBtnUseDefaultRhqdeploydir);
         fBtnUseDefaultRhqdeploydir.setSelection(true);
         fBtnUseDefaultRhqdeploydir.addSelectionListener(new SelectionAdapter() {
         	@Override
@@ -132,21 +205,32 @@ public class LaunchPropertiesTab extends AbstractLaunchConfigurationTab{
         });
         fBtnUseDefaultRhqdeploydir.setText("Use default rhq.deploy.dir "+
         		System.getProperty("file.separator")+RhqConstants.RHQ_DEFAULT_DEPLOY_DIR_PATH);
-        new Label(myComposite, SWT.NONE);
         
         fLblPathToDeploy = new Label(myComposite, SWT.NONE);
+        FormData fd_fLblPathToDeploy = new FormData();
+        fd_fLblPathToDeploy.top = new FormAttachment(0, 281);
+        fd_fLblPathToDeploy.left = new FormAttachment(0, 5);
+        fLblPathToDeploy.setLayoutData(fd_fLblPathToDeploy);
         fLblPathToDeploy.setText("Path to deploy directory (rhq.deploy.dir)");
-        new Label(myComposite, SWT.NONE);
         
         fTxtDeployDir = new Text(myComposite, SWT.BORDER);
+        FormData fd_fTxtDeployDir = new FormData();
+        fd_fTxtDeployDir.right = new FormAttachment(0, 480);
+        fd_fTxtDeployDir.top = new FormAttachment(0, 304);
+        fd_fTxtDeployDir.left = new FormAttachment(0, 5);
+        fTxtDeployDir.setLayoutData(fd_fTxtDeployDir);
         fTxtDeployDir.addModifyListener(new ModifyListener() {
         	public void modifyText(ModifyEvent e) {
         		updateLaunchConfigurationDialog();
         	}
         });
-        fTxtDeployDir.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
         
         fBtnBrowse = new Button(myComposite, SWT.NONE);
+        fd_grpInput.right = new FormAttachment(fBtnBrowse, 0, SWT.RIGHT);
+        FormData fd_fBtnBrowse = new FormData();
+        fd_fBtnBrowse.top = new FormAttachment(0, 303);
+        fd_fBtnBrowse.left = new FormAttachment(0, 487);
+        fBtnBrowse.setLayoutData(fd_fBtnBrowse);
         fBtnBrowse.addSelectionListener(new SelectionAdapter() {
         	@Override
         	public void widgetSelected(SelectionEvent e) {

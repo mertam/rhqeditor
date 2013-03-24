@@ -29,10 +29,12 @@ public class RhqRecipeContentChange extends TextFileChange{
 		Display.getDefault().syncExec(new Runnable() {
 		    public void run()  {
 		    	try{
+		    		System.out.println("from " + formerName);
+		    		System.out.println("to " +newName);
 		    		IDocument document = acquireDocument(null);
 					String content = document.get();
 					
-					content = content.replaceAll("name=\""+ formerName +"\"", "name=\""+ newName +"\"");
+					content = content.replaceAll("name=\""+ formerName, "name=\""+ newName);
 //					content.replaceAll(formerName, newName);
 					document.set(content);
 					performEdits(document);

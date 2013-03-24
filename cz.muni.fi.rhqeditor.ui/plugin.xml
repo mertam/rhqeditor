@@ -62,7 +62,9 @@
             class="cz.muni.fi.rhqeditor.ui.launch.LunchShortcut"
             id="cz.muni.fi.rhqeditor.ui.shortcut1"
             label="RHQ bundle standalone deployment"
-            modes="run">
+            modes="run"
+            icon="icons/rhq.gif"
+            >
             <contextualLaunch>
             <contextLabel
                   mode="run"

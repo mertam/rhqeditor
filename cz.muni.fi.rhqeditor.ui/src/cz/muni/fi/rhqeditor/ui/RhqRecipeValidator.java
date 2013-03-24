@@ -189,6 +189,11 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 				break;
 			
 			attrPath = new Path(attrValue);
+			
+			//ignore rhq:file name=file.${property}
+			if(attrValue.matches(".*\\$\\{.*\\}.*"))
+				break;
+			
 			//file can have only one only destinationDir or destinationFile, not both
 			if(attributes.getIndex("destinationFile") > -1 && attributes.getIndex("destinationDir") > -1){
 				fRhqAnnotationModel.addMarker(locator.getLineNumber(), 

@@ -439,13 +439,15 @@ public class RhqPathExtractor {
 		}
 		
 		//update files
-		for(IPath path: fAbsolutePathsFiles){
-			if(path.toString().startsWith(formerPath)){
-				String newName = path.toString().replaceFirst(formerPath, newPath);
-				path = new Path(newName);
+		for(int i = 0; i!=fAbsolutePathsFiles.size(); i++){
+			if(fAbsolutePathsFiles.get(i).toString().startsWith(formerPath)){
+				String newName = fAbsolutePathsFiles.get(i).toString().replaceFirst(formerPath, newPath);
+				fAbsolutePathsFiles.set(i, new Path(newName));
 			}
 		}
 	}
+	
+	
 		
 	
 }
