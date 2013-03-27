@@ -19,6 +19,10 @@ import org.eclipse.core.runtime.Path;
  */
 public class RecipeReader {
 	
+//	public static String getProjectName(String recipeContent){
+//		
+//	}
+	
 	
 	/**
 	 * reads recipe and return stringBuilder containing it's contain

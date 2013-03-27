@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
@@ -35,7 +36,7 @@ import org.eclipse.core.runtime.jobs.Job;
  */
 public class RhqPathExtractor {
 	
-	private ArrayList<IPath> 	fAbsolutePathsFiles 		= null;
+	private List<IPath> 		fAbsolutePathsFiles 		= null;
 //	private ArrayList<IPath> 	fAbsolutePathsArchives 		= null;
 	private ArrayList<IPath> 	fAbsolutePathsDirectories 	= null;
 	//resource 
@@ -56,7 +57,7 @@ public class RhqPathExtractor {
 	public RhqPathExtractor(IProject project){
 		fProject = project;
 		fPathComparator = new PathComparator();
-		fAbsolutePathsFiles = new ArrayList<IPath>();
+		fAbsolutePathsFiles =  new ArrayList<IPath>();
 		fAbsolutePathsDirectories = new ArrayList<IPath>();
 //		fAbsolutePathsArchives = new ArrayList<IPath>();
 		fArchiveContent = new HashMap<String, ArrayList<IPath>>();
@@ -82,14 +83,14 @@ public class RhqPathExtractor {
 	 */
 	public List<IPath> getAbsolutePathsFiles() {
 		Collections.sort(fAbsolutePathsFiles, fPathComparator);
-		return fAbsolutePathsFiles;
+		return  Collections.synchronizedList(fAbsolutePathsFiles);
 	}
 	/**
 	 * returns sorted list of Path to all archives in project
 	 * @return
 	 */
 	public List<IPath> getAbsolutePathsArchives() {
-		ArrayList<IPath> paths= new ArrayList<IPath>();
+		List<IPath> paths=  Collections.synchronizedList(new ArrayList<IPath>());
 		for(String s: fArchiveContent.keySet()){
 			paths.add(new Path(s));
 		}
@@ -99,7 +100,7 @@ public class RhqPathExtractor {
 
 	public List<IPath> getAbsolutePathsDirectories() {
 		Collections.sort(fAbsolutePathsDirectories, fPathComparator);
-		return fAbsolutePathsDirectories;
+		return  Collections.synchronizedList(fAbsolutePathsDirectories);
 	}
 	
 	public List<IPath> getAbsolutePathsFilesByPrefix(String prefix){
@@ -128,7 +129,7 @@ public class RhqPathExtractor {
 		List <IPath> files = fArchiveContent.get(archiveName);
 		if(files == null)
 			return Collections.emptyList();
-		return files;
+		return  Collections.synchronizedList(files);
 	}
 	
 	/**
@@ -170,7 +171,7 @@ public class RhqPathExtractor {
 			else
 				break;
 		}		
-		return paths.subList(startIndex, endIndex);
+		return  Collections.synchronizedList(paths.subList(startIndex, endIndex));
 		
 	}
 	
@@ -444,6 +445,53 @@ public class RhqPathExtractor {
 				String newName = fAbsolutePathsFiles.get(i).toString().replaceFirst(formerPath, newPath);
 				fAbsolutePathsFiles.set(i, new Path(newName));
 			}
+		}
+	}
+	
+	/**
+	 * removes folder and all content from extractor
+	 * @param folder
+	 */
+	public void removeFolder(IPath folder){
+		
+		
+		 IPath currentPath;
+		 for(Iterator<IPath> i = fAbsolutePathsFiles.iterator(); i.hasNext();) {
+		     currentPath = i.next();
+		     if(folder.isPrefixOf(currentPath))
+		       i.remove();
+		 }
+		
+
+		 for(Iterator<String> i = fArchiveContent.keySet().iterator(); i.hasNext();) {
+		     currentPath = new Path(i.next());
+		     if(folder.isPrefixOf(currentPath))
+		       i.remove();
+		 }
+		
+	}
+	
+	public void addFolder(IPath folderName){
+		IFolder folder = fProject.getFolder(folderName);
+		if(folder == null)
+			return;
+		try{
+		Stack<IFolder> stack = new Stack<>();
+		stack.push(folder);
+		
+		IFolder temp;
+		while(!stack.empty()){
+			temp = stack.pop();
+			
+			for(IResource resource: temp.members()){
+				if(resource instanceof IFolder)
+					stack.push((IFolder) resource);
+				if(resource instanceof IFile)
+					manageResource(resource);
+			}
+		}
+		} catch (CoreException ex){
+			ex.printStackTrace();
 		}
 	}
 	

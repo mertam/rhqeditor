@@ -12,15 +12,15 @@
 			<attribute name="name" visible="true" required="true">
 				The name given to the bundle.
 			</attribute>
-			<attribute  name="version" visible="false" required="false">
-				The version string for this specific bundle. Bundles can have the same name - they are differentiated by their version strings. These version strings normally conform to an OSGi style of versioning (e.g. "1.0.0" or "2.4.1.GA")
+			<attribute  name="version" visible="true" required="true">
+				The version string for this specific bundle. Bundles can have the same name, but each bundle of that name must have a unique version string. These version strings normally conform to an OSGi style of versioning, such as 1.0 or 1.2.FINAL. 
 			</attribute>
 			<attribute  name="description" visible="false" required="false">
 				A human readable description of this specific bundle version. (optional)
 			</attribute>
 		</attributes>
 		<description>
-		 Sample RHQ bundle description.
+		Contains the definition for the main JBoss ON-related Ant task that is required for any Ant bundle recipe. This element defines basic information about the bundle and is the parent element for all of the specific details about what is in the bundle and how it should be provisioned. 
 		</description>
 	</task>
 	<task name="deployment-unit" paired="true">
@@ -30,20 +30,21 @@
 		<antparents></antparents>
 		<attributes>
 			<attribute name="name" 	visible="true"	required="true">
-				The name of the deployment unit (e.g. "appserver" or "database")
+				The name of the application.
 			</attribute>
 			<attribute  name="manageRootDir" visible="false" required="false" entity="boolean">
 				A boolean (true,false) that specifies if RHQ is to manage all files in the top root directory where the bundle is deployed. If false, any unrelated files found in the top destination directory will be ignored. Default is true.
 			</attribute>
 			<attribute  name="postinstallTarget" visible="false" required="false">
-				If defined, this names the Ant target that will be invoked prior to the deployment unit getting installed.(optional)
+					An Ant target that is invoked after the deployment unit is installed. 
 			</attribute>
 			<attribute  name="preinstallTarget" 	visible="false" required="false">
-				If defined, this names the Ant target that will be invoked after the deployment unit was installed.(optional)
+				An Ant target that is invoked before the deployment unit is installed. 
 			</attribute>
 		</attributes>
 		<description>
-		 Add description.
+		Defines the application being deployed by the bundle. A deployment unit is a software product, in any form, including an application server, web server, or database. A deployment unit (application) can have multiple archive and configuration files associated with it.
+Only a single deployment unit is provisioned at a time by the provisioning process, so there can be only one element in a bundle recipe. 
 		</description>
 	</task>
 	<task name="input-property" paired="false">
@@ -53,18 +54,18 @@
 		<antparents></antparents>
 		<attributes>
 			<attribute name="name"	visible="true" 	required="true">
-				The name of the property. You can refer to this property in the recipe using the standard Ant syntax "${var}".
+				The name of the user-defined property. Within the recipe, this property can be referred to by this name, in the format ${property_name}. 
 			</attribute>
 			<attribute  name="required"	visible="false" required="false" entity="boolean">
-				If true, this property must be given a value; if false, it may be left undefined.
+				Sets whether the property is required or optional for configuration. The default value is false, which means the property is optional. If this argument isn't given, then it is assumed that the property is optional. 
 			</attribute>
-			<attribute  name="description" 	visible="false" 	required="false">
-				A human readable description of this specific bundle version which the user will see when being asked to provide a value for this property.
+			<attribute  name="description" 	visible="true" 	required="true">
+				A readable description of the property. This is the text string displayed in the JBoss ON bundle UI when the bundle is deployed. 
 			</attribute>
 			<attribute  name="defaultValue"	visible="false" 	required="false">
 				If the user does not define a value for this property, this will be its default.
 			</attribute>
-			<attribute  name="type" visible="true" 	required="false" entity="inputpropertytype">
+			<attribute  name="type" visible="true" 	required="true" entity="inputpropertytype">
 				The type of value. Valid types are: string, longString, boolean, integer, long, float, double, password, file, directory
 			</attribute>
 		</attributes>
@@ -83,6 +84,10 @@
 be compressed and stored in the same relative location as the 'name' attribute indicates (relative to the bundle destination directory).
 			</attribute>
 		</attributes>
+		<description>
+		 Defines any archive file that is associated with deploying the application. An archive can be a ZIP or JAR file. A bundle doesn't require an archive file, so this element is optional. 
+		</description>
+
 	</task>
 	<task name="url-archive" paired="true">
 		<rhqparents>

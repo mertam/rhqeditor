@@ -13,7 +13,6 @@ public class ProjectScanner {
 	
 	public final String NATURE_ID = "cz.muni.fi.rhqeditor.natures.rhqeditornature";
 	
-	private RecipeChangeListener fListener = null;
 	
 	/**
 	 * scans all projects in workspace, finds ones having RHQ nature, add listener to them and ...
@@ -24,26 +23,25 @@ public class ProjectScanner {
 	
 	/**
 	 * calls init on all projects existing in workspace
+	 * Set's up listener - this method should be called on workspace start only
+	 * TODO consider sigleton to prevent duplicit listeners
 	 */
 	public void initAllProjects(){
+		RecipeChangeListener listener = new RecipeChangeListener();
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(listener);
+			
 		for(IProject proj: ResourcesPlugin.getWorkspace().getRoot().getProjects()){
 			initProject(proj);
 		}
 	}
 	
 	/**
-	 * setup for RHQ project after opening. Sets up listener and adds it's extractor
+	 * setup for RHQ project after opening. 
 	 * @param project
 	 */
 	public void initProject(IProject project){
 		
 		ExtractorProvider extProvider = ExtractorProvider.getInstance();
-		
-		if(fListener == null){
-			RecipeChangeListener listener = new RecipeChangeListener();
-			ResourcesPlugin.getWorkspace().addResourceChangeListener(listener);
-			fListener = listener;
-		}
 		
 		//terminate if project is already initialized
 		if(extProvider.getMap().keySet().contains(project))

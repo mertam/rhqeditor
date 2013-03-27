@@ -13,50 +13,67 @@
   </modules>
 
   <properties>
-    <tycho-version>0.15.0</tycho-version>
+    <tycho-version>0.17.0</tycho-version>
   </properties>
-
- <repositories>
+  <repositories>
     <repository>
       <id>juno</id>
       <layout>p2</layout>
       <url>http://download.eclipse.org/releases/juno</url>
     </repository>
-  </repositories> 
+  </repositories>
 
-  <build>
-    <plugins>
-      <plugin>
+ <build>
+  <plugins>
+
+
+       <plugin>
         <groupId>org.eclipse.tycho</groupId>
-        <artifactId>tycho-maven-plugin</artifactId>
-        <version>${tycho-version}</version>
-        <extensions>true</extensions>
+        <artifactId>target-platform-configuration</artifactId>
+	<version>${tycho-version}</version>
+        <configuration>
+          <environments>
+            <environment>
+              <os>linux</os>
+              <ws>gtk</ws>
+              <arch>x86</arch>
+            </environment>
+            <environment>
+              <os>linux</os>
+              <ws>gtk</ws>
+              <arch>x86_64</arch>
+            </environment>
+            <environment>
+              <os>win32</os>
+              <ws>win32</ws>
+              <arch>x86</arch>
+            </environment>
+            <environment>
+              <os>win32</os>
+              <ws>win32</ws>
+              <arch>x86_64</arch>
+            </environment>
+            <environment>
+              <os>macosx</os>
+              <ws>cocoa</ws>
+              <arch>x86_64</arch>
+            </environment>
+          </environments>
+        </configuration>
       </plugin>
 
-      <plugin>
-        <groupId>org.eclipse.tycho</groupId>
-        <artifactId>tycho-p2-director-plugin</artifactId>
-        <version>${tycho-version}</version>
-        <executions>
-          <execution>
-            <id>materialize-products</id>
-            <goals>
-              <goal>materialize-products</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>archive-products</id>
-            <goals>
-              <goal>archive-products</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>  
-      
-      <plugin>
+
+     <plugin>
+  	<groupId>org.eclipse.tycho</groupId>
+	 <artifactId>tycho-maven-plugin</artifactId>
+	 <version>${tycho-version}</version>
+	 <extensions>true</extensions>
+     </plugin>
+
+     <plugin>
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>tycho-source-plugin</artifactId>
-        <version>${tycho-version}</version>
+ 	<version>${tycho-version}</version>
         <executions>
           <execution>
             <id>plugin-source</id>
@@ -66,8 +83,10 @@
           </execution>
         </executions>
       </plugin>
+	
 
-    </plugins>
-  </build>
+	
+ </plugins>
+</build>
 
 </project> 

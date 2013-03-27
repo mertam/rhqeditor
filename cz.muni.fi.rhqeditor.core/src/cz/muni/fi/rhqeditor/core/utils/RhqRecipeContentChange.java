@@ -31,6 +31,7 @@ public class RhqRecipeContentChange extends TextFileChange{
 		    	try{
 		    		System.out.println("from " + formerName);
 		    		System.out.println("to " +newName);
+		    		setSaveMode(KEEP_SAVE_STATE);
 		    		IDocument document = acquireDocument(null);
 					String content = document.get();
 					
@@ -45,9 +46,6 @@ public class RhqRecipeContentChange extends TextFileChange{
 			}
 		    }
 		});
-		
-		
-
 		
 	}
 	
@@ -72,5 +70,15 @@ public class RhqRecipeContentChange extends TextFileChange{
 		
 		
 	}
+	
+	
+	public void addFileToRecipe(String filename){
+		
+	}
+	
+	public void addArchiveToRecipe(String archiveName){
+		
+	}
+	
 
 }

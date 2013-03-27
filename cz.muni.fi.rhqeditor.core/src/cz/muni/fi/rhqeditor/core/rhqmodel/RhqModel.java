@@ -47,8 +47,8 @@ public class RhqModel {
 	private Map<String, RhqTask> readDocument() {
 		try {
 			
-			System.out.println(Activator.getFileURL("cz/muni/fi/rhqeditor/core/rhqmodel/rhq_tasks-4.6.0.xml"));
-			URL fXmlFile = Activator.getFileURL("cz/muni/fi/rhqeditor/core/rhqmodel/rhq_tasks-4.6.0.xml");
+			System.out.println(Activator.getFileURL("bin/cz/muni/fi/rhqeditor/core/rhqmodel/rhq_tasks-4.6.0.xml"));
+			URL fXmlFile = Activator.getFileURL("bin/cz/muni/fi/rhqeditor/core/rhqmodel/rhq_tasks-4.6.0.xml");
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory
 					.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();

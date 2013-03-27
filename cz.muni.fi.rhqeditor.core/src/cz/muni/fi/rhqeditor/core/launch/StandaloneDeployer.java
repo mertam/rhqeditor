@@ -199,7 +199,7 @@ public class StandaloneDeployer {
 	 */
 	private String initializeLocalDeployer(){
 		DeployerProider provider = DeployerProider.getInstance();
-		provider.initializeDeployer(Activator.getFileURL("cz/muni/fi/rhqeditor/core/launch/rhq-bundle-deployer-4.6.0.zip")); 
+		provider.initializeDeployer(Activator.getFileURL(RhqConstants.RHQ_STANDALONE_DEPLOYER_URL));
 		Path path = provider.getDeployerPath();
 		if(path == null || !provider.isExexutable())
 		{
