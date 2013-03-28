@@ -5,7 +5,7 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWizard;
 
-import cz.muni.fi.rhqeditor.core.RHQEditorProject;
+import cz.muni.fi.rhqeditor.core.RHQBundleProject;
 
 public class ImportBundleArchiveWizard extends Wizard implements IWorkbenchWizard{
 
@@ -25,7 +25,7 @@ public class ImportBundleArchiveWizard extends Wizard implements IWorkbenchWizar
 	@Override
 	public boolean performFinish() {
 		// TODO Auto-generated method stub
-		RHQEditorProject proj = new RHQEditorProject();
+		RHQBundleProject proj = new RHQBundleProject();
 		return false;
 	}
 

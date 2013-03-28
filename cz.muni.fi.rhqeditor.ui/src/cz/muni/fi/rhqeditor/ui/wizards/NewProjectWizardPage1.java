@@ -36,8 +36,6 @@ public class NewProjectWizardPage1 extends WizardPage{
 	private Label				lblLocation;
 
 	private Label 				lblProjectName;
-
-	private Label				lblProjectNameCheck;
 	
 	private Text				txtBundleName;
 	private Text 				txtBundleVersion;
@@ -47,8 +45,8 @@ public class NewProjectWizardPage1 extends WizardPage{
 	private String				newProjectPath = null;
 	
 	private String				newProjectName = null;
-	private Text text;
-	private Text text_1;
+
+	private boolean 			firstChange = true;
 
 	
 //	protected NewProjectWizardPage1(String pageName) {
@@ -83,7 +81,7 @@ public class NewProjectWizardPage1 extends WizardPage{
 		container.setLayout(new GridLayout(4, false));
 		new Label(container, SWT.NONE);
 		new Label(container, SWT.NONE);
-		lblProjectNameCheck = new Label(container, SWT.NONE);
+		
 		setDescription("Enter project name.");
 		new Label(container, SWT.NONE);
 		
@@ -144,6 +142,11 @@ public class NewProjectWizardPage1 extends WizardPage{
 					lblLocation.setEnabled(true);
 					txtProjectLocation.setEnabled(true);
 					btnUseDeafultLocation.setSelection(false);
+				}
+				
+				if(firstChange){
+					txtProjectLocation.setText("");
+					firstChange = false;
 				}
 			}
 		});
@@ -217,13 +220,13 @@ public class NewProjectWizardPage1 extends WizardPage{
 				setPageComplete(true);
 				return;
 			}else{
-				setDescription("Project with this name already in workspace");		
+				setErrorMessage("Project with this name already in workspace");		
 				setPageComplete(false);
 				return;
 			}
 
 		}else{
-			setDescription("Project name contains invalid characters");		
+			setErrorMessage("Project name contains invalid characters");		
 			setPageComplete(false);
 			return;
 		}
@@ -237,7 +240,7 @@ public class NewProjectWizardPage1 extends WizardPage{
 	
 	public String getNewProjectPath()
 	{
-		return newProjectPath;
+		return txtProjectLocation.getText();
 	}
 	
 	public String getBundleName(){

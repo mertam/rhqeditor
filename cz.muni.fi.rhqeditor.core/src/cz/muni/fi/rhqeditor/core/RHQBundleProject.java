@@ -3,6 +3,7 @@ package cz.muni.fi.rhqeditor.core;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
+import org.eclipse.core.internal.resources.ProjectDescription;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -22,44 +23,41 @@ import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
 
 
 
-public class RHQEditorProject {
+public class RHQBundleProject {
 			
-//	/**
-//	 * Constructor creates project of given name in workspace
-//	 * 
-//	 * @param strProjectName - name of project
-//	 * @throws CoreException - if some error occures during creating
-//	 */
-//	public RHQEditorProject(String strProjectName, String bundleName, String bundleVersio) throws CoreException {
-//		
-//		
-//	}
-	
-	
-//	public RHQEditorProject(String strProjectName, IPath pathProjectPath,String bundleName, String bundleVersion) throws CoreException{
-//		this(strProjectName, bundleName, bundleVersion);
-//		//TODO dokoncit presun projektu
-//	}
 	
 	/**
-	 * creates rhq project with given name
+	 * creates RHQ bundle project with given name in given location
 	 * @param projectName project name
 	 * @param bundleName bundle name
 	 * @param bundleVersion bundle version
-	 * @throws CoreException
+	 * @param location location for creating project. Workspace is used if null.
+	 * @throws CoreException if some error occures
 	 */
-	public void createProject(String projectName) throws CoreException{
+	public void createProject(String projectName, IPath location) throws CoreException{
 
 		IProgressMonitor progressMonitor = new NullProgressMonitor();
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		IProject project = root.getProject(projectName);
+		IStatus status;
 		
-		project.create(progressMonitor);
+		
+		IProjectDescription description;
+		if(location != null){
+			description = new ProjectDescription();
+			description.setLocation(location);
+			description.setName(projectName);
+			String[] natures = new String[1];
+			natures[0] = RhqConstants.RHQ_NATURE_ID;
+			description.setNatureIds(natures);
+			project.create(description, progressMonitor);
+			
+		} else {
+			project.create(progressMonitor);
+		}
 		project.open(progressMonitor);
-		
-	
-		IProjectDescription description = project.getDescription();
+		description = project.getDescription();
 		String[] natures = description.getNatureIds();
 		
 		boolean addRhqNature = true;
@@ -75,7 +73,7 @@ public class RHQEditorProject {
 			System.arraycopy(natures, 0, newNatures, 0, natures.length);
 			newNatures[natures.length] = RhqConstants.RHQ_NATURE_ID;
 		
-			IStatus status = workspace.validateNatureSet(newNatures);
+			status = workspace.validateNatureSet(newNatures);
 			if(!status.isOK()){
 				System.out.println(status.toString());
 				throw new CoreException(status);
@@ -83,17 +81,12 @@ public class RHQEditorProject {
 	    	description.setNatureIds(newNatures);
 		}
 	    project.setDescription(description, null);
-//	    this.createDefaultRecipe(projectName, bundleName, bundleVersion);
-	    
+
 	    ProjectScanner scanner = new ProjectScanner();
 	    scanner.initProject(project);
 
 	    
 	    LaunchConfigurationsManager.createNewLaunchConfiguration(projectName);
-	}
-	
-	public void createProject(String projectName, IPath pathProjectPath ) throws CoreException{
-		 createProject(projectName);
 	}
 	
 	public void createProjectFromArchive(IPath pathToArchive) {

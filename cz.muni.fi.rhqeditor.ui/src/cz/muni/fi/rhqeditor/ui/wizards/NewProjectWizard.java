@@ -3,12 +3,14 @@ package cz.muni.fi.rhqeditor.ui.wizards;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWizard;
 
-import cz.muni.fi.rhqeditor.core.RHQEditorProject;
+import cz.muni.fi.rhqeditor.core.RHQBundleProject;
 import cz.muni.fi.rhqeditor.ui.UiActivator;
 
 public class NewProjectWizard extends Wizard implements IWorkbenchWizard{
@@ -38,20 +40,21 @@ public class NewProjectWizard extends Wizard implements IWorkbenchWizard{
 	@Override
 	public boolean performFinish() {
 		try{
-			RHQEditorProject project = new RHQEditorProject();
+			RHQBundleProject project = new RHQBundleProject();
 			
 			if(page1.getNewProjectPath() == null){
-				project.createProject(page1.getNewProjectName());
+				project.createProject(page1.getNewProjectName(), null);
 				project.createDefaultRecipe(page1.getNewProjectName(),page1.getBundleName(),page1.getBundleVersion());
-//				project = new RHQEditorProject(page1.getNewProjectName(),page1.getBundleName(),page1.getBundleVersion());
+//				project = new RHQBundleProject(page1.getNewProjectName(),page1.getBundleName(),page1.getBundleVersion());
 			}else{
 				IPath path = Path.fromOSString(page1.getNewProjectPath());
-//				project = new RHQEditorProject(page1.getNewProjectName(),path, page1.getBundleName(), page1.getBundleVersion());
+				project.createProject(page1.getNewProjectName(), path);
+				project.createDefaultRecipe(page1.getNewProjectName(),page1.getBundleName(),page1.getBundleVersion());
 			}
 		
 		}catch(CoreException ex)
 		{
-			System.err.println(ex);
+			ErrorDialog.openError(new Shell(), "Project creationg error", ex.getMessage(),ex.getStatus());
 			ex.printStackTrace();
 		}
 		return true;
