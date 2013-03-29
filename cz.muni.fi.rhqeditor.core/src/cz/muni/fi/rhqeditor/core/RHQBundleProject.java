@@ -102,14 +102,15 @@ public class RHQBundleProject {
 		String name = (bundleName == null || bundleName.equals("") ? "bundle" : bundleName);
 		String version = (bundleVersion == null || bundleVersion.equals("") ? "1.0.0" : bundleVersion);
 		
-		IFile recipe = project.getFile("deploy.xml");
+		IFile recipe = project.getFile(RhqConstants.RHQ_RECIPE_FILE);
 		if(!recipe.exists()){
-		
-			String str = "<?xml version=\"1.0\"?>"+ System.getProperty("line.separator")+
+			String separator =  System.getProperty("line.separator");
+			String str = "<?xml version=\"1.0\"?>"+separator+
 					"<project name=\""+projectName+"\" default=\"main\" xmlns:rhq=\"antlib:org.rhq.bundle\">"+
-					System.getProperty("line.separator")+"\t<target name=\"main\"/>"+  System.getProperty("line.separator")+
-					"\t<rhq:bundle name=\""+name+"\" version=\""+version+"\">"+System.getProperty("line.separator") +
-					"\t</rhq:bundle>" + System.getProperty("line.separator")+
+					System.getProperty("line.separator")+"\t<target name=\"main\"/>"+ separator+
+					"\t<rhq:bundle name=\""+name+"\" version=\""+version+"\">"+System.getProperty("line.separator") + 
+					"\t<rhq:deployment-unit name=\"unit\">"+separator + separator + "\t\t</rhq:deployment-unit>" + separator+
+					"\t</rhq:bundle>" +separator+
 					"</project>";
 			InputStream is = new ByteArrayInputStream(str.getBytes());
 			recipe.create(is, true, null);

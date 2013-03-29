@@ -57,7 +57,7 @@ public class RhqModelReader {
 	 * @return RhqTask or null
 	 */
 	public RhqTask getTask(String taskName){
-		if(taskName.startsWith(getRhqNamespacePrefix(fDocument))){
+		if(taskName.startsWith(getRhqNamespacePrefix())){
 			return(fModelMap.get(removeNamespacePrefix(taskName)));
 		}
 		return null;
@@ -75,18 +75,9 @@ public class RhqModelReader {
     	return name.substring(beginIndex+1);
     }
     
-    /**
-     * returns RhqPrefix from Document
-     * @return
-     */
-    private String getRhqNamespacePrefix(IDocument doc){
-    	String content;
-    	//if doc isn't set ~~~> recipe hasn't been opened in editor yet, read recipe content on disk
-    	if(doc != null)
-    		content = doc.get();
-    	else
-    		content = RecipeReader.readRecipe(fProject).toString();
-    	
+    
+    
+    public static String getRhqNamespacePrefix(String content){
     	int endIndex = content.indexOf(RhqConstants.RHQ_NAMESPACE_URL);
     	if(endIndex == -1)
     		return null;
@@ -101,8 +92,13 @@ public class RhqModelReader {
     	
     }
     
+    /**
+     * return namespace prefix. If fDocument is unset, reads from file in workspace.
+     * @return
+     */
     public String getRhqNamespacePrefix(){
-    	return getRhqNamespacePrefix(fDocument);
+    	return (fDocument == null ? 
+    			getRhqNamespacePrefix(RecipeReader.readRecipe(fProject).toString()) : getRhqNamespacePrefix(fDocument.get()));
     }
     
 	/**

@@ -136,7 +136,7 @@ public class RecipeChangeListener implements IResourceChangeListener {
 
 		IPath removedResourcePath = null;
 		IResourceDelta currentDelta;
-		
+
 		// go through all deltas
 		while (!stackDelta.isEmpty()) {
 			currentDelta = stackDelta.pop();
@@ -292,6 +292,30 @@ public class RecipeChangeListener implements IResourceChangeListener {
 			change.refactorFileName(oldPath.removeFirstSegments(1).toString(),
 					newPath.removeFirstSegments(1).toString());
 			return;
+		}
+
+		// file was only added, update recipe
+		if (fAddedFiles.size() > 0 && fDeletedFiles.size() == 0) {
+			for(int i = 0; i < fAddedFiles.size(); i++){			
+				IPath path = fAddedFiles.get(i);
+				//ignore creating deploy.xml
+				if(path.removeFirstSegments(1).toString().equals(RhqConstants.RHQ_RECIPE_FILE))
+					return;
+				IProject affectedProject = ResourcesPlugin
+						.getWorkspace()
+						.getRoot()
+						.getProject(
+								path.removeLastSegments(
+										path.segmentCount() - 1).toString());
+		
+				RhqRecipeContentChange change = new RhqRecipeContentChange(
+						"add file to recipe", affectedProject.getFile(RhqConstants.RHQ_RECIPE_FILE));
+				if(path.toString().endsWith(RhqConstants.RHQ_ARCHIVE_JAR_SUFFIX) ||
+						path.toString().endsWith(RhqConstants.RHQ_ARCHIVE_ZIP_SUFFIX))
+					change.addTaskToRecipe(RhqConstants.RHQ_TYPE_ARCHIVE,path.removeFirstSegments(1).toString());
+				else
+					change.addTaskToRecipe(RhqConstants.RHQ_TYPE_FILE,path.removeFirstSegments(1).toString());
+				}
 		}
 	}
 

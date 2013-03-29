@@ -82,6 +82,7 @@ public class NewProjectWizardPage1 extends WizardPage{
 		new Label(container, SWT.NONE);
 		new Label(container, SWT.NONE);
 		
+		setErrorMessage(null);
 		setDescription("Enter project name.");
 		new Label(container, SWT.NONE);
 		
@@ -160,7 +161,7 @@ public class NewProjectWizardPage1 extends WizardPage{
 		txtProjectLocation = new Text(container, SWT.BORDER);
 		txtProjectLocation.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
 		txtProjectLocation.setEnabled(false);
-		txtProjectLocation.setText(ResourcesPlugin.getWorkspace().getRoot().getLocation().toString());
+		txtProjectLocation.setMessage(ResourcesPlugin.getWorkspace().getRoot().getLocation().toString());
 				
 		btnDirectoryDialog = new Button(container, SWT.BUTTON1);
 		btnDirectoryDialog.setText("Browse...");
@@ -196,6 +197,7 @@ public class NewProjectWizardPage1 extends WizardPage{
 		
 		if(txtProjectName.getText().isEmpty())
 		{
+			setErrorMessage(null);
 			setDescription("Enter project name.");
 			setPageComplete(false);
 			return;
@@ -208,13 +210,13 @@ public class NewProjectWizardPage1 extends WizardPage{
 			{
 				if(projects[i].getName().equals(txtProjectName.getText()))
 				{
-					System.out.println(projects[i].getName());
 					projectExist = true;
 					break;
 				}
 			}
 				
 			if(!projectExist){
+				setErrorMessage(null);
 				setDescription("Create a RHQ Bundle project in the workspace or in an external location.");
 				newProjectName = txtProjectName.getText();
 				setPageComplete(true);
@@ -240,7 +242,7 @@ public class NewProjectWizardPage1 extends WizardPage{
 	
 	public String getNewProjectPath()
 	{
-		return txtProjectLocation.getText();
+		return (txtProjectLocation.getText().isEmpty() ? null : txtProjectLocation.getText());
 	}
 	
 	public String getBundleName(){

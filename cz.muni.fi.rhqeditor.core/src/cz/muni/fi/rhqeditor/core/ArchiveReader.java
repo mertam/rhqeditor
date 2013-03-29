@@ -6,11 +6,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
 
 public class ArchiveReader {
 	
-	private String getTextFile(String pathToArchive, String fileName){
+	private String getFileContent(String pathToArchive, String fileName){
 		try {
 			ZipFile archive = new ZipFile(pathToArchive);
 			ZipEntry entry = archive.getEntry(fileName);

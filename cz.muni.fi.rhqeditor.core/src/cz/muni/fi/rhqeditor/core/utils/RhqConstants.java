@@ -65,7 +65,7 @@ public class RhqConstants {
 	
 	public static final String NOT_FOUND = "not found";
 	
-	public static final String RHQ_STANDALONE_DEPLOYER_URL = "bin/cz/muni/fi/rhqeditor/core/launch/rhq-bundle-deployer-4.6.0.zip";
+	public static final String RHQ_STANDALONE_DEPLOYER_URL = "cz/muni/fi/rhqeditor/core/launch/rhq-bundle-deployer-4.6.0.zip";
 	public static final String RHQ_STANDALONE_DEPLOYER = "rhq-bundle-deployer-4.6.0.zip";
 	
 	public static final String RHQ_DEFAULT_BUILD_DIR = ".bin";
