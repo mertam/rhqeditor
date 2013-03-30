@@ -147,6 +147,9 @@ public class RecipeChangeListener implements IResourceChangeListener {
 						.removeFirstSegments(1).toString().startsWith(".bin")) {
 					break;
 				}
+				// for (IResourceDelta d : delta.getAffectedChildren()) {
+				// stackDelta.push(d);
+				// }
 
 				IResource addedResource = currentDelta.getResource();
 				IPath path = currentDelta.getFullPath();
@@ -209,6 +212,7 @@ public class RecipeChangeListener implements IResourceChangeListener {
 				}
 
 				if (removedResource instanceof IFolder) {
+
 					fDeletedFolders.add(removedResource.getFullPath());
 				}
 
@@ -220,36 +224,29 @@ public class RecipeChangeListener implements IResourceChangeListener {
 	}
 
 	private void finalizeRefactoring() {
+
+		// import add files and folders into project
+		for (IPath addedFolder : fAddedFolders) {
+			IProject project = getProjectFromPath(addedFolder);
+			RhqPathExtractor extractor = ExtractorProvider.getInstance().getMap().get(project);
+			extractor.addFolder(addedFolder.removeFirstSegments(1));
+			for(IPath path :extractor.getAbsolutePathsFilesByPrefix(addedFolder.removeFirstSegments(1).toString())){
+				addFileToRecipe(project, path);
+			}
+		}
+		// removes all folders from extractor
+		for (IPath deletedFolder : fDeletedFolders) {
+			IProject project = getProjectFromPath(deletedFolder);
+			ExtractorProvider.getInstance().getMap().get(project)
+					.removeFolder(deletedFolder.removeFirstSegments(1));
+		}
+
 		// folder was moved with content
 		if (fAddedFolders.size() == 1 && fDeletedFolders.size() == 1) {
 			IPath newPath = fAddedFolders.get(0);
 			IPath oldPath = fDeletedFolders.get(0);
 
-			IProject affectedProject = ResourcesPlugin
-					.getWorkspace()
-					.getRoot()
-					.getProject(
-							newPath.removeLastSegments(
-									newPath.segmentCount() - 1).toString());
-			IProject unaffectedProject = ResourcesPlugin
-					.getWorkspace()
-					.getRoot()
-					.getProject(
-							oldPath.removeLastSegments(
-									oldPath.segmentCount() - 1).toString());
-
-			// if project are different, only update paths in extractor
-			if (!affectedProject.equals(unaffectedProject)) {
-				RhqPathExtractor extractorAdded = ExtractorProvider
-						.getInstance().getMap().get(affectedProject);
-				RhqPathExtractor extractorDeleted = ExtractorProvider
-						.getInstance().getMap().get(unaffectedProject);
-
-				extractorDeleted.removeFolder(oldPath.removeFirstSegments(1));
-				extractorAdded.addFolder(newPath.removeFirstSegments(1));
-
-				return;
-			}
+			IProject affectedProject = getProjectFromPath(newPath);
 
 			RhqRecipeContentChange change = new RhqRecipeContentChange(
 					"change",
@@ -260,7 +257,6 @@ public class RecipeChangeListener implements IResourceChangeListener {
 					.getMap().get(affectedProject);
 			extractor.updatePaths(oldPath.removeFirstSegments(1).toString(),
 					newPath.removeFirstSegments(1).toString());
-			return;
 		}
 
 		// file was moved or renamed
@@ -268,18 +264,8 @@ public class RecipeChangeListener implements IResourceChangeListener {
 			IPath newPath = fAddedFiles.get(0);
 			IPath oldPath = fDeletedFiles.get(0);
 
-			IProject affectedProject = ResourcesPlugin
-					.getWorkspace()
-					.getRoot()
-					.getProject(
-							newPath.removeLastSegments(
-									newPath.segmentCount() - 1).toString());
-			IProject unaffectedProject = ResourcesPlugin
-					.getWorkspace()
-					.getRoot()
-					.getProject(
-							oldPath.removeLastSegments(
-									oldPath.segmentCount() - 1).toString());
+			IProject affectedProject = getProjectFromPath(newPath);
+			IProject unaffectedProject = getProjectFromPath(oldPath);
 
 			// do not change recipe when folder was moved to different project
 			if (!affectedProject.equals(unaffectedProject)) {
@@ -294,29 +280,35 @@ public class RecipeChangeListener implements IResourceChangeListener {
 			return;
 		}
 
-		// file was only added, update recipe
-		if (fAddedFiles.size() > 0 && fDeletedFiles.size() == 0) {
-			for(int i = 0; i < fAddedFiles.size(); i++){			
-				IPath path = fAddedFiles.get(i);
-				//ignore creating deploy.xml
-				if(path.removeFirstSegments(1).toString().equals(RhqConstants.RHQ_RECIPE_FILE))
-					return;
-				IProject affectedProject = ResourcesPlugin
-						.getWorkspace()
-						.getRoot()
-						.getProject(
-								path.removeLastSegments(
-										path.segmentCount() - 1).toString());
-		
-				RhqRecipeContentChange change = new RhqRecipeContentChange(
-						"add file to recipe", affectedProject.getFile(RhqConstants.RHQ_RECIPE_FILE));
-				if(path.toString().endsWith(RhqConstants.RHQ_ARCHIVE_JAR_SUFFIX) ||
-						path.toString().endsWith(RhqConstants.RHQ_ARCHIVE_ZIP_SUFFIX))
-					change.addTaskToRecipe(RhqConstants.RHQ_TYPE_ARCHIVE,path.removeFirstSegments(1).toString());
-				else
-					change.addTaskToRecipe(RhqConstants.RHQ_TYPE_FILE,path.removeFirstSegments(1).toString());
-				}
-		}
+	}
+
+	
+	private void addFileToRecipe(IProject project, IPath path){
+		if (path.removeFirstSegments(1).toString()
+				.equals(RhqConstants.RHQ_RECIPE_FILE))
+			return;
+
+		RhqRecipeContentChange change = new RhqRecipeContentChange(
+				"add file to recipe",
+				project.getFile(RhqConstants.RHQ_RECIPE_FILE));
+		if (path.toString().endsWith(
+				RhqConstants.RHQ_ARCHIVE_JAR_SUFFIX)
+				|| path.toString().endsWith(
+						RhqConstants.RHQ_ARCHIVE_ZIP_SUFFIX))
+			change.addTaskToRecipe(RhqConstants.RHQ_TYPE_ARCHIVE, path
+					.toString());
+		else
+			change.addTaskToRecipe(RhqConstants.RHQ_TYPE_FILE, path
+					.toString());
+	}
+	
+	private IProject getProjectFromPath(IPath path) {
+		return ResourcesPlugin
+				.getWorkspace()
+				.getRoot()
+				.getProject(
+						path.removeLastSegments(path.segmentCount() - 1)
+								.toString());
 	}
 
 }

@@ -7,11 +7,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -60,7 +60,7 @@ public class RhqPathExtractor {
 		fAbsolutePathsFiles =  new ArrayList<IPath>();
 		fAbsolutePathsDirectories = new ArrayList<IPath>();
 //		fAbsolutePathsArchives = new ArrayList<IPath>();
-		fArchiveContent = new HashMap<String, ArrayList<IPath>>();
+		fArchiveContent = new ConcurrentHashMap<String, ArrayList<IPath>>();
 		fShouldBeJobScheduled = new AtomicBoolean(true);
 	}
 	
@@ -429,22 +429,26 @@ public class RhqPathExtractor {
 	 */
 	public void updatePaths(String formerPath, String newPath){
 		//update archives
-		ArrayList<IPath> temp;
-		for(String name : fArchiveContent.keySet()){
-			String newName = name.replaceFirst(formerPath, newPath);
-			if(name.startsWith(formerPath)){
-				temp = fArchiveContent.get(name);
-				fArchiveContent.remove(name);
-				fArchiveContent.put(newName, temp);
-			}
-		}
+		 ArrayList<IPath> temp;
+		 for(Iterator<String> i = fArchiveContent.keySet().iterator(); i.hasNext();) {
+			 String name = i.next();
+			 String newName = name.replaceFirst(formerPath, newPath);
+		     if(name.startsWith(formerPath)){
+					temp = fArchiveContent.get(name);
+					fArchiveContent.remove(name);
+					fArchiveContent.put(newName, temp);
+				}
+		 }
 		
 		//update files
-		for(int i = 0; i!=fAbsolutePathsFiles.size(); i++){
-			if(fAbsolutePathsFiles.get(i).toString().startsWith(formerPath)){
-				String newName = fAbsolutePathsFiles.get(i).toString().replaceFirst(formerPath, newPath);
-				fAbsolutePathsFiles.set(i, new Path(newName));
+		int index = 0;
+		for(Iterator<IPath> i = fAbsolutePathsFiles.iterator(); i.hasNext();) {
+			String currentPath = i.next().toString();
+			if(currentPath.startsWith(formerPath)){
+				String newName = currentPath.toString().replaceFirst(formerPath, newPath);
+				fAbsolutePathsFiles.set(index, new Path(newName));
 			}
+			index++;
 		}
 	}
 	
