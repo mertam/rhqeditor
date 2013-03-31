@@ -1,6 +1,8 @@
 package cz.muni.fi.rhqeditor.core.listeners;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
@@ -35,6 +37,7 @@ public class RecipeChangeListener implements IResourceChangeListener {
 	private ArrayList<IPath> fDeletedFolders = new ArrayList<>();
 	private ArrayList<IPath> fAddedFiles = new ArrayList<>();
 	private ArrayList<IPath> fDeletedFiles = new ArrayList<>();
+	private Map<IPath, RefactoredPair> fRefactoredMap = new HashMap<IPath,RefactoredPair>();
 
 	/**
 	 * When resource is chan
@@ -46,6 +49,7 @@ public class RecipeChangeListener implements IResourceChangeListener {
 		fAddedFolders.clear();
 		fDeletedFiles.clear();
 		fDeletedFolders.clear();
+		fRefactoredMap.clear();
 		IProject project = null;
 		IResourceDelta rootDelta = event.getDelta();
 
@@ -140,24 +144,56 @@ public class RecipeChangeListener implements IResourceChangeListener {
 		// go through all deltas
 		while (!stackDelta.isEmpty()) {
 			currentDelta = stackDelta.pop();
+			
+			
+			IResource currentResource = currentDelta.getResource();
+			RefactoredPair pair;
+			IPath key =  findMatchInRefactoredFiles(currentResource.getFullPath());
+			System.out.println(currentResource.getFullPath());
+			if(currentDelta.getMovedFromPath() != null){
+				if(key == null){
+					pair = new RefactoredPair();
+					pair.setFrom(currentDelta.getMovedFromPath());
+					key = currentResource.getFullPath();
+					fRefactoredMap.put(key,pair);
+					System.out.println("PUT: " + currentResource.getFullPath().toString() + "  " + currentDelta.getMovedFromPath().toString());
+				} else {
+					pair = fRefactoredMap.get(key);
+					pair.setFrom(currentDelta.getMovedFromPath());
+				} 
+			}
+			
+			if(currentDelta.getMovedToPath() != null){
+				if(key == null){
+					pair = new RefactoredPair();
+					pair.setTo(currentDelta.getMovedToPath());
+					key = currentResource.getFullPath();
+					fRefactoredMap.put(key,pair);
+					System.out.println("PUT: " + currentResource.getFullPath().toString() + "  " + currentDelta.getMovedToPath().toString());
+				} else {
+					pair = fRefactoredMap.get(key);
+					pair.setTo(currentDelta.getMovedToPath());
+				}
+			}
+			
+			
 			switch (currentDelta.getKind()) {
 			case IResourceDelta.ADDED:
 				// ignore added files into proj/.bin of proj/build
-				if (currentDelta.getResource().getFullPath()
+				if (currentResource.getFullPath()
 						.removeFirstSegments(1).toString().startsWith(RhqConstants.RHQ_DEFAULT_BUILD_DIR) ||
-					currentDelta.getResource().getFullPath()
+					currentResource.getFullPath()
 						.removeFirstSegments(1).toString().startsWith(RhqConstants.RHQ_DEFAULT_BUILD_DIR))
 						{
 					break;
 				}
 
-				IResource addedResource = currentDelta.getResource();
 				IPath path = currentDelta.getFullPath();
-				if (addedResource instanceof IFile) {
+				if (currentResource instanceof IFile) {
 
-					if (addedResource.getName().endsWith(
+					if (currentResource.getName().endsWith(
 							RhqConstants.RHQ_ARCHIVE_JAR_SUFFIX)
-							|| addedResource.getName().endsWith(
+							|| currentResource.getName().endsWith(
 									RhqConstants.RHQ_ARCHIVE_ZIP_SUFFIX)) {
 
 						if (!extractor.getAbsolutePathsArchives().contains(
@@ -173,8 +209,8 @@ public class RecipeChangeListener implements IResourceChangeListener {
 				}
 
 				// foldername refactoring
-				if (addedResource instanceof IFolder) {
-					fAddedFolders.add(addedResource.getFullPath());
+				if (currentResource instanceof IFolder) {
+					fAddedFolders.add(currentResource.getFullPath());
 				}
 
 				break;
@@ -196,24 +232,27 @@ public class RecipeChangeListener implements IResourceChangeListener {
 				break;
 
 			case IResourceDelta.REMOVED:
-				if (currentDelta.getResource().getFullPath()
-						.removeFirstSegments(1).toString().startsWith(".bin")) {
+				if (currentResource.getFullPath()
+						.removeFirstSegments(1).toString().startsWith(RhqConstants.RHQ_DEFAULT_BUILD_DIR) ||
+					currentResource.getFullPath()
+						.removeFirstSegments(1).toString().startsWith(RhqConstants.RHQ_DEFAULT_BUILD_DIR))
+						{
 					break;
 				}
+				
 				extractor.removeFile(currentDelta.getFullPath()
 						.removeFirstSegments(1));
 				removedResourcePath = currentDelta.getFullPath();
 				removedResourcePath = removedResourcePath
 						.removeFirstSegments(1);
 
-				IResource removedResource = currentDelta.getResource();
-				if (removedResource instanceof IFile) {
-					fDeletedFiles.add(removedResource.getFullPath());
+				if (currentResource instanceof IFile) {
+					fDeletedFiles.add(currentResource.getFullPath());
 				}
 
-				if (removedResource instanceof IFolder) {
+				if (currentResource instanceof IFolder) {
 
-					fDeletedFolders.add(removedResource.getFullPath());
+					fDeletedFolders.add(currentResource.getFullPath());
 				}
 
 				break;
@@ -225,68 +264,87 @@ public class RecipeChangeListener implements IResourceChangeListener {
 
 	private void finalizeRefactoring() {
 
-		// import add files and folders into project
-		for (IPath addedFolder : fAddedFolders) {
-			IProject project = getProjectFromPath(addedFolder);
-			RhqPathExtractor extractor = ExtractorProvider.getInstance().getMap().get(project);
-			extractor.addFolder(addedFolder.removeFirstSegments(1));
-			for(IPath path :extractor.getAbsolutePathsFilesByPrefix(addedFolder.removeFirstSegments(1).toString())){
-				addFileToRecipe(project, path);
-			}
-		}
 		
-		for(IPath addedFile : fAddedFiles){
-			IProject project = getProjectFromPath(addedFile);
-			addFileToRecipe(project, addedFile.removeFirstSegments(1));
-		}
-		// removes all folders from extractor
-		for (IPath deletedFolder : fDeletedFolders) {
-			IProject project = getProjectFromPath(deletedFolder);
-			ExtractorProvider.getInstance().getMap().get(project)
-					.removeFolder(deletedFolder.removeFirstSegments(1));
-		}
-
-		// folder was moved with content
-		if (fAddedFolders.size() == 1 && fDeletedFolders.size() == 1) {
-			IPath newPath = fAddedFolders.get(0);
-			IPath oldPath = fDeletedFolders.get(0);
-
-			IProject affectedProject = getProjectFromPath(newPath);
-
-			RhqRecipeContentChange change = new RhqRecipeContentChange(
-					"change",
-					affectedProject.getFile(RhqConstants.RHQ_RECIPE_FILE));
-			change.refactorFileName(oldPath.removeFirstSegments(1).toString(),
-					newPath.removeFirstSegments(1).toString());
-			RhqPathExtractor extractor = ExtractorProvider.getInstance()
-					.getMap().get(affectedProject);
-			extractor.updatePaths(oldPath.removeFirstSegments(1).toString(),
-					newPath.removeFirstSegments(1).toString());
-		}
-
-		// file was moved or renamed
-		if (fAddedFiles.size() == 1 && fDeletedFiles.size() == 1) {
-			IPath newPath = fAddedFiles.get(0);
-			IPath oldPath = fDeletedFiles.get(0);
-
-			IProject affectedProject = getProjectFromPath(newPath);
-			IProject unaffectedProject = getProjectFromPath(oldPath);
-
-			// do not change recipe when folder was moved to different project
-			if (!affectedProject.equals(unaffectedProject)) {
-				return;
-			}
-
-			RhqRecipeContentChange change = new RhqRecipeContentChange(
-					"change",
-					affectedProject.getFile(RhqConstants.RHQ_RECIPE_FILE));
-			change.refactorFileName(oldPath.removeFirstSegments(1).toString(),
-					newPath.removeFirstSegments(1).toString());
+		//adding files to project
+		if(wasSomethingAdded() && !wasSomethingDeleted()){
+			addFiles();
 			return;
 		}
+		
+		//deleting files from project
+		if(!wasSomethingAdded() && wasSomethingDeleted()){
+			removeFiles();
+			return;
+		}
+		
+		
+		fAddedFiles.clear();
+		fAddedFolders.clear();
+		//refactoring (renaming or moving files)
+		for(RefactoredPair pair: fRefactoredMap.values()){
+			System.out.println("FROM :" +pair.getFrom() + " TO: "+pair.getTo());
+		}
+		if(!fRefactoredMap.isEmpty()){
+			refactorPairs();
+		}
+		
+		
+//		//renaming single file (more files cann't be renamed at the same time ?)
+//		if(fAddedFiles.size() == 1 && fDeletedFiles.size() == 1){
+//			IProject project = getProjectFromPath(fAddedFiles.get(0));
+//			RhqRecipeContentChange change = new RhqRecipeContentChange(
+//					"change",
+//					project.getFile(RhqConstants.RHQ_RECIPE_FILE));
+//			change.refactorFileName(fDeletedFiles.get(0).removeFirstSegments(1).toString(),
+//					fAddedFiles.get(0).removeFirstSegments(1).toString());
+//			return;
+//			
+//		}
 
 	}
 
+	
+	
+	/**
+	 * handles refactoring of content of fRefactoredMap
+	 */
+	private void refactorPairs(){
+		IPath from,to;
+		for(RefactoredPair pair: fRefactoredMap.values()){
+			from = pair.getFrom();
+			to = pair.getTo();
+			//filter non-refactoring related changes
+			if(from == null || to == null)
+				continue;
+			
+			IProject affectedProject = getProjectFromPath(to);
+			IProject unaffectedProject = getProjectFromPath(from);
+			
+			if(affectedProject.equals(unaffectedProject)){
+				RhqPathExtractor extractor = ExtractorProvider.getInstance().getMap().get(affectedProject);
+				extractor.updatePaths(from.removeFirstSegments(1).toString(), to.removeFirstSegments(1).toString());
+				
+				RhqRecipeContentChange change = new RhqRecipeContentChange(
+						"change",
+						affectedProject.getFile(RhqConstants.RHQ_RECIPE_FILE));
+				change.refactorFileName(from.removeFirstSegments(1).toString(),
+						to.removeFirstSegments(1).toString());
+			} else {
+				RhqPathExtractor fromExtractor = ExtractorProvider.getInstance().getMap().get(unaffectedProject);
+				
+				IResource resource = ResourcesPlugin.getWorkspace().getRoot().getFolder(to);
+				if(resource != null && resource.exists()){
+					fromExtractor.removeFolder(from.removeFirstSegments(1));
+					fAddedFolders.add(to);
+				} else {
+					fromExtractor.removeFile(from.removeFirstSegments(1));
+					fAddedFiles.add(to);
+				}
+			}	
+		}
+		
+		addFiles();
+	}
 	
 	private void addFileToRecipe(IProject project, IPath path){
 		if (path.toString().equals(RhqConstants.RHQ_RECIPE_FILE) ||
@@ -317,5 +375,91 @@ public class RecipeChangeListener implements IResourceChangeListener {
 						path.removeLastSegments(path.segmentCount() - 1)
 								.toString());
 	}
-
+	
+	private boolean wasSomethingAdded(){
+		return !(fAddedFiles.isEmpty() && fAddedFolders.isEmpty());
+	}
+	
+	private boolean wasSomethingDeleted(){
+		return !(fDeletedFiles.isEmpty() && fDeletedFolders.isEmpty());
+	}
+	
+	private void addFiles(){
+		// import add files and folders into project
+		for (IPath addedFolder : fAddedFolders) {
+			IProject project = getProjectFromPath(addedFolder);
+			RhqPathExtractor extractor = ExtractorProvider.getInstance().getMap().get(project);
+			extractor.addFolder(addedFolder.removeFirstSegments(1));
+			for(IPath path :extractor.getAbsolutePathsFilesByPrefix(addedFolder.removeFirstSegments(1).toString())){
+				addFileToRecipe(project, path);
+			}
+		}
+		
+		for(IPath addedFile : fAddedFiles){
+			IProject project = getProjectFromPath(addedFile);
+			addFileToRecipe(project, addedFile.removeFirstSegments(1));
+		}
+	}
+	
+	private void removeFiles(){
+		// removes all folders from extractor
+		for (IPath deletedFolder : fDeletedFolders) {
+			IProject project = getProjectFromPath(deletedFolder);
+			ExtractorProvider.getInstance().getMap().get(project)
+					.removeFolder(deletedFolder.removeFirstSegments(1));
+		}
+		for(IPath deletedFile : fDeletedFiles){
+			IProject project = getProjectFromPath(deletedFile);
+			ExtractorProvider.getInstance().getMap().get(project)
+			.removeFolder(deletedFile.removeFirstSegments(1));
+		}
+	}
+	
+	/**
+	 * object used to holding information about refactoring
+	 * @author syche
+	 *
+	 */
+	private class RefactoredPair{
+		IPath from;
+		IPath to;
+		
+		public IPath getFrom() {
+			return from;
+		}
+		public void setFrom(IPath from) {
+			this.from = from;
+		}
+		public IPath getTo() {
+			return to;
+		}
+		public void setTo(IPath to) {
+			this.to = to;
+		}
+		
+		@Override
+		public String toString(){
+			return "from: " +from + " to: " + to;
+		}
+		
+	}
+	
+	/**
+	 * return key from fRefactoredMap of matching value. Value can match on key of one of RefactorePair values
+	 * @param path
+	 * @return
+	 */
+	private IPath findMatchInRefactoredFiles(IPath path){
+		RefactoredPair pair;
+		for(IPath key : fRefactoredMap.keySet()){
+			if(key.equals(path))
+				return key;
+			pair = fRefactoredMap.get(key);
+			if(pair.getFrom() != null && pair.getFrom().equals(path))
+				return key;
+			if(pair.getTo() != null && pair.getTo().equals(path))
+				return key;
+		}
+		return null;
+	}
 }

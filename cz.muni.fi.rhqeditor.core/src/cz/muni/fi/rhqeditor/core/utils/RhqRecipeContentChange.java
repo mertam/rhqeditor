@@ -149,7 +149,6 @@ public class RhqRecipeContentChange extends TextFileChange {
 				return matcher.start();
 			}
 		}
-		System.out.println("");
 		return -1;
 
 	}
@@ -191,8 +190,8 @@ public class RhqRecipeContentChange extends TextFileChange {
 	private String prepareTagToInsert(String tagName, String filename){
 		String insert;
 		//for archive prepare paired tag
-		if(tagName.equals(RhqConstants.RHQ_TYPE_ARCHIVE)){
-			insert = "<" + tagName + " name=\"" + filename + "/> + </"+tagName+">";
+		if(tagName.endsWith(RhqConstants.RHQ_TYPE_ARCHIVE)){
+			insert = "<" + tagName + " name=\"" + filename + "\"></"+tagName+">";
 		} else {
 			insert = "<" + tagName+ " name=\"" + filename + "\"/>";
 		}

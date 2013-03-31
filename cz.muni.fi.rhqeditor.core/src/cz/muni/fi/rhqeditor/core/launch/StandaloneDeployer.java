@@ -217,7 +217,7 @@ public class StandaloneDeployer {
 			if(folder.exists()){
 				folder.delete(true, null);
 			}
-			IFolder folder = fProject.getFolder(RhqConstants.RHQ_DEFAULT_BUILD_DIR);
+			folder = fProject.getFolder(RhqConstants.RHQ_DEFAULT_BUILD_DIR);
 			//delete content of previous deployment
 			if(folder.exists()){
 				folder.delete(true, null);
