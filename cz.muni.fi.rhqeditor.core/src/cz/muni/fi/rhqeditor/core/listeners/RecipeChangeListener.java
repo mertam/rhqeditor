@@ -142,14 +142,14 @@ public class RecipeChangeListener implements IResourceChangeListener {
 			currentDelta = stackDelta.pop();
 			switch (currentDelta.getKind()) {
 			case IResourceDelta.ADDED:
-				// ignore added files into proj/.bin
+				// ignore added files into proj/.bin of proj/build
 				if (currentDelta.getResource().getFullPath()
-						.removeFirstSegments(1).toString().startsWith(".bin")) {
+						.removeFirstSegments(1).toString().startsWith(RhqConstants.RHQ_DEFAULT_BUILD_DIR) ||
+					currentDelta.getResource().getFullPath()
+						.removeFirstSegments(1).toString().startsWith(RhqConstants.RHQ_DEFAULT_BUILD_DIR))
+						{
 					break;
 				}
-				// for (IResourceDelta d : delta.getAffectedChildren()) {
-				// stackDelta.push(d);
-				// }
 
 				IResource addedResource = currentDelta.getResource();
 				IPath path = currentDelta.getFullPath();
@@ -234,6 +234,11 @@ public class RecipeChangeListener implements IResourceChangeListener {
 				addFileToRecipe(project, path);
 			}
 		}
+		
+		for(IPath addedFile : fAddedFiles){
+			IProject project = getProjectFromPath(addedFile);
+			addFileToRecipe(project, addedFile.removeFirstSegments(1));
+		}
 		// removes all folders from extractor
 		for (IPath deletedFolder : fDeletedFolders) {
 			IProject project = getProjectFromPath(deletedFolder);
@@ -284,9 +289,11 @@ public class RecipeChangeListener implements IResourceChangeListener {
 
 	
 	private void addFileToRecipe(IProject project, IPath path){
-		if (path.removeFirstSegments(1).toString()
-				.equals(RhqConstants.RHQ_RECIPE_FILE))
+		if (path.toString().equals(RhqConstants.RHQ_RECIPE_FILE) ||
+				path.toString().startsWith(RhqConstants.RHQ_DEFAULT_BUILD_DIR) ||
+				path.toString().startsWith(RhqConstants.RHQ_DEFAULT_DEPLOY_DIR))
 			return;
+		
 
 		RhqRecipeContentChange change = new RhqRecipeContentChange(
 				"add file to recipe",

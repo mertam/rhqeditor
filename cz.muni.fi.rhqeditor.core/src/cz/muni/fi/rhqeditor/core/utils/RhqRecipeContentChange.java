@@ -77,8 +77,7 @@ public class RhqRecipeContentChange extends TextFileChange {
 
 					String namespace = RhqModelReader
 							.getRhqNamespacePrefix(content);
-					content = addToTextToPosition("<" + namespace + taskName
-							+ " name=\"" + filename + "\"/>", content, position);
+					content = addToTextToPosition(prepareTagToInsert(namespace+taskName, filename), content, position);
 					document.set(content);
 					performEdits(document);
 
@@ -188,4 +187,15 @@ public class RhqRecipeContentChange extends TextFileChange {
 
 	}
 
+	
+	private String prepareTagToInsert(String tagName, String filename){
+		String insert;
+		//for archive prepare paired tag
+		if(tagName.equals(RhqConstants.RHQ_TYPE_ARCHIVE)){
+			insert = "<" + tagName + " name=\"" + filename + "/> + </"+tagName+">";
+		} else {
+			insert = "<" + tagName+ " name=\"" + filename + "\"/>";
+		}
+		return insert;
+	}
 }
