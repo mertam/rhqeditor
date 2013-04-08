@@ -1,6 +1,7 @@
 package cz.muni.fi.rhqeditor.core;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
 import org.eclipse.core.internal.resources.ProjectDescription;
@@ -8,6 +9,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -89,7 +91,12 @@ public class RHQBundleProject {
 	    LaunchConfigurationsManager.createNewLaunchConfiguration(projectName);
 	}
 	
-	public void createProjectFromArchive(IPath pathToArchive) {
+	public void createProjectFromArchive(IPath pathToArchive) throws CoreException, IOException{
+		String name = pathToArchive.removeFirstSegments(pathToArchive.segmentCount()-1).removeFileExtension().toString();
+		createProject(name, null);
+		IProject newProject = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
+		ArchiveReader.unzipFile(pathToArchive.toString(), newProject.getLocation().toString());
+		newProject.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 		
 	}
 	
@@ -109,7 +116,7 @@ public class RHQBundleProject {
 					"<project name=\""+projectName+"\" default=\"main\" xmlns:rhq=\"antlib:org.rhq.bundle\">"+
 					System.getProperty("line.separator")+"\t<target name=\"main\"/>"+ separator+
 					"\t<rhq:bundle name=\""+name+"\" version=\""+version+"\">"+System.getProperty("line.separator") + 
-					"\t<rhq:deployment-unit name=\"unit\">"+separator + separator + "\t\t</rhq:deployment-unit>" + separator+
+					"\t\t<rhq:deployment-unit name=\"unit\">"+separator + separator + "\t\t</rhq:deployment-unit>" + separator+
 					"\t</rhq:bundle>" +separator+
 					"</project>";
 			InputStream is = new ByteArrayInputStream(str.getBytes());

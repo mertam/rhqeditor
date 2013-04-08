@@ -9,12 +9,12 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -37,6 +37,7 @@ public class LaunchMainTab extends AbstractLaunchConfigurationTab {
 	private Label fLblPathToLocal;
 	private Button fBtnUseDafaultDeployer;
 	private Button fBtnBrowseDeployer;
+	private Group grpDeployerSettings;
 	
 	
 
@@ -51,75 +52,81 @@ public class LaunchMainTab extends AbstractLaunchConfigurationTab {
 		Composite myComposite = new Composite(parent, SWT.NONE);
 		setControl(myComposite);
 		setMessage("Main RHQ Standalone deployment run configuration");
-		myComposite.setLayout(new GridLayout(3, false));
+		myComposite.setLayout(new FormLayout());
 
 		fLblProject = new Label(myComposite, SWT.NONE);
-		GridData gd_fLblProject = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
-		gd_fLblProject.widthHint = 114;
-		fLblProject.setLayoutData(gd_fLblProject);
+		FormData fd_fLblProject = new FormData();
+		fd_fLblProject.right = new FormAttachment(0, 119);
+		fd_fLblProject.top = new FormAttachment(0, 10);
+		fd_fLblProject.left = new FormAttachment(0, 5);
+		fLblProject.setLayoutData(fd_fLblProject);
 		fLblProject.setText("Project:");
 
 		fComboProject = new Combo(myComposite, SWT.READ_ONLY);
-		GridData gd_fComboProject = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
-		gd_fComboProject.widthHint = 189;
-		fComboProject.setLayoutData(gd_fComboProject);
+		FormData fd_fComboProject = new FormData();
+		fd_fComboProject.right = new FormAttachment(0, 313);
+		fd_fComboProject.top = new FormAttachment(0, 5);
+		fd_fComboProject.left = new FormAttachment(0, 124);
+		fComboProject.setLayoutData(fd_fComboProject);
 
 		ExtractorProvider provider = ExtractorProvider.getInstance();
 		String[] projects = provider.listProjects();
 		fComboProject.setItems(projects);
-				new Label(myComposite, SWT.NONE);
-		
-				Label label = new Label(myComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
-				label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 3, 1));
-
-		// enable - disable own deployer selection
-		fBtnUseDafaultDeployer = new Button(myComposite, SWT.CHECK);
-		fBtnUseDafaultDeployer.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
-		fBtnUseDafaultDeployer.addSelectionListener(new SelectionAdapter() {
-
-			public void widgetSelected(SelectionEvent e) {
-				enableLocalDeployerWidgets(!fBtnUseDafaultDeployer
-						.getSelection());
-				updateLaunchConfigurationDialog();
-				
-			}
-		});
-
-		fBtnUseDafaultDeployer.setSelection(fUseDefault);
-		fBtnUseDafaultDeployer.setText("Use dafault deployer (version 4.5.1)");
-				new Label(myComposite, SWT.NONE);
-		
-				fLblPathToLocal = new Label(myComposite, SWT.NONE);
-				fLblPathToLocal.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
-//				fd_text.top = new FormAttachment(fLblPathToLocal, 6);
-				fLblPathToLocal.setText("Path to local standalone deployer:");
-		new Label(myComposite, SWT.NONE);
 		FormData fd_text = new FormData();
 		fd_text.left = new FormAttachment(0, 21);
+		
+		grpDeployerSettings = new Group(myComposite, SWT.NONE);
+		grpDeployerSettings.setText("Deployer settings");
+		FormData fd_grpDeployerSettings = new FormData();
+		fd_grpDeployerSettings.bottom = new FormAttachment(100, -128);
+		fd_grpDeployerSettings.top = new FormAttachment(fComboProject, 6);
+		fd_grpDeployerSettings.left = new FormAttachment(0, 5);
+		fd_grpDeployerSettings.right = new FormAttachment(0, 440);
+		grpDeployerSettings.setLayoutData(fd_grpDeployerSettings);
+		
+				// enable - disable own deployer selection
+				fBtnUseDafaultDeployer = new Button(grpDeployerSettings, SWT.CHECK);
+				fBtnUseDafaultDeployer.setBounds(10, 24, 192, 22);
+				fBtnUseDafaultDeployer.addSelectionListener(new SelectionAdapter() {
+
+					public void widgetSelected(SelectionEvent e) {
+						enableLocalDeployerWidgets(!fBtnUseDafaultDeployer
+								.getSelection());
+						updateLaunchConfigurationDialog();
+						
+					}
+				});
 				
-						fTextDeployerPath = new Text(myComposite, SWT.BORDER);
-						GridData gd_fTextDeployerPath = new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1);
-						gd_fTextDeployerPath.widthHint = 303;
-						fTextDeployerPath.setLayoutData(gd_fTextDeployerPath);
-						fTextDeployerPath.setTouchEnabled(true);
-						fTextDeployerPath.setMessage("Path to local deployer");
-
-		fBtnBrowseDeployer = new Button(myComposite, SWT.NONE);
-
-		// selection of deployer
-		fBtnBrowseDeployer.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				Shell shell = new Shell();
-				openSelectFileDialog(shell);
-				updateLaunchConfigurationDialog();
-			}
-		});
-		fd_text.right = new FormAttachment(fBtnBrowseDeployer, -6);
-		fBtnBrowseDeployer.setText("Browse...");
-
-		// for default purposes
-		fBtnUseDafaultDeployer.setSelection(true);
+						fBtnUseDafaultDeployer.setSelection(fUseDefault);
+						fBtnUseDafaultDeployer.setText("Use dafault deployer (version 4.5.1)");
+						
+								// for default purposes
+								fBtnUseDafaultDeployer.setSelection(true);
+								
+										fLblPathToLocal = new Label(grpDeployerSettings, SWT.NONE);
+										fLblPathToLocal.setBounds(10, 51, 157, 14);
+										//				fd_text.top = new FormAttachment(fLblPathToLocal, 6);
+														fLblPathToLocal.setText("Path to local standalone deployer:");
+														
+																fTextDeployerPath = new Text(grpDeployerSettings, SWT.BORDER);
+																fTextDeployerPath.setBounds(10, 71, 354, 24);
+																fTextDeployerPath.setTouchEnabled(true);
+																fTextDeployerPath.setMessage("Path to local deployer");
+																
+																		fBtnBrowseDeployer = new Button(grpDeployerSettings, SWT.NONE);
+																		fBtnBrowseDeployer.setBounds(370, 71, 55, 26);
+																		
+																				// selection of deployer
+																				fBtnBrowseDeployer.addSelectionListener(new SelectionAdapter() {
+																					@Override
+																					public void widgetSelected(SelectionEvent e) {
+																						Shell shell = new Shell();
+																						openSelectFileDialog(shell);
+																						updateLaunchConfigurationDialog();
+																					}
+																				});
+																				fd_text.right = new FormAttachment(fBtnBrowseDeployer, -6);
+																				fBtnBrowseDeployer.setText("Browse...");
 		enableLocalDeployerWidgets(false);
 
 	}

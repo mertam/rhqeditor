@@ -19,7 +19,7 @@ import cz.muni.fi.rhqeditor.core.rhqmodel.RhqModelReader;
  * 
  */
 public class RhqRecipeContentChange extends TextFileChange {
-
+	
 	public RhqRecipeContentChange(String name, IFile file) {
 		super(name, file);
 	}
@@ -108,20 +108,22 @@ public class RhqRecipeContentChange extends TextFileChange {
 
 		int lastValidOffset = -1;
 		// finds closing tag of existing element
-		Pattern pattern = Pattern.compile("(<\\s*" + namespace + element
-				+ "[.|/\\s>]*)|(</\\s*" + namespace + element + "\\s*>)");
+		Pattern pattern = Pattern.compile("(<\\s*"+namespace+element + 
+				"\\s+(\\s*\\w+=\"[\\w\\d\\s\\p{Punct}&&[^\"]]*\")*+\\s*/>)" +//<rhq:file attt="" />
+				"|(<\\s*/\\s*"+namespace+element+"\\s*>)",Pattern.DOTALL); //</rhq:file>
 		Matcher matcher = pattern.matcher(content);
-		System.out.println(pattern);
 		int commentEndPosition, commentStartPosition;
 		while (matcher.find()) {
 			if ((commentEndPosition = content.substring(matcher.start(),
 					content.length()).indexOf("-->")) > -1) {
 				commentStartPosition = content.substring(matcher.start(),
 						content.length()).indexOf("<!--");
-				if (commentStartPosition == -1
-						|| commentEndPosition < commentStartPosition)
-					// commented, find other
+				if(true && commentStartPosition > commentEndPosition){
+					// commented, find another
 					continue;
+				} else  {
+					return matcher.start();
+				}
 			} else {
 				lastValidOffset = matcher.start();
 			}
@@ -132,19 +134,17 @@ public class RhqRecipeContentChange extends TextFileChange {
 		// if there's no previous element of this type, insert into
 		// deployment-unit
 		pattern = Pattern.compile("<\\s*" + namespace
-				+ RhqConstants.RHQ_TYPE_DEPLOYMENT_UNIT + "[.|>]*");
+				+ RhqConstants.RHQ_TYPE_DEPLOYMENT_UNIT + ".*>",Pattern.DOTALL);
 		matcher = pattern.matcher(content);
-		System.out.println(pattern);
 		while (matcher.find()) {
-
-			if ((commentEndPosition = content.substring(matcher.start(),
-					content.length()).indexOf("-->")) > -1) {
-				commentStartPosition = content.substring(matcher.start(),
-						content.length()).indexOf("<!--");
-				if (commentStartPosition == -1
-						|| commentEndPosition < commentStartPosition)
-					// commented, find other
+			if ((commentEndPosition = content.substring(matcher.start(),content.length()).indexOf("-->")) > -1) {
+				commentStartPosition = content.substring(matcher.start(),content.length()).indexOf("<!--");
+				if(true && commentStartPosition > commentEndPosition){
+					// commented, find another
 					continue;
+				} else  {
+					return matcher.start();
+				}
 			} else {
 				return matcher.start();
 			}

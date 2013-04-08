@@ -2183,6 +2183,7 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
     		if(att.isVisible())
     			atts.add(att.getName());
     	}
+    	
     	StringBuilder builder = new StringBuilder("<");
     	builder.append(taskName);
     	Collections.sort(atts,	new RhqAttributeNameComparator());

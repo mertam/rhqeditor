@@ -59,14 +59,6 @@ public class RhqEditorSourceViewerConfiguration extends AntSourceViewerConfigura
 		    fEditor= editor;
 	    }
 	    
-//ADDED setter	    
-//	    public void setPathExtractor(RhqPathExtractor ext){
-//	    	fRhqPathExtractor = ext;
-//	    }
-//	    
-//	    public RhqPathExtractor getPathExtractor(){
-//	    	return fRhqPathExtractor;
-//	    }
 
 	    /* (non-Javadoc)
 	     * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getContentAssistant(ISourceViewer)

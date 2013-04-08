@@ -17,6 +17,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import cz.muni.fi.rhqeditor.core.Activator;
+import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
 
 public class RhqModel {
 	private Map<String, RhqTask> fModel;
@@ -47,8 +48,7 @@ public class RhqModel {
 	private Map<String, RhqTask> readDocument() {
 		try {
 			
-			System.out.println(Activator.getFileURL("cz/muni/fi/rhqeditor/core/rhqmodel/rhq_tasks-4.6.0.xml"));
-			URL fXmlFile = Activator.getFileURL("cz/muni/fi/rhqeditor/core/rhqmodel/rhq_tasks-4.6.0.xml");
+			URL fXmlFile = Activator.getFileURL(RhqConstants.RHQ_MODEL_SOURCEFILE);
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory
 					.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();

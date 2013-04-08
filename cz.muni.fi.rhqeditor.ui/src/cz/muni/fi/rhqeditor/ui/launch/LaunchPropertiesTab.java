@@ -5,7 +5,6 @@ import java.util.HashMap;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.debug.internal.ui.MultipleInputDialog;
 import org.eclipse.debug.internal.ui.SWTFactory;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
 import org.eclipse.jface.viewers.TableViewer;
@@ -17,8 +16,10 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
@@ -36,15 +37,12 @@ import cz.muni.fi.rhqeditor.core.utils.InputPropertiesManager;
 import cz.muni.fi.rhqeditor.core.utils.InputProperty;
 import cz.muni.fi.rhqeditor.core.utils.RecipeReader;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
-import org.eclipse.swt.layout.FormLayout;
-import org.eclipse.swt.layout.FormData;
-import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.GridLayout;
 
 
 public class LaunchPropertiesTab extends AbstractLaunchConfigurationTab{
 	
 	private Table 		fTable;
-	private Button 		fBtnSelect;
 	private TableViewer fViewer;
 	private Text 		fTxtDeployDir;
 	private Label		fLblPathToDeploy;
@@ -64,21 +62,16 @@ public class LaunchPropertiesTab extends AbstractLaunchConfigurationTab{
 		System.out.println("create control");
 		Composite myComposite = SWTFactory.createComposite(parent, 2, 1, GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
         setControl(myComposite);
-        myComposite.setLayout(new FormLayout());
+        myComposite.setLayout(new GridLayout(2,false));
+       
         
-        Group grpInput = new Group(myComposite, SWT.SHADOW_OUT);
-        FormData fd_grpInput = new FormData();
-        fd_grpInput.bottom = new FormAttachment(0, 249);
-        fd_grpInput.top = new FormAttachment(0, 5);
-        fd_grpInput.left = new FormAttachment(0, 5);
-        grpInput.setLayoutData(fd_grpInput);
-        grpInput.setText("Input Properties");
-        
-        fViewer = new TableViewer(grpInput, SWT.BORDER | SWT.FULL_SELECTION);
+        fViewer = new TableViewer(myComposite, SWT.BORDER | SWT.FULL_SELECTION | SWT.FILL);
         fTable = fViewer.getTable();
+        GridData gd_fTable = new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1);
+        gd_fTable.heightHint = 239;
+        fTable.setLayoutData(gd_fTable);
         fTable.setHeaderVisible(true);
         fTable.setLinesVisible(true);
-        fTable.setBounds(10, 20, 515, 163);
         
         
        
@@ -100,8 +93,44 @@ public class LaunchPropertiesTab extends AbstractLaunchConfigurationTab{
         
         
         final TableEditor tableEditor = new TableEditor(fTable);
-        tableEditor.horizontalAlignment = SWT.LEFT;
-	    tableEditor.grabHorizontal = true;
+        
+        fBtnUseDefaultRhqdeploydir = new Button(myComposite, SWT.CHECK);
+        fBtnUseDefaultRhqdeploydir.setSelection(true);
+        fBtnUseDefaultRhqdeploydir.addSelectionListener(new SelectionAdapter() {
+        	@Override
+        	public void widgetSelected(SelectionEvent e) {
+        		enableCustomDeployDirWidgets(!fBtnUseDefaultRhqdeploydir.getSelection());
+        		updateLaunchConfigurationDialog();
+        	}
+        });
+        fBtnUseDefaultRhqdeploydir.setText("Use default rhq.deploy.dir "+
+        		System.getProperty("file.separator")+RhqConstants.RHQ_DEFAULT_DEPLOY_DIR);
+        new Label(myComposite, SWT.NONE);
+        
+        fLblPathToDeploy = new Label(myComposite, SWT.NONE);
+        fLblPathToDeploy.setText("Path to deploy directory (rhq.deploy.dir)");
+        new Label(myComposite, SWT.NONE);
+        
+        fTxtDeployDir = new Text(myComposite, SWT.BORDER);
+        GridData gd_fTxtDeployDir = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+        gd_fTxtDeployDir.widthHint = 381;
+        fTxtDeployDir.setLayoutData(gd_fTxtDeployDir);
+        fTxtDeployDir.addModifyListener(new ModifyListener() {
+        	public void modifyText(ModifyEvent e) {
+        		updateLaunchConfigurationDialog();
+        	}
+        });
+        
+        fBtnBrowse = new Button(myComposite, SWT.NONE);
+        fBtnBrowse.addSelectionListener(new SelectionAdapter() {
+        	@Override
+        	public void widgetSelected(SelectionEvent e) {
+    		Shell shell = new Shell();
+			openSelectDirDialog(shell);
+			updateLaunchConfigurationDialog();
+        	}
+        });
+        fBtnBrowse.setText("Browse");
         fTable.addListener(SWT.MouseDown, new Listener() {
 			
 			@Override
@@ -145,101 +174,24 @@ public class LaunchPropertiesTab extends AbstractLaunchConfigurationTab{
 		               text.setText(item.getText(1));
 		               text.selectAll();
 		               text.setFocus();
+		               updateLaunchConfigurationDialog();
 		               return;
 		             }
 		             if (!visible && rect.intersects(clientArea)) {
 		               visible = true;
 		             }
 		           
-		           if (!visible)
-		             return;
+		           if (!visible){
+		        	   updateLaunchConfigurationDialog();
+		        	   return;
+		           }
 		           index++;
 		         }
 		         updateLaunchConfigurationDialog();
 		       }
 		     });
-        
-        
-        fBtnSelect = new Button(grpInput, SWT.NONE);
-        fBtnSelect.addSelectionListener(new SelectionAdapter() {
-        	@Override
-        	public void widgetSelected(SelectionEvent e) {
-        		
-        
-        		TableItem items[] = fTable.getSelection();
-        		if(items.length < 1)
-        			return;
-        		
-        		TableItem item = items[0];
-
-        		Shell shell = new Shell();
-    			MultipleInputDialog dialog = new MultipleInputDialog(shell, "Input property settings");
-    			dialog.addTextField(items[0].getText() , "", true);
-    			dialog.create();
-    			dialog.open();
-    			TableItem newItem = fItems.get(item.getText(0));
-        		String propertyValue = dialog.getStringValue(items[0].getText());
-        		if(propertyValue == null)
-        			newItem.setText(1, EMPTY_VALUE);
-        		else
-        			newItem.setText(1,propertyValue);
-        		updateLaunchConfigurationDialog();
-        		
-        	}
-        });
-        fBtnSelect.setBounds(10, 189, 45, 29);
-        fBtnSelect.setText("Edit");
-        
-        fBtnUseDefaultRhqdeploydir = new Button(myComposite, SWT.CHECK);
-        FormData fd_fBtnUseDefaultRhqdeploydir = new FormData();
-        fd_fBtnUseDefaultRhqdeploydir.top = new FormAttachment(0, 254);
-        fd_fBtnUseDefaultRhqdeploydir.left = new FormAttachment(0, 5);
-        fBtnUseDefaultRhqdeploydir.setLayoutData(fd_fBtnUseDefaultRhqdeploydir);
-        fBtnUseDefaultRhqdeploydir.setSelection(true);
-        fBtnUseDefaultRhqdeploydir.addSelectionListener(new SelectionAdapter() {
-        	@Override
-        	public void widgetSelected(SelectionEvent e) {
-        		enableCustomDeployDirWidgets(!fBtnUseDefaultRhqdeploydir.getSelection());
-        		updateLaunchConfigurationDialog();
-        	}
-        });
-        fBtnUseDefaultRhqdeploydir.setText("Use default rhq.deploy.dir "+
-        		System.getProperty("file.separator")+RhqConstants.RHQ_DEFAULT_DEPLOY_DIR_PATH);
-        
-        fLblPathToDeploy = new Label(myComposite, SWT.NONE);
-        FormData fd_fLblPathToDeploy = new FormData();
-        fd_fLblPathToDeploy.top = new FormAttachment(0, 281);
-        fd_fLblPathToDeploy.left = new FormAttachment(0, 5);
-        fLblPathToDeploy.setLayoutData(fd_fLblPathToDeploy);
-        fLblPathToDeploy.setText("Path to deploy directory (rhq.deploy.dir)");
-        
-        fTxtDeployDir = new Text(myComposite, SWT.BORDER);
-        FormData fd_fTxtDeployDir = new FormData();
-        fd_fTxtDeployDir.right = new FormAttachment(0, 480);
-        fd_fTxtDeployDir.top = new FormAttachment(0, 304);
-        fd_fTxtDeployDir.left = new FormAttachment(0, 5);
-        fTxtDeployDir.setLayoutData(fd_fTxtDeployDir);
-        fTxtDeployDir.addModifyListener(new ModifyListener() {
-        	public void modifyText(ModifyEvent e) {
-        		updateLaunchConfigurationDialog();
-        	}
-        });
-        
-        fBtnBrowse = new Button(myComposite, SWT.NONE);
-        fd_grpInput.right = new FormAttachment(fBtnBrowse, 0, SWT.RIGHT);
-        FormData fd_fBtnBrowse = new FormData();
-        fd_fBtnBrowse.top = new FormAttachment(0, 303);
-        fd_fBtnBrowse.left = new FormAttachment(0, 487);
-        fBtnBrowse.setLayoutData(fd_fBtnBrowse);
-        fBtnBrowse.addSelectionListener(new SelectionAdapter() {
-        	@Override
-        	public void widgetSelected(SelectionEvent e) {
-    		Shell shell = new Shell();
-			openSelectDirDialog(shell);
-			updateLaunchConfigurationDialog();
-        	}
-        });
-        fBtnBrowse.setText("Browse");
+        tableEditor.horizontalAlignment = SWT.LEFT;
+	    tableEditor.grabHorizontal = true;
         
         enableCustomDeployDirWidgets(!fUseDefaultDir);
 		
@@ -272,7 +224,7 @@ public class LaunchPropertiesTab extends AbstractLaunchConfigurationTab{
 					EMPTY_VALUE);
 			
 			fBtnUseDefaultRhqdeploydir.setText("Use default rhq.deploy.dir "+
-		        		fProjectName + System.getProperty("file.separator") + RhqConstants.RHQ_DEFAULT_DEPLOY_DIR_PATH);
+		        		fProjectName + System.getProperty("file.separator") + RhqConstants.RHQ_DEFAULT_DEPLOY_DIR);
 			fBtnUseDefaultRhqdeploydir.setSelection(fUseDefaultDir);
 			
 			fTxtDeployDir.setText(fLocalDirPath);

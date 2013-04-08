@@ -12,9 +12,18 @@ import org.eclipse.jface.text.IDocument;
 import cz.muni.fi.rhqeditor.core.rhqmodel.RhqModelReader;
 
 
+/**
+ * class used for getting input properties from recipe
+ * @author syche
+ *
+ */
 public class InputPropertiesManager {
 
+	/**
+	 * project associated to this manager, is't recipe is being searched
+	 */
 	private IProject fProject;
+	
 	
 	public InputPropertiesManager(String projectName){
 		fProject = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
@@ -47,12 +56,28 @@ public class InputPropertiesManager {
 		
 		//find properties
 		RhqModelReader reader = new RhqModelReader(fProject,0);
-		Pattern pattern = Pattern.compile(reader.getRhqNamespacePrefix() + RhqConstants.RHQ_TYPE_INPUT_PROPERTY + "\\s+[[\\w|\\s]*|=|\"|\\s]*name\\s*=\\s*\"");
+		Pattern pattern = 
+				Pattern.compile("("+ reader.getRhqNamespacePrefix() +
+				RhqConstants.RHQ_TYPE_INPUT_PROPERTY + ")"+     				//rhq:input-property
+				"(\\s+\\w+\\s*=\"[\\w\\d\\s\\p{Punct}&&[^\"]]*\")*" +			//some attribute*
+				"\\s+name\\s*=\"[\\w\\d\\s\\p{Punct}&&[^\"]]+\"" +    			//name="..."
+				"(\\s+\\w+\\s*=\"[\\w\\d\\s\\p{Punct}&&[^\"]]*\")*" + 			//some attribute*
+				 "\\s*/?\\s*>", Pattern.DOTALL);								// /> or >
         Matcher matcher = pattern.matcher(sb);
         
         ArrayList<InputProperty>  result = new ArrayList<>();
         addDefaultProperties(result);
+        int commentStartPosition, commentEndPosition;
         while(matcher.find()){
+        	if ((commentEndPosition = sb.substring(matcher.start(),sb.length()).indexOf("-->")) > -1) {
+				commentStartPosition = sb.substring(matcher.start(),sb.length()).indexOf("<!--");
+				if(true && commentStartPosition > commentEndPosition){
+					// commented property
+					continue;
+				}
+        	}	
+        	
+        	
         	InputProperty property = new InputProperty();
         	String toAdd = sb.substring(matcher.start());
         	property.setName(getAttributeValue(toAdd, "name"));
@@ -73,6 +98,12 @@ public class InputPropertiesManager {
 		return result;
 	}
 	
+	/**
+	 * returns value of given attribute from string readFrom
+	 * @param readFrom string with part of recipe content
+	 * @param name name of atribute
+	 * @return
+	 */
 	private String getAttributeValue(String readFrom, String name){
 		int endIndex = readFrom.indexOf('>');
 		if(endIndex < 0)
@@ -90,6 +121,11 @@ public class InputPropertiesManager {
         return null;
 	}
 	
+	
+	/**
+	 * addes default properties (rhq.deploy.dir, rhq.deploy.name, rhq.deploy.id) into given list of InputProperties
+	 * @param properties
+	 */
 	private void addDefaultProperties(ArrayList<InputProperty> properties){
 		InputProperty dir = new InputProperty();
 		dir.setName(RhqConstants.RHQ_DEPLOY_DIR);

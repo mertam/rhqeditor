@@ -3,11 +3,12 @@ package cz.muni.fi.rhqeditor.ui.wizards;
 import java.io.IOException;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.swt.SWT;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWizard;
 
@@ -39,19 +40,26 @@ public class ExportWizzard extends Wizard implements IWorkbenchWizard {
 		fPage1 = new ExportWizzardPage1("exportPage", "Export RHQ bundle", null);
 		addPage(fPage1);
 		try {
-			if (!checkNature())
-				throw new CoreException(Status.CANCEL_STATUS);
+			if(checkNature())
+				fPage1.setProject(fProject.getName());
 		} catch (CoreException e) {
-			fPage1.setInactive();
+			e.printStackTrace();
 		}
 		super.addPages();
 	}
 
 	@Override
 	public boolean performFinish() {
-		BundleExport export = new BundleExport(fProject, fPage1.getTargetFile());
+		String projectName = fPage1.getProject();
+		
+		BundleExport export = new BundleExport(ResourcesPlugin.getWorkspace().getRoot().getProject(projectName), fPage1.getTargetFile());
 		try {
-			export.ExportBundle();
+			int result = export.ExportBundle();
+			switch(result){
+			case SWT.OK: return true;
+			case SWT.NO: return true;
+			case SWT.CANCEL: return false;
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

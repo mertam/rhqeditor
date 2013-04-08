@@ -1,5 +1,6 @@
 package cz.muni.fi.rhqeditor.core;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -13,6 +14,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
 
 import cz.muni.fi.rhqeditor.core.utils.ExtractorProvider;
 import cz.muni.fi.rhqeditor.core.utils.RhqPathExtractor;
@@ -32,7 +36,7 @@ public class BundleExport {
 	
 	
 	
-	public void ExportBundle() throws IOException{
+	public int ExportBundle() throws IOException{
 		 
 		ExtractorProvider provider = ExtractorProvider.getInstance();
 		final RhqPathExtractor extractor = provider.getMap().get(fProject); 
@@ -41,14 +45,31 @@ public class BundleExport {
 			extractor.listFiles();
 		System.out.println(fTargetFile);
 	   
+	    final File file = new File(fTargetFile);
+	    if(file.exists()){
+	    	// Message
+	    	Shell shell = new Shell();
+	    	shell.setSize(300, 100);
+	        MessageBox messageDialog = new MessageBox(shell, SWT.ICON_QUESTION | SWT.CANCEL | SWT.NO | SWT.YES);
+	        messageDialog.setText("Overwrite file");
+	        messageDialog.setMessage("File "+ fTargetFile +" exists, overwrite?");
+	        int returnCode = messageDialog.open();
+	        if(returnCode == SWT.NO)
+	        	return SWT.NO;
+	        if(returnCode == SWT.CANCEL)
+	        	return SWT.CANCEL;
+	    }
+		
+		
 	    System.out.println(fProject.getLocation());
 	    Job export = new Job("export bundle") {
 			
+	    
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				
 				try(
-					 ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fTargetFile));
+					 ZipOutputStream out = new ZipOutputStream(new FileOutputStream(file));
 						) {
 					 	   byte[] buf = new byte[1024];
 					       IFile currentFile;
@@ -82,7 +103,7 @@ public class BundleExport {
 				
 		};
 		export.schedule();
-		
+		return SWT.OK;
 		
 	    
 	}

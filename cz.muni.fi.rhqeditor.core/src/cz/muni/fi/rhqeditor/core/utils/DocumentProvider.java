@@ -1,6 +1,7 @@
 package cz.muni.fi.rhqeditor.core.utils;
 
-import java.util.HashMap;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 import org.eclipse.jface.text.IDocument;
 
@@ -15,7 +16,7 @@ public class DocumentProvider {
 
 	
 	private static final DocumentProvider instance 	= new DocumentProvider();
-	private HashMap<String, IDocument> map 		= new HashMap<>();
+	private Map<String, IDocument> map 				= new WeakHashMap<>();
 	
 	public static DocumentProvider getInstance(){
 		return instance;

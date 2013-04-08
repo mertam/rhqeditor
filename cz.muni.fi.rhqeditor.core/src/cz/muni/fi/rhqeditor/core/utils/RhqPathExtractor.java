@@ -30,25 +30,38 @@ import org.eclipse.core.runtime.jobs.Job;
 
 
 /**
- * This class provides functionality for extracting all files from project directory and all sub directories
+ * This class provides functionality for extracting all files from project directory and all sub directories.
  * @author syche
  *
  */
 public class RhqPathExtractor {
 	
+	/**
+	 * list of all files in project. Doesn't contain zip and jar archives, these are saved separately.
+	 */
 	private List<IPath> 		fAbsolutePathsFiles 		= null;
-//	private ArrayList<IPath> 	fAbsolutePathsArchives 		= null;
-	private ArrayList<IPath> 	fAbsolutePathsDirectories 	= null;
-	//resource 
-	private IProject 			fProject					= null;
-	private PathComparator 		fPathComparator				= null;
+	
+	/**
+	 *	concurent hash map contains <String path to archive, list of all files in archive> 
+	 */
 	private Map<String,ArrayList<IPath> >   fArchiveContent = null;
 	
+	/**
+	 * IProject attached to this extractor
+	 */
+	private  IProject 			fProject					= null;
+
+	/**
+	 * serves as semaphore to avoid multiple listing of files in project
+	 */
 	AtomicBoolean 				fShouldBeJobScheduled		= null;
 	
+	/**
+	 * comparetor used to sort IPath
+	 */
+	private PathComparator fPathComparator		= null;	
 	
-	
-	private String FILE_SEPARATOR = System.getProperty("file.separator");
+	private final String FILE_SEPARATOR = System.getProperty("file.separator");
 	
 	/**
 	 * 
@@ -58,18 +71,10 @@ public class RhqPathExtractor {
 		fProject = project;
 		fPathComparator = new PathComparator();
 		fAbsolutePathsFiles =  new ArrayList<IPath>();
-		fAbsolutePathsDirectories = new ArrayList<IPath>();
-//		fAbsolutePathsArchives = new ArrayList<IPath>();
 		fArchiveContent = new ConcurrentHashMap<String, ArrayList<IPath>>();
 		fShouldBeJobScheduled = new AtomicBoolean(true);
 	}
-	
-//	public void setResource(IResource resource){
-//		fRecipeResource = resource;
-//	}
-	
-	
-	
+		
 	public boolean hasResource(){
 		return (fProject != null ? true : false);
 	}
@@ -98,10 +103,10 @@ public class RhqPathExtractor {
 		return paths;
 	}
 
-	public List<IPath> getAbsolutePathsDirectories() {
-		Collections.sort(fAbsolutePathsDirectories, fPathComparator);
-		return  Collections.synchronizedList(fAbsolutePathsDirectories);
-	}
+//	public List<IPath> getAbsolutePathsDirectories() {
+//		Collections.sort(fAbsolutePathsDirectories, fPathComparator);
+//		return  Collections.synchronizedList(fAbsolutePathsDirectories);
+//	}
 	
 	public List<IPath> getAbsolutePathsFilesByPrefix(String prefix){
 		if(prefix == null || prefix.isEmpty())
@@ -180,7 +185,6 @@ public class RhqPathExtractor {
 	}
 	
 	public void addArchive(IPath path){
-//		fAbsolutePathsArchives.add(path);
 		manageArchive(path);
 	}
 	public boolean isPathToFileValid(IPath abslutePath){
@@ -216,6 +220,12 @@ public class RhqPathExtractor {
 		
 	}
 	
+	public List<IPath> getAllFilesByPrefix(String prefix){
+		if(prefix == null || prefix.isEmpty())
+			return getAllFiles();
+		return getListAccordingToPrefix(getAllFiles(),prefix);
+	}
+	
 
 	
 	
@@ -228,64 +238,43 @@ public class RhqPathExtractor {
 	 */
 	
 	public void listFiles() {
-//		fAbsolutePathsArchives.clear();
 		fAbsolutePathsFiles.clear();
-		fAbsolutePathsDirectories.clear();
 		fArchiveContent.clear();
 		
-		Job listingJob = new Job("listing"){
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				System.out.println("job for project starts "+ fProject.getName());
-				try{
-					IResource[] res = fProject.getProject().members();
-					
-					Stack<IFolder> folders = new Stack<IFolder>();
-					IFolder temp = null;
-					
-		//iterates over files in project directory
-					for(IResource forResource : res){
-						if(forResource instanceof IFolder){
-						//ignore content of /.bin/ and /build/
-							if(!forResource.getName().equals(".bin") && !forResource.getName().equals("build"))
-								folders.push((IFolder)forResource);
-						}
+		fShouldBeJobScheduled.compareAndSet(true, false);
+		try{
+			IResource[] res = fProject.getProject().members();
+			
+			Stack<IFolder> folders = new Stack<IFolder>();
+			IFolder temp = null;
+			
+//iterates over files in project directory
+			for(IResource forResource : res){
+				if(forResource instanceof IFolder){
+				//ignore content of /.bin/ and /build/
+					if(!forResource.getName().equals(".bin") && !forResource.getName().equals("build"))
+						folders.push((IFolder)forResource);
+				}
+			else
+				manageResource(forResource);
+			}
+//iterates over directories inside parent project
+			while(!folders.isEmpty()){
+				temp = folders.pop();
+				for(IResource forResource : temp.members()){
+					if(forResource instanceof IFolder)
+						folders.push((IFolder)forResource);
 					else
 						manageResource(forResource);
-					}
-		//iterates over directories inside parent project
-					while(!folders.isEmpty()){
-						temp = folders.pop();
-						for(IResource forResource : temp.members()){
-							if(forResource instanceof IFolder)
-								folders.push((IFolder)forResource);
-							else
-								manageResource(forResource);
-						}
-					}
-				
-				} catch (CoreException e) {
-					fShouldBeJobScheduled.compareAndSet(false, true);
-					return Status.CANCEL_STATUS;
-//					e.printStackTrace();
 				}
-				
-				
-//				for(IPath p: fAbsolutePathsArchives){
-//					manageArchive(p);
-//				}
-				
-				System.out.println("job for project done "+ fProject.getName());
-				fShouldBeJobScheduled.compareAndSet(false, true);
-				return Status.OK_STATUS;
-				}
-			};
+			}
 		
-			listingJob.setPriority(Job.LONG);
-			//job is scheduled only if no ohter job is running
-			if(fShouldBeJobScheduled.compareAndSet(true, false))
-				listingJob.schedule();
-			
+		} catch (CoreException e) {
+			fShouldBeJobScheduled.compareAndSet(false, true);
+		}
+		
+		System.out.println("job for project done "+ fProject.getName());
+		fShouldBeJobScheduled.compareAndSet(false, true);			
 
 	}
 	
@@ -308,41 +297,60 @@ public class RhqPathExtractor {
 			}else{
 				fAbsolutePathsFiles.add(path);
 			}
+			for(String s: fArchiveContent.keySet()){
+				System.out.println(s);
+			}
 			return;
+			
 		}
-		fAbsolutePathsDirectories.add(path);
+//		fAbsolutePathsDirectories.add(path);
 	}
 	
 	
-	
-	private void manageArchive(IPath pathToArchive){		
-		IFile localFile = fProject.getFile(pathToArchive);
-		String finalPath = localFile.getLocation().toString();
+	/**
+	 * adds to fArchiveContent archive and all it's content. Runs in separated thread.
+	 * @param pathToArchive
+	 */
+	private void manageArchive(final IPath pathToArchive){		
+		
+		Job listArchiveContent = new Job("listArchiveContent") {
+			
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
 
-		File file = new File(finalPath);
-		ZipEntry ze;
-		ArrayList<IPath> filesOfArchive = fArchiveContent.get(pathToArchive);
+				IFile localFile = fProject.getFile(pathToArchive);
+				String finalPath = localFile.getLocation().toString();
+
+				File file = new File(finalPath);
+				ZipEntry ze;
+				ArrayList<IPath> filesOfArchive = fArchiveContent.get(pathToArchive);
 		
-		if(filesOfArchive == null)
-			filesOfArchive = new ArrayList<IPath>();
-		else
-			filesOfArchive.clear();
+				if(filesOfArchive == null)
+					filesOfArchive = new ArrayList<IPath>();
+				else
+					filesOfArchive.clear();
 		
-		try(
-			ZipFile archive = new ZipFile(file, ZipFile.OPEN_READ);
-			) {
-			Enumeration<? extends ZipEntry> entries = archive.entries();
+				try(
+						ZipFile archive = new ZipFile(file, ZipFile.OPEN_READ);
+					) {
+					Enumeration<? extends ZipEntry> entries = archive.entries();
 			
-			while(entries.hasMoreElements()){
-				ze = (ZipEntry)entries.nextElement();
-				filesOfArchive.add(new Path(ze.getName()));
-			}
-			
-			Collections.sort(filesOfArchive,fPathComparator);
-			fArchiveContent.put(pathToArchive.toString(), filesOfArchive);
-		} catch (IOException e) {
-			e.printStackTrace();
-		} 
+					while(entries.hasMoreElements()){
+						ze = (ZipEntry)entries.nextElement();
+						filesOfArchive.add(new Path(ze.getName()));
+					}
+					
+					Collections.sort(filesOfArchive,fPathComparator);
+					fArchiveContent.put(pathToArchive.toString(), filesOfArchive);
+				} catch (IOException e) {
+					e.printStackTrace();
+					return Status.CANCEL_STATUS;
+				} 
+				return Status.OK_STATUS;
+			}	
+	
+		};
+		listArchiveContent.schedule();
 		
 	}
 	
@@ -402,16 +410,25 @@ public class RhqPathExtractor {
 		return false;
 	}
 	
+	
+	/**
+	 * removes single file from extractor
+	 * @param file
+	 */
 	public void removeFile(IPath file){
 		if(file.toString().endsWith(RhqConstants.RHQ_ARCHIVE_JAR_SUFFIX) ||
 				file.toString().endsWith(RhqConstants.RHQ_ARCHIVE_ZIP_SUFFIX)){
 			fArchiveContent.remove(file.toString());
-//			fAbsolutePathsArchives.remove(file);
 		}else{
 			fAbsolutePathsFiles.remove(file);
 		}
 	}
 	
+	/**
+	 * Comparetor of IPath, two paths are equal iff their toString() value is equal. Path1 is greater than Path2 iff it's toString() is alfabetically
+	 * @author syche
+	 *
+	 */
 	private class PathComparator implements Comparator<IPath>{
 
 		@Override
@@ -453,7 +470,7 @@ public class RhqPathExtractor {
 	}
 	
 	/**
-	 * removes folder and all content from extractor
+	 * removes folder and all it's content from extractor
 	 * @param folder
 	 */
 	public void removeFolder(IPath folder){
@@ -475,6 +492,11 @@ public class RhqPathExtractor {
 		
 	}
 	
+	
+	/**
+	 * adds folder and all it's content into extractor
+	 * @param folderName
+	 */
 	public void addFolder(IPath folderName){
 		IFolder folder = fProject.getFolder(folderName);
 		if(folder == null)

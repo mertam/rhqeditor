@@ -45,7 +45,6 @@ public class NewProjectWizard extends Wizard implements IWorkbenchWizard{
 			if(page1.getNewProjectPath() == null){
 				project.createProject(page1.getNewProjectName(), null);
 				project.createDefaultRecipe(page1.getNewProjectName(),page1.getBundleName(),page1.getBundleVersion());
-//				project = new RHQBundleProject(page1.getNewProjectName(),page1.getBundleName(),page1.getBundleVersion());
 			}else{
 				IPath path = Path.fromOSString(page1.getNewProjectPath());
 				project.createProject(page1.getNewProjectName(), path);

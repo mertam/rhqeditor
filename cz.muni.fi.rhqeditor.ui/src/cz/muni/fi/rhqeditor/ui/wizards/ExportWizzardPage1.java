@@ -7,15 +7,18 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import cz.muni.fi.rhqeditor.core.utils.ExtractorProvider;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
 
 
@@ -23,19 +26,17 @@ public class ExportWizzardPage1 extends WizardPage {
 
 	private Composite fContainer;
 	private Text txtExportDir;
-	private Text txtFileName;
-	
-	private Label lblWarning;
 	
 	private boolean fActive = true;
 	
-	private boolean fileNameValid = false;
-	private boolean folderValid = false;
+	private Combo fComboProject;
 
 	
-	private String EMPTY_STRING = "";
 	
-	private String exportDir = EMPTY_STRING;
+	private String EMPTY_STRING = "";
+
+	private String fProjectName = EMPTY_STRING;
+	private String fBundleName = EMPTY_STRING;
 			
 	protected ExportWizzardPage1(String pageName, String title,
 			ImageDescriptor titleImage) {
@@ -43,99 +44,105 @@ public class ExportWizzardPage1 extends WizardPage {
 		// TODO Auto-generated constructor stub
 	}
 	
-	public String getTargetFile(){
-		String target = txtExportDir.getText();
-		if(!target.endsWith(System.getProperty("file.separator"))){
-			target = target.concat(System.getProperty("file.separator"));
-		}
-		target = target.concat(txtFileName.getText());
-		return target;
-	}
+
 
 	@Override
 	public void createControl(Composite parent) {
 		
 		
 		fContainer = new Composite(parent, SWT.NONE);
-        fContainer.setLayout(new GridLayout(4, false));
         fContainer.setEnabled(fActive);
-        if(!fActive)
-        	setErrorMessage("Only RHQ project can be exported");
-        pageComplete();
+        setErrorMessage(null);
+        setDescription("Export RHQ Bundle");
         
         setControl(fContainer);
+        fContainer.setLayout(new FormLayout());
         
         Label lblExportDir = new Label(fContainer, SWT.NONE);
-        lblExportDir.setText("Export into directory");
-        new Label(fContainer, SWT.NONE);
+        FormData fd_lblExportDir = new FormData();
+        fd_lblExportDir.left = new FormAttachment(0, 10);
+        lblExportDir.setLayoutData(fd_lblExportDir);
+        lblExportDir.setText("Export as:");
 
         
         txtExportDir = new Text(fContainer, SWT.BORDER);
-        GridData gd_txtExportDir = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
-        gd_txtExportDir.widthHint = 435;
-        txtExportDir.setLayoutData(gd_txtExportDir);
+        FormData fd_txtExportDir = new FormData();
+        fd_txtExportDir.left = new FormAttachment(lblExportDir, 6);
+        txtExportDir.setLayoutData(fd_txtExportDir);
         txtExportDir.addModifyListener(new ModifyListener() {
 			
 			@Override
 			public void modifyText(ModifyEvent e) {
 				if(txtExportDir.getText().isEmpty()){
-					folderValid = false;
-					exportDir = txtExportDir.getText();
+					fBundleName = EMPTY_STRING;
 				}
 				else{
-					exportDir = EMPTY_STRING;
-					folderValid = true;
+					fBundleName = txtExportDir.getText();
 				}
+				if(!validateFileName()){
+        			setErrorMessage("Only .zip of .jar archives allowed.");
+        		} else {
+        			setErrorMessage(null);
+        		}
+				pageComplete();
 			}
 		});
        
 
         Button btnBrowse = new Button(fContainer, SWT.NONE);
+        fd_txtExportDir.right = new FormAttachment(100, -140);
+        FormData fd_btnBrowse = new FormData();
+        fd_btnBrowse.bottom = new FormAttachment(txtExportDir, 0, SWT.BOTTOM);
+        fd_btnBrowse.left = new FormAttachment(txtExportDir, 6);
+        btnBrowse.setLayoutData(fd_btnBrowse);
         btnBrowse.setText("Browse");
         btnBrowse.addSelectionListener(new SelectionAdapter() {
         	@Override
         	public void widgetSelected(SelectionEvent e) {
-        		openSelectDirectoryDialog(new Shell());
-        		if(txtExportDir.getText().isEmpty())
-        			folderValid = false;
-        		else
-        			folderValid = true;
+        		openFileDialog(new Shell());
+        		if(!validateFileName()){
+        			setErrorMessage("Only .zip of .jar archives allowed.");
+        		} else {
+        			setErrorMessage(null);
+        		}
+       			pageComplete();
         		super.widgetSelected(e);
         	}
         });
         
-        Label lblFileName = new Label(fContainer, SWT.NONE);
-        lblFileName.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-        lblFileName.setText("Bundle name:");
-        new Label(fContainer, SWT.NONE);
+        fComboProject = new Combo(fContainer, SWT.READ_ONLY);
+        fComboProject.addModifyListener(new ModifyListener() {
+        	public void modifyText(ModifyEvent e) {
+        		fProjectName = fComboProject.getItem(fComboProject.getSelectionIndex());
+        	}
+        });
+        fd_txtExportDir.top = new FormAttachment(fComboProject, 11);
+        FormData fd_combo = new FormData();
+        fd_combo.top = new FormAttachment(0, 5);
+        fd_combo.left = new FormAttachment(0, 122);
+        fComboProject.setLayoutData(fd_combo);
         
-        txtFileName = new Text(fContainer, SWT.BORDER);
-        txtFileName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-        new Label(fContainer, SWT.NONE);
-        new Label(fContainer, SWT.NONE);
-        new Label(fContainer, SWT.NONE);
-        
-        
-        lblWarning = new Label(fContainer, SWT.NONE);
-        lblWarning.setText("warning");
-        lblWarning.setVisible(true);
-        new Label(fContainer, SWT.NONE);
-        txtFileName.addModifyListener(new ModifyListener() {
-			
-			@Override
-			public void modifyText(ModifyEvent e) {
-				System.out.println("modify " + txtFileName.getText());
-				if(validateFileName()){
-					lblWarning.setVisible(false);
-					fileNameValid = true;
-				}else{
-					lblWarning.setText("Only .jar or .zip archives supported");
-					lblWarning.setVisible(true);
-					fileNameValid = false;
-				}
-				pageComplete();
+		ExtractorProvider provider = ExtractorProvider.getInstance();
+		String[] projects = provider.listProjects();
+		fComboProject.setItems(projects);
+		
+		for(int i = 0; i != fComboProject.getItemCount(); i++){
+			if(fComboProject.getItem(i).equals(fProjectName)){
+				fComboProject.select(i);
+				break;
 			}
-		});
+				
+		}
+
+		
+        Label lblSelectProjectTo = new Label(fContainer, SWT.NONE);
+        fd_lblExportDir.top = new FormAttachment(lblSelectProjectTo, 21);
+        FormData fd_lblSelectProjectTo = new FormData();
+        fd_lblSelectProjectTo.top = new FormAttachment(0, 10);
+        fd_lblSelectProjectTo.right = new FormAttachment(fComboProject, -6);
+        lblSelectProjectTo.setLayoutData(fd_lblSelectProjectTo);
+        lblSelectProjectTo.setText("Select project to export:");
+        pageComplete();
         
 	}
 	
@@ -143,27 +150,41 @@ public class ExportWizzardPage1 extends WizardPage {
 		fActive = false;
 	}
 	
+	public void setProject(String projectName){
+		if(projectName == null)
+			fProjectName = EMPTY_STRING;
+		else
+			fProjectName = projectName;
+		
+	}
 	
+	public String getProject(){
+		return fProjectName;
+	}
 	
-	private void openSelectDirectoryDialog(Shell shell){
-		DirectoryDialog selectDirDialog = new DirectoryDialog(shell);
-		selectDirDialog.setMessage("Choose export directory");
-		exportDir = selectDirDialog.open();	
-		if(exportDir == null)
-			exportDir = EMPTY_STRING;
-		txtExportDir.setText(exportDir);
+	public String getTargetFile(){
+		return fBundleName;
+	}
+	
+	private void openFileDialog(Shell shell){
+		FileDialog dialog = new FileDialog(shell,SWT.SAVE);
+		dialog.setFilterExtensions(new String[]{"*.zip","*.jar"});
+		fBundleName = dialog.open();	
+		if(fBundleName == null)
+			fBundleName = EMPTY_STRING;
+		txtExportDir.setText(fBundleName);
 	}
 	
 	protected boolean validateFileName(){
-		if(txtFileName.getText().endsWith(RhqConstants.RHQ_ARCHIVE_JAR_SUFFIX)
-				|| txtFileName.getText().endsWith(RhqConstants.RHQ_ARCHIVE_ZIP_SUFFIX))
+		if(fBundleName.endsWith(RhqConstants.RHQ_ARCHIVE_JAR_SUFFIX)
+				|| fBundleName.endsWith(RhqConstants.RHQ_ARCHIVE_ZIP_SUFFIX))
 			return true;
 		return false;
 	}
 	
 
 	private void pageComplete(){
-		setPageComplete(fileNameValid && folderValid);
+		boolean valid = (fProjectName.equals(EMPTY_STRING) ? false : true);
+		setPageComplete(validateFileName() && valid);
 	}
-
 }

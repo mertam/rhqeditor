@@ -4,17 +4,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
-import java.util.Enumeration;
 import java.util.Set;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
+import cz.muni.fi.rhqeditor.core.ArchiveReader;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
 
 
@@ -68,8 +65,8 @@ public class DeployerProider {
 			InputStream in = zippedDeployer.openStream();													
 			String pathToArchive = deployerDirPath.toString() + FILE_SEPARATOR + RhqConstants.RHQ_STANDALONE_DEPLOYER;
 			FileOutputStream out = new FileOutputStream(new File(pathToArchive));
-			copyInputStream(in, out);
-			unzipFile(pathToArchive);
+			ArchiveReader.copyInputStream(in, out);
+			ArchiveReader.unzipFile(pathToArchive, deployerDirPath.toString());
 			
 			out.close();
 			in.close();
@@ -88,43 +85,8 @@ public class DeployerProider {
 		}
     }
     
-    private void unzipFile(String file){
-    	try {
-	      ZipFile zipFile = new ZipFile(file);
 
-	      Enumeration<? extends ZipEntry> entries = zipFile.entries();
-
-	      while(entries.hasMoreElements()) {
-	        ZipEntry entry = (ZipEntry)entries.nextElement();
-
-	        if(entry.isDirectory()) {
-	          (new File(deployerDirPath + FILE_SEPARATOR + entry.getName())).mkdir();
-	          continue;
-	        }
-
-	       
-	        OutputStream out = new FileOutputStream(deployerDirPath + FILE_SEPARATOR + entry.getName());
-	        copyInputStream(zipFile.getInputStream(entry),out);
-	        out.close();
-	      }
-
-	      
-	      zipFile.close();
-	    } catch (IOException e) {
-	    	e.printStackTrace();
-	      return;
-	    }
-	  }
     	
-    	
-    private void copyInputStream(InputStream in, OutputStream out) throws IOException{
-    	byte buf[] = new byte[1024];
-		int read;	
-    	
-    	while((read = in.read(buf)) > -1){
-			out.write(buf,0,read);
-		}
-    }
     
     private void setPermisions(){
     	if(!isExexutable()){

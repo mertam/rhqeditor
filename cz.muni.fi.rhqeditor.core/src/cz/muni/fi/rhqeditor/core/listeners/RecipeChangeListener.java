@@ -2,7 +2,9 @@ package cz.muni.fi.rhqeditor.core.listeners;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
@@ -19,6 +21,7 @@ import org.eclipse.core.runtime.IPath;
 import cz.muni.fi.rhqeditor.core.ProjectScanner;
 import cz.muni.fi.rhqeditor.core.launch.LaunchConfigurationsManager;
 import cz.muni.fi.rhqeditor.core.utils.ExtractorProvider;
+import cz.muni.fi.rhqeditor.core.utils.RecipeReader;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
 import cz.muni.fi.rhqeditor.core.utils.RhqPathExtractor;
 import cz.muni.fi.rhqeditor.core.utils.RhqRecipeContentChange;
@@ -38,6 +41,8 @@ public class RecipeChangeListener implements IResourceChangeListener {
 	private ArrayList<IPath> fAddedFiles = new ArrayList<>();
 	private ArrayList<IPath> fDeletedFiles = new ArrayList<>();
 	private Map<IPath, RefactoredPair> fRefactoredMap = new HashMap<IPath,RefactoredPair>();
+	
+	private Set<String> fReferencedFiles = new HashSet<>();
 
 	/**
 	 * When resource is chan
@@ -49,6 +54,7 @@ public class RecipeChangeListener implements IResourceChangeListener {
 		fAddedFolders.clear();
 		fDeletedFiles.clear();
 		fDeletedFolders.clear();
+		fRefactoredMap.clear();
 		fRefactoredMap.clear();
 		IProject project = null;
 		IResourceDelta rootDelta = event.getDelta();
@@ -263,7 +269,6 @@ public class RecipeChangeListener implements IResourceChangeListener {
 	}
 
 	private void finalizeRefactoring() {
-
 		
 		//adding files to project
 		if(wasSomethingAdded() && !wasSomethingDeleted()){
@@ -287,19 +292,6 @@ public class RecipeChangeListener implements IResourceChangeListener {
 		if(!fRefactoredMap.isEmpty()){
 			refactorPairs();
 		}
-		
-		
-//		//renaming single file (more files cann't be renamed at the same time ?)
-//		if(fAddedFiles.size() == 1 && fDeletedFiles.size() == 1){
-//			IProject project = getProjectFromPath(fAddedFiles.get(0));
-//			RhqRecipeContentChange change = new RhqRecipeContentChange(
-//					"change",
-//					project.getFile(RhqConstants.RHQ_RECIPE_FILE));
-//			change.refactorFileName(fDeletedFiles.get(0).removeFirstSegments(1).toString(),
-//					fAddedFiles.get(0).removeFirstSegments(1).toString());
-//			return;
-//			
-//		}
 
 	}
 
@@ -347,12 +339,14 @@ public class RecipeChangeListener implements IResourceChangeListener {
 	}
 	
 	private void addFileToRecipe(IProject project, IPath path){
+		//ignore changes in /build /.bin and adding recipe
 		if (path.toString().equals(RhqConstants.RHQ_RECIPE_FILE) ||
 				path.toString().startsWith(RhqConstants.RHQ_DEFAULT_BUILD_DIR) ||
 				path.toString().startsWith(RhqConstants.RHQ_DEFAULT_DEPLOY_DIR))
 			return;
 		
-
+		//check if file is alredy in recipe
+		
 		RhqRecipeContentChange change = new RhqRecipeContentChange(
 				"add file to recipe",
 				project.getFile(RhqConstants.RHQ_RECIPE_FILE));
@@ -389,16 +383,21 @@ public class RecipeChangeListener implements IResourceChangeListener {
 		for (IPath addedFolder : fAddedFolders) {
 			IProject project = getProjectFromPath(addedFolder);
 			RhqPathExtractor extractor = ExtractorProvider.getInstance().getMap().get(project);
+			fReferencedFiles = RecipeReader.getReferencedFiles(project);
 			extractor.addFolder(addedFolder.removeFirstSegments(1));
-			for(IPath path :extractor.getAbsolutePathsFilesByPrefix(addedFolder.removeFirstSegments(1).toString())){
-				addFileToRecipe(project, path);
+			for(IPath path :extractor.getAllFilesByPrefix(addedFolder.removeFirstSegments(1).toString())){
+				if(!fReferencedFiles.contains(path.toString()))
+					addFileToRecipe(project, path);
 			}
 		}
 		
 		for(IPath addedFile : fAddedFiles){
 			IProject project = getProjectFromPath(addedFile);
-			addFileToRecipe(project, addedFile.removeFirstSegments(1));
+			fReferencedFiles = RecipeReader.getReferencedFiles(project);
+			if(!fReferencedFiles.contains(addedFile.removeFirstSegments(1).toString()))
+				addFileToRecipe(project, addedFile.removeFirstSegments(1));
 		}
+	
 	}
 	
 	private void removeFiles(){

@@ -1,5 +1,8 @@
 package cz.muni.fi.rhqeditor.core.utils;
 
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Path;
+
 
 public class RhqConstants {
 
@@ -43,6 +46,8 @@ public class RhqConstants {
 	
 	public static final String RHQ_MARKER_TYPE = "cz.muni.fi.rhqeditor.ui.rhqproblemmarker";
 	
+	public static final String FILE_SEPARATOR = System.getProperty("file.separator");
+	
 	
 	public static final String RHQ_LAUNCH_CONFIGURATION_ID 			= "cz.muni.fi.rhqeditor.core.launchconfigurationtype";
 	public static final String RHQ_LAUNCH_ATTR_PROJECT 				= "cz.muni.fi.rhqditor.launchattr.project";
@@ -52,7 +57,6 @@ public class RhqConstants {
 	public static final String RHQ_LAUNCH_ATTR_USE_DEFAULT_DIRECTORY 	= "cz.muni.fi.rhqditor.launchattr.usedefaultdirectory";
 	public static final String RHQ_LAUNCH_ATTR_INPUT_PROPERTY		= "cz.muni.fi.rhqditor.launchattr.inputproperty";
 	
-	public static final String RHQ_DEFAULT_DEPLOY_DIR_PATH			= "build";
 	
 	//used for handling persistent proterties
 	public static final String RHQ_PROPERTY_NODE = "rhq";
@@ -66,9 +70,14 @@ public class RhqConstants {
 	public static final String NOT_FOUND = "not found";
 	
 	public static final String RHQ_STANDALONE_DEPLOYER_URL = "cz/muni/fi/rhqeditor/core/launch/rhq-bundle-deployer-4.6.0.zip";
+	public static final String RHQ_MODEL_SOURCEFILE = "cz/muni/fi/rhqeditor/core/rhqmodel/rhq_tasks-4.6.0.xml";
 	public static final String RHQ_STANDALONE_DEPLOYER = "rhq-bundle-deployer-4.6.0.zip";
 	
 	public static final String RHQ_DEFAULT_BUILD_DIR = ".bin";
 	public static final String RHQ_DEFAULT_DEPLOY_DIR = "build";
+	
+	public static final String RHQ_DIALOG_SETTINGS = ResourcesPlugin.getWorkspace().getRoot().getLocation()
+			.append(new Path(".metadata/.rhq-dialog-settings.xml")).toString();
+	
 
 }

@@ -4,12 +4,17 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
+
+import cz.muni.fi.rhqeditor.core.rhqmodel.RhqModelReader;
 
 
 /**
@@ -18,11 +23,6 @@ import org.eclipse.core.runtime.Path;
  *
  */
 public class RecipeReader {
-	
-//	public static String getProjectName(String recipeContent){
-//		
-//	}
-	
 	
 	/**
 	 * reads recipe and return stringBuilder containing it's contain
@@ -75,6 +75,36 @@ public class RecipeReader {
 		IFile file = proj.getFile(new Path(RhqConstants.RHQ_RECIPE_FILE));
 		return file.exists();
 		
+	}
+	
+	/**
+	 *	reads recipe of given project and finds all files, that are referenced in it (rhq:file name="file.xml", rhq:archive name="arch.jar") 
+	 *  @param project IProject to be searched
+	 *  @return HashSet containing names of referenced files
+	 */
+	public static HashSet<String> getReferencedFiles(IProject project){
+		HashSet<String> result = new HashSet<>();
+		String content = readRecipe(project).toString();
+		String namespace = RhqModelReader.getRhqNamespacePrefix(content);
+		Pattern pattern = 
+				Pattern.compile("("+namespace + RhqConstants.RHQ_TYPE_ARCHIVE +	//rhq:archive
+				"|" + namespace + RhqConstants.RHQ_TYPE_FILE + ")"+     		// or rhq:file
+				"(\\s+\\w+\\s*=\"[\\w\\d\\s\\p{Punct}&&[^\"]]*\")*" +			//some attribute*
+				"\\s+name\\s*=\"[\\w\\d\\s\\p{Punct}&&[^\"]]+\"" +    			//name="..."
+				"(\\s+\\w+\\s*=\"[\\w\\d\\s\\p{Punct}&&[^\"]]*\")*" + 			//some attribute*
+				 "\\s*/?\\s*>", Pattern.DOTALL);								// /> or >
+		
+	    Matcher matcher = pattern.matcher(content);
+        while (matcher.find()) {
+        	int endIndex;
+        	String currentString = content.substring(matcher.start());
+        	currentString = currentString.substring(currentString.indexOf("name"));
+        	currentString = currentString.substring(currentString.indexOf("\"")+1);
+        	endIndex = currentString.indexOf("\"");
+        	result.add(currentString.substring(0,endIndex));
+        }
+        
+		return result;
 	}
 
 }

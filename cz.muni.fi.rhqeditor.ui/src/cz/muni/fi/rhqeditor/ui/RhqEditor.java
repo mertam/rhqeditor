@@ -1433,6 +1433,11 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
 	}
 	
 	
+//	@Override
+//	public int hashCode(){
+//		return 37 * getProject().hashCode();
+//	}
+	
 	//ADDED
 	public IProject getProject(){
 		return fAntModel.getFile().getProject();
