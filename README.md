@@ -22,7 +22,7 @@ Bundle] (https://docs.jboss.org/author/display/RHQ/Ant+Bundles)
 
 
 Classes inherited from ant:
-	RhqEditor.java
-	RhqEditorCompletionProcessor.java
-	RhqEditorSourceViewerConfiguration.java
-	TaskDescriptionProvider.java
+ * RhqEditor.java
+ * RhqEditorCompletionProcessor.java
+ * RhqEditorSourceViewerConfiguration.java
+ * TaskDescriptionProvider.java
