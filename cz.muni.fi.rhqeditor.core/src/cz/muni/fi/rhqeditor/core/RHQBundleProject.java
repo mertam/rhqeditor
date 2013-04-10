@@ -34,7 +34,7 @@ public class RHQBundleProject {
 	 * @param bundleName bundle name
 	 * @param bundleVersion bundle version
 	 * @param location location for creating project. Workspace is used if null.
-	 * @throws CoreException if some error occures
+	 * @throws CoreException if some error occurs
 	 */
 	public void createProject(String projectName, IPath location) throws CoreException{
 
@@ -84,14 +84,20 @@ public class RHQBundleProject {
 		}
 	    project.setDescription(description, null);
 
-	    ProjectScanner scanner = new ProjectScanner();
+	    ProjectInitializer scanner = new ProjectInitializer();
 	    scanner.initProject(project);
 
 	    
 	    LaunchConfigurationsManager.createNewLaunchConfiguration(projectName);
 	}
 	
-	public void createProjectFromArchive(IPath pathToArchive) throws CoreException, IOException{
+	/**
+	 * creates new Project from existing bundle. Calls createProject
+	 * @param pathToArchive
+	 * @throws CoreException 
+	 * @throws IOException
+	 */
+	public void createProjectFromBundle(IPath pathToArchive) throws CoreException, IOException{
 		String name = pathToArchive.removeFirstSegments(pathToArchive.segmentCount()-1).removeFileExtension().toString();
 		createProject(name, null);
 		IProject newProject = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
@@ -101,7 +107,13 @@ public class RHQBundleProject {
 	}
 	
 	
-	
+	/**
+	 * creates default recipe in project
+	 * @param projectName
+	 * @param bundleName
+	 * @param bundleVersion
+	 * @throws CoreException
+	 */
 	public void createDefaultRecipe(String projectName, String bundleName, String bundleVersion) throws CoreException{
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		IProject project = root.getProject(projectName);

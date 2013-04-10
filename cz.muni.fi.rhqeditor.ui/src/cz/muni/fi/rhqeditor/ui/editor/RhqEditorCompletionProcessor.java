@@ -1,4 +1,4 @@
-package cz.muni.fi.rhqeditor.ui;
+package cz.muni.fi.rhqeditor.ui.editor;
 
 import java.io.File;
 import java.io.IOException;
@@ -106,7 +106,7 @@ import cz.muni.fi.rhqeditor.core.utils.InputPropertiesManager;
 import cz.muni.fi.rhqeditor.core.utils.InputProperty;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
 import cz.muni.fi.rhqeditor.core.utils.RhqPathExtractor;
-import cz.muni.fi.rhqeditor.ui.TaskDescriptionProvider.ProposalNode;
+import cz.muni.fi.rhqeditor.ui.editor.TaskDescriptionProvider.ProposalNode;
 
 public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
 	
@@ -120,7 +120,7 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
 
 	private static final Comparator fgProposalComparator= new ProposalComparator();
 	
- 	private Comparator proposalComparator= new Comparator() {
+ 	private Comparator proposalComparator = new Comparator() {
 		public int compare(Object o1, Object o2) {
 		    
 			int type1= getProposalType(o1);
@@ -153,8 +153,6 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
 	protected final static int PROPOSAL_MODE_NESTED_ELEMENT_PROPOSAL = 7;
 	
 	protected final static String PROPOSAL_IMG_RHQ =  "w";
-	
-	private RhqCompletionProposal rhqCompletionProposal = new RhqCompletionProposal();
 	
 	private final static ICompletionProposal[] NO_PROPOSALS= new ICompletionProposal[0];
 	
@@ -1259,10 +1257,17 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
     	   if(noPrefix.equals(task.getName())){
            	   //add posible ant children proposals
         	   for(String antChild: task.getAntChildren()){
-        			    proposal =  proposal = newCompletionProposal(document, prefix, antChild);
+        			    proposal = newCompletionProposal(document, prefix, antChild);
         		   		proposals.add(proposal);
         	   }
     	   }
+    	   
+    	   //add task that can be placed wherever
+    	   if(task.canBePlacedInAnyTask()){
+    		   proposal = newCompletionProposal(document, prefix, getReader().getRhqNamespacePrefix() + task.getName());
+		   	   proposals.add(proposal);
+    	   }
+    	   
 
     		   
        }

@@ -18,7 +18,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
-import cz.muni.fi.rhqeditor.core.ProjectScanner;
+import cz.muni.fi.rhqeditor.core.ProjectInitializer;
 import cz.muni.fi.rhqeditor.core.launch.LaunchConfigurationsManager;
 import cz.muni.fi.rhqeditor.core.utils.ExtractorProvider;
 import cz.muni.fi.rhqeditor.core.utils.RecipeReader;
@@ -33,7 +33,7 @@ import cz.muni.fi.rhqeditor.core.utils.RhqRecipeContentChange;
  * 
  */
 
-public class RecipeChangeListener implements IResourceChangeListener {
+public class RhqResourceChangeListener implements IResourceChangeListener {
 
 	// refactoring purposes
 	private ArrayList<IPath> fAddedFolders = new ArrayList<>();
@@ -125,7 +125,7 @@ public class RecipeChangeListener implements IResourceChangeListener {
 
 		// this should happen when project is opened for first time
 		if (extractor == null) {
-			ProjectScanner scan = new ProjectScanner();
+			ProjectInitializer scan = new ProjectInitializer();
 			scan.initProject(project);
 			// get extractor again
 			extractor = provider.getMap().get(project);

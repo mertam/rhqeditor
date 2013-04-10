@@ -24,9 +24,10 @@
          </category>
          <wizard
                id="cz.muni.fi.rhqeditor.ui.exportwizard"
-               name="ExportWizard"
+               name="RHQ Bundle"
+               icon="icons/rhq.gif"
                category="cz.muni.fi.rhqeditor.ui.export"
-               class="cz.muni.fi.rhqeditor.ui.wizards.ExportWizzard">
+               class="cz.muni.fi.rhqeditor.ui.wizards.ExportBundleWizard">
                <description>
                   RHQ bundle export wizard
                </description>
@@ -36,12 +37,13 @@
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            default="false"
+            default="true"
             id="cz.muni.fi.rhqeditor.ui.editor1"
             name="RHQ Editor"
-            class="cz.muni.fi.rhqeditor.ui.RhqEditor"
+            class="cz.muni.fi.rhqeditor.ui.editor.RhqEditor"
             icon="icons/rhq.gif"
-            filenames="deploy.xml">
+            filenames="deploy.xml"
+>
       </editor>
    </extension>
 
@@ -86,16 +88,8 @@
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
-            class="preferences.PreferencePage"
+            class="cz.muni.fi.rhqeditor.ui.preferences.PreferencePage"
             id="cz.muni.fi.rhqeditor.ui.prefenecePages"
-            name="RHQ">
-      </page>
-   </extension>
-   <extension
-         point="org.eclipse.ui.propertyPages">
-      <page
-            class="preferences.RHQPropertyPage"
-            id="cz.muni.fi.rhqeditor.propertyPage"
             name="RHQ">
       </page>
    </extension>

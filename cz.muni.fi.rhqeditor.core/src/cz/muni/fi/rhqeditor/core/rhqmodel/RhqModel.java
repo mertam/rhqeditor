@@ -107,8 +107,12 @@ public class RhqModel {
 							for (int k = 0; k != antParents.getLength(); k++) {
 								if (antParents.item(k).getNodeType() == Node.ELEMENT_NODE) {
 									Element name = (Element) antParents.item(k);
-									setAntParents
-											.add(name.getAttribute("name"));
+									//check whether can be in all ant tasks
+									if(name.getAttribute("name").equals(RhqConstants.RHQ_ALL_POSSIBLE_PARENTS)){
+										currentTask.setCanBePlacedInAnyTask(true);
+									} else {
+										setAntParents.add(name.getAttribute("name"));
+									}
 										
 								}
 							}

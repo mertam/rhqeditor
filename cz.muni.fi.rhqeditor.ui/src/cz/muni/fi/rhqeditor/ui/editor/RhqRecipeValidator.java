@@ -1,4 +1,4 @@
-package cz.muni.fi.rhqeditor.ui;
+package cz.muni.fi.rhqeditor.ui.editor;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -93,9 +93,8 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 	}
 	
 	private RhqModelReader getReader(){
-		if(fRhqModelReader != null)
-    		return fRhqModelReader;
-    	fRhqModelReader = new RhqModelReader(fRhqPathExtractor.getProject(), 0);
+		if(fRhqModelReader == null)
+			fRhqModelReader = new RhqModelReader(fRhqPathExtractor.getProject(), 0);
     	return fRhqModelReader;
 	}
 
@@ -154,8 +153,6 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 			return;
 		}
 			
-		
-		
 		//managing targets
 		String attrValue;
 		IPath attrPath ;
@@ -271,7 +268,7 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 	
 		
 	/**
-	 * cheks whether element has all required attributes
+	 * checcs whether element has all required attributes
 	 * @param elementName
 	 * @param atts
 	 */
@@ -298,6 +295,9 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 	private void checkParentAndSetMarkers(RhqTask child, String parentName){
 		if(child == null || parentName == null)
 			return;
+		if(child.canBePlacedInAnyTask() == true)
+			return;
+		
 		for(String parent: child.getAllParentNames()){
 			if(parent.equals(getReader().removeNamespacePrefix(parentName)))
 				return;

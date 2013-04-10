@@ -1,4 +1,4 @@
-package cz.muni.fi.rhqeditor.ui;
+package cz.muni.fi.rhqeditor.ui.editor;
 
 import java.util.ArrayList;
 import java.util.List;

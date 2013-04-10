@@ -17,6 +17,8 @@ public class RhqTask {
 	private String description = "";
 	private List<String> antChildren = new ArrayList<>();
 	
+	private boolean canBePlacedInAnyTask = false;
+	
 	
 	public RhqTask(){}
 	public RhqTask(String name){
@@ -63,6 +65,7 @@ public class RhqTask {
 	public boolean isPaired() {
 		return paired;
 	}
+	
 	public void setPaired(boolean paired) {
 		this.paired = paired;
 	}
@@ -70,9 +73,11 @@ public class RhqTask {
 	public List<String> getAntChildren() {
 		return antChildren;
 	}
+	
 	public void setAntChildren(List<String> antChildren) {
 		this.antChildren = antChildren;
 	}
+	
 	public Set<String> getAllParentNames(){
 		Set<String> prnts = new HashSet<>(antParents);
 		for(RhqTask task: parents){
@@ -88,6 +93,14 @@ public class RhqTask {
 				return attr;
 		}
 		return null;
+	}
+	
+	public void setCanBePlacedInAnyTask(boolean placed){
+		canBePlacedInAnyTask = placed;
+	}
+	
+	public boolean canBePlacedInAnyTask(){
+		return canBePlacedInAnyTask;
 	}
 	
 	@Override

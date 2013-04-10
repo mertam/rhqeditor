@@ -7,9 +7,8 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.FormAttachment;
-import org.eclipse.swt.layout.FormData;
-import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -22,7 +21,7 @@ import cz.muni.fi.rhqeditor.core.utils.ExtractorProvider;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
 
 
-public class ExportWizzardPage1 extends WizardPage {
+public class ExportBundleWizardPage1 extends WizardPage {
 
 	private Composite fContainer;
 	private Text txtExportDir;
@@ -38,7 +37,7 @@ public class ExportWizzardPage1 extends WizardPage {
 	private String fProjectName = EMPTY_STRING;
 	private String fBundleName = EMPTY_STRING;
 			
-	protected ExportWizzardPage1(String pageName, String title,
+	protected ExportBundleWizardPage1(String pageName, String title,
 			ImageDescriptor titleImage) {
 		super(pageName, title, titleImage);
 		// TODO Auto-generated constructor stub
@@ -56,19 +55,41 @@ public class ExportWizzardPage1 extends WizardPage {
         setDescription("Export RHQ Bundle");
         
         setControl(fContainer);
-        fContainer.setLayout(new FormLayout());
+        fContainer.setLayout(new GridLayout(4, false));
+        
+        		
+                Label lblSelectProjectTo = new Label(fContainer, SWT.NONE);
+                lblSelectProjectTo.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+                lblSelectProjectTo.setText("Select project to export:");
+        
+        fComboProject = new Combo(fContainer, SWT.READ_ONLY);
+        ExtractorProvider provider = ExtractorProvider.getInstance();
+		String[] projects = provider.listProjects();
+		fComboProject.setItems(projects);
+        
+		for(int i = 0; i != fComboProject.getItemCount(); i++){
+			if(fComboProject.getItem(i).equals(fProjectName)){
+				fComboProject.select(i);
+				break;
+			}
+				
+		}
+        
+        fComboProject.addModifyListener(new ModifyListener() {
+        	public void modifyText(ModifyEvent e) {
+        		fProjectName = fComboProject.getItem(fComboProject.getSelectionIndex());
+        	}
+        });
+        new Label(fContainer, SWT.NONE);
         
         Label lblExportDir = new Label(fContainer, SWT.NONE);
-        FormData fd_lblExportDir = new FormData();
-        fd_lblExportDir.left = new FormAttachment(0, 10);
-        lblExportDir.setLayoutData(fd_lblExportDir);
         lblExportDir.setText("Export as:");
 
         
         txtExportDir = new Text(fContainer, SWT.BORDER);
-        FormData fd_txtExportDir = new FormData();
-        fd_txtExportDir.left = new FormAttachment(lblExportDir, 6);
-        txtExportDir.setLayoutData(fd_txtExportDir);
+        GridData gd_txtExportDir = new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1);
+        gd_txtExportDir.widthHint = 463;
+        txtExportDir.setLayoutData(gd_txtExportDir);
         txtExportDir.addModifyListener(new ModifyListener() {
 			
 			@Override
@@ -90,11 +111,6 @@ public class ExportWizzardPage1 extends WizardPage {
        
 
         Button btnBrowse = new Button(fContainer, SWT.NONE);
-        fd_txtExportDir.right = new FormAttachment(100, -140);
-        FormData fd_btnBrowse = new FormData();
-        fd_btnBrowse.bottom = new FormAttachment(txtExportDir, 0, SWT.BOTTOM);
-        fd_btnBrowse.left = new FormAttachment(txtExportDir, 6);
-        btnBrowse.setLayoutData(fd_btnBrowse);
         btnBrowse.setText("Browse");
         btnBrowse.addSelectionListener(new SelectionAdapter() {
         	@Override
@@ -109,39 +125,7 @@ public class ExportWizzardPage1 extends WizardPage {
         		super.widgetSelected(e);
         	}
         });
-        
-        fComboProject = new Combo(fContainer, SWT.READ_ONLY);
-        fComboProject.addModifyListener(new ModifyListener() {
-        	public void modifyText(ModifyEvent e) {
-        		fProjectName = fComboProject.getItem(fComboProject.getSelectionIndex());
-        	}
-        });
-        fd_txtExportDir.top = new FormAttachment(fComboProject, 11);
-        FormData fd_combo = new FormData();
-        fd_combo.top = new FormAttachment(0, 5);
-        fd_combo.left = new FormAttachment(0, 122);
-        fComboProject.setLayoutData(fd_combo);
-        
-		ExtractorProvider provider = ExtractorProvider.getInstance();
-		String[] projects = provider.listProjects();
-		fComboProject.setItems(projects);
-		
-		for(int i = 0; i != fComboProject.getItemCount(); i++){
-			if(fComboProject.getItem(i).equals(fProjectName)){
-				fComboProject.select(i);
-				break;
-			}
-				
-		}
-
-		
-        Label lblSelectProjectTo = new Label(fContainer, SWT.NONE);
-        fd_lblExportDir.top = new FormAttachment(lblSelectProjectTo, 21);
-        FormData fd_lblSelectProjectTo = new FormData();
-        fd_lblSelectProjectTo.top = new FormAttachment(0, 10);
-        fd_lblSelectProjectTo.right = new FormAttachment(fComboProject, -6);
-        lblSelectProjectTo.setLayoutData(fd_lblSelectProjectTo);
-        lblSelectProjectTo.setText("Select project to export:");
+    
         pageComplete();
         
 	}

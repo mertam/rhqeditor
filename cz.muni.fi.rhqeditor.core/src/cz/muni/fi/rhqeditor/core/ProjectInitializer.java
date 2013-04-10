@@ -4,12 +4,12 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 
-import cz.muni.fi.rhqeditor.core.listeners.RecipeChangeListener;
+import cz.muni.fi.rhqeditor.core.listeners.RhqResourceChangeListener;
 import cz.muni.fi.rhqeditor.core.utils.ExtractorProvider;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
 import cz.muni.fi.rhqeditor.core.utils.RhqPathExtractor;
 
-public class ProjectScanner {
+public class ProjectInitializer {
 	
 	public final String NATURE_ID = "cz.muni.fi.rhqeditor.natures.rhqeditornature";
 	
@@ -18,7 +18,7 @@ public class ProjectScanner {
 	 * scans all projects in workspace, finds ones having RHQ nature, add listener to them and ...
 	 */
 	
-	public ProjectScanner(){
+	public ProjectInitializer(){
 	}
 	
 	/**
@@ -27,7 +27,7 @@ public class ProjectScanner {
 	 * TODO consider sigleton to prevent duplicit listeners
 	 */
 	public void initAllProjects(){
-		RecipeChangeListener listener = new RecipeChangeListener();
+		RhqResourceChangeListener listener = new RhqResourceChangeListener();
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(listener);
 			
 		for(IProject proj: ResourcesPlugin.getWorkspace().getRoot().getProjects()){

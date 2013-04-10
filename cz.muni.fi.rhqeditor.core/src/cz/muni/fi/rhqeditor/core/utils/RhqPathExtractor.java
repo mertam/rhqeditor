@@ -44,7 +44,7 @@ public class RhqPathExtractor {
 	/**
 	 *	concurent hash map contains <String path to archive, list of all files in archive> 
 	 */
-	private Map<String,ArrayList<IPath> >   fArchiveContent = null;
+	private Map<IPath,ArrayList<IPath> >   fArchiveContent = null;
 	
 	/**
 	 * IProject attached to this extractor
@@ -71,7 +71,7 @@ public class RhqPathExtractor {
 		fProject = project;
 		fPathComparator = new PathComparator();
 		fAbsolutePathsFiles =  new ArrayList<IPath>();
-		fArchiveContent = new ConcurrentHashMap<String, ArrayList<IPath>>();
+		fArchiveContent = new ConcurrentHashMap<IPath, ArrayList<IPath>>();
 		fShouldBeJobScheduled = new AtomicBoolean(true);
 	}
 		
@@ -95,9 +95,9 @@ public class RhqPathExtractor {
 	 * @return
 	 */
 	public List<IPath> getAbsolutePathsArchives() {
-		List<IPath> paths=  Collections.synchronizedList(new ArrayList<IPath>());
-		for(String s: fArchiveContent.keySet()){
-			paths.add(new Path(s));
+		List<IPath> paths =  Collections.synchronizedList(new ArrayList<IPath>());
+		for(IPath path: fArchiveContent.keySet()){
+			paths.add(path);
 		}
 		Collections.sort(paths, fPathComparator);
 		return paths;
@@ -131,7 +131,7 @@ public class RhqPathExtractor {
 	}
 	
 	public List<IPath> getContentOfArchive(String archiveName){
-		List <IPath> files = fArchiveContent.get(archiveName);
+		List <IPath> files = fArchiveContent.get(new Path(archiveName));
 		if(files == null)
 			return Collections.emptyList();
 		return  Collections.synchronizedList(files);
@@ -196,7 +196,7 @@ public class RhqPathExtractor {
 	public boolean isPathToArchiveFileValid(IPath path, String archive){
 		if(path == null || archive == null)
 			return false;
-		List<IPath> paths = fArchiveContent.get(archive);
+		List<IPath> paths = fArchiveContent.get(new Path(archive));
 		if(paths == null)
 			return false;
 		
@@ -209,7 +209,7 @@ public class RhqPathExtractor {
 	}
 	
 	public boolean isPathToArchiveValid(IPath absolutePath){
-		return fArchiveContent.containsKey(absolutePath.toString());
+		return fArchiveContent.containsKey(absolutePath);
 	}
 	
 	public List<IPath> getAllFiles(){
@@ -297,13 +297,9 @@ public class RhqPathExtractor {
 			}else{
 				fAbsolutePathsFiles.add(path);
 			}
-			for(String s: fArchiveContent.keySet()){
-				System.out.println(s);
-			}
 			return;
 			
 		}
-//		fAbsolutePathsDirectories.add(path);
 	}
 	
 	
@@ -341,7 +337,7 @@ public class RhqPathExtractor {
 					}
 					
 					Collections.sort(filesOfArchive,fPathComparator);
-					fArchiveContent.put(pathToArchive.toString(), filesOfArchive);
+					fArchiveContent.put(pathToArchive, filesOfArchive);
 				} catch (IOException e) {
 					e.printStackTrace();
 					return Status.CANCEL_STATUS;
@@ -418,7 +414,7 @@ public class RhqPathExtractor {
 	public void removeFile(IPath file){
 		if(file.toString().endsWith(RhqConstants.RHQ_ARCHIVE_JAR_SUFFIX) ||
 				file.toString().endsWith(RhqConstants.RHQ_ARCHIVE_ZIP_SUFFIX)){
-			fArchiveContent.remove(file.toString());
+			fArchiveContent.remove(file);
 		}else{
 			fAbsolutePathsFiles.remove(file);
 		}
@@ -447,13 +443,13 @@ public class RhqPathExtractor {
 	public void updatePaths(String formerPath, String newPath){
 		//update archives
 		 ArrayList<IPath> temp;
-		 for(Iterator<String> i = fArchiveContent.keySet().iterator(); i.hasNext();) {
-			 String name = i.next();
+		 for(Iterator<IPath> i = fArchiveContent.keySet().iterator(); i.hasNext();) {
+			 String name = i.next().toString();
 			 String newName = name.replaceFirst(formerPath, newPath);
 		     if(name.startsWith(formerPath)){
 					temp = fArchiveContent.get(name);
 					fArchiveContent.remove(name);
-					fArchiveContent.put(newName, temp);
+					fArchiveContent.put(new Path(newName), temp);
 				}
 		 }
 		
@@ -484,8 +480,8 @@ public class RhqPathExtractor {
 		 }
 		
 
-		 for(Iterator<String> i = fArchiveContent.keySet().iterator(); i.hasNext();) {
-		     currentPath = new Path(i.next());
+		 for(Iterator<IPath> i = fArchiveContent.keySet().iterator(); i.hasNext();) {
+		     currentPath = i.next();
 		     if(folder.isPrefixOf(currentPath))
 		       i.remove();
 		 }

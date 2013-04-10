@@ -79,5 +79,7 @@ public class RhqConstants {
 	public static final String RHQ_DIALOG_SETTINGS = ResourcesPlugin.getWorkspace().getRoot().getLocation()
 			.append(new Path(".metadata/.rhq-dialog-settings.xml")).toString();
 	
+	public static final String RHQ_ALL_POSSIBLE_PARENTS = "#all_posible_parents";
+	
 
 }

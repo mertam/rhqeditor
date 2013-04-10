@@ -41,7 +41,7 @@ public class ImportBundleArchiveWizard extends Wizard implements IWorkbenchWizar
 		if(archive == null)
 			return false;
 		try{
-			project.createProjectFromArchive(new Path(archive));
+			project.createProjectFromBundle(new Path(archive));
 		} catch (CoreException e){
 			ErrorDialog.openError(new Shell(), "Project creationg error", e.getMessage(),e.getStatus());
 		} catch (IOException e) {

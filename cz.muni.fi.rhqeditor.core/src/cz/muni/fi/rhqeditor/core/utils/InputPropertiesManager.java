@@ -43,7 +43,7 @@ public class InputPropertiesManager {
 		StringBuilder sb;
 		if(!forceSearchOnSavedFile){
 			DocumentProvider provider = DocumentProvider.getInstance();
-			IDocument document = provider.getDocument(fProject.getName());
+			IDocument document = provider.getDocument(fProject);
 			String searchedContext = (document == null ? null : document.get());
 			if(searchedContext == null)
 				sb = RecipeReader.readRecipe(fProject);

@@ -127,7 +127,7 @@ be compressed and stored in the top level destination directory.
 	</task>
 	<task name="ignore" paired="true">
 		<rhqparents>
-			<parent name="bundle"/>
+			<parent name="deployment-unit"/>
 		</rhqparents>
 		<antparents></antparents>
 	</task>
@@ -171,11 +171,24 @@ be compressed and stored in the top level destination directory.
 			</attribute>
 		</attributes>
 	</task>
+	<!-- parent name="#all_possible_parents" means tag can be child of any tag in file, other <parent> tags are irrelevant -->
 	<task name="audit" paired="true">
 		<rhqparents>
+		<!--  
 			<parent name="deployment-unit"/>
+			<parent name="bundle"/>
+			<parent name="input-property"/>
+			<parent name="deployment-unit"/>
+			<parent name="archive"/>
+			<parent name="file"/>
+			<parent name="replace"/>
+			<parent name="ignore"/>
+			<parent name="fileset"/>
+		-->
 		</rhqparents>
-		<antparents></antparents>
+		<antparents>
+			<parent name="#all_posible_parents"/>
+		</antparents>
 		<attributes>
 			<attribute name="status"	visible="true" 	required="true" entity="auditstatus">
 				The status of your custom processing. Values are: SUCCESS, WARN, FAILURE. Default is SUCCESS

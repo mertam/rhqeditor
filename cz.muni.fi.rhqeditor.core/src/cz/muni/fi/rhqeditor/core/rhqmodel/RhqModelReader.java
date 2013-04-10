@@ -36,7 +36,7 @@ public class RhqModelReader {
 	public RhqModelReader(IProject proj, int version){
 //		fProject = proj;
 		fProject  = proj;
-		fDocument = DocumentProvider.getInstance().getDocument(proj.getName());
+		fDocument = DocumentProvider.getInstance().getDocument(proj);
 		fModelMap = RhqModel.getInstance().getModel(); 
 		
 	}

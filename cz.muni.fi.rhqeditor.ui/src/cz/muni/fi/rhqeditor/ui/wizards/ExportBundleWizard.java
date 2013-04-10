@@ -2,7 +2,9 @@ package cz.muni.fi.rhqeditor.ui.wizards;
 
 import java.io.IOException;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -15,29 +17,31 @@ import org.eclipse.ui.IWorkbenchWizard;
 import cz.muni.fi.rhqeditor.core.BundleExport;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
 
-public class ExportWizzard extends Wizard implements IWorkbenchWizard {
+public class ExportBundleWizard extends Wizard implements IWorkbenchWizard {
 
 	private IProject fProject = null;
-	private ExportWizzardPage1 fPage1;
+	private ExportBundleWizardPage1 fPage1;
 
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 
-		if (selection instanceof IStructuredSelection) {
-			IStructuredSelection structuredSelection = (IStructuredSelection) selection;
-			Object firstElement = structuredSelection.getFirstElement();
-			if (firstElement instanceof IAdaptable) {
-				fProject = (IProject) ((IAdaptable) firstElement)
-						.getAdapter(IProject.class);
-			}
+		Object firstElement = selection.getFirstElement();
+		if(firstElement instanceof IResource) {
+			fProject = ((IResource) firstElement).getProject();
+			return;
 		}
-		// TODO Auto-generated method stub
-
+		if (firstElement instanceof IAdaptable) {
+			fProject = (IProject) ((IAdaptable) firstElement)
+					.getAdapter(IProject.class);
+		}
+		
 	}
+	
+	
 
 	@Override
 	public void addPages() {
-		fPage1 = new ExportWizzardPage1("exportPage", "Export RHQ bundle", null);
+		fPage1 = new ExportBundleWizardPage1("exportPage", "Export RHQ bundle project into bundle", null);
 		addPage(fPage1);
 		try {
 			if(checkNature())

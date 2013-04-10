@@ -17,7 +17,7 @@ import org.eclipse.ui.IEditorPart;
 
 import cz.muni.fi.rhqeditor.core.launch.LaunchConfigurationsManager;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
-import cz.muni.fi.rhqeditor.ui.RhqEditor;
+import cz.muni.fi.rhqeditor.ui.editor.RhqEditor;
 
 /**
  * 

@@ -1,4 +1,4 @@
-package preferences;
+package cz.muni.fi.rhqeditor.ui.preferences;
 
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
@@ -27,7 +27,7 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 	protected void createFieldEditors() {
 		
 		BooleanFieldEditor booleanEditor = new BooleanFieldEditor(
-				RhqConstants.RHQ_USE_DEFAULT_DEPLOYER, "Use default standalone editor (version 4.5.1)", getFieldEditorParent());
+				RhqConstants.RHQ_USE_DEFAULT_DEPLOYER, "Use default standalone editor (version 4.6.0)", getFieldEditorParent());
 		booleanEditor.setFocus();
 		addField(booleanEditor);
 		

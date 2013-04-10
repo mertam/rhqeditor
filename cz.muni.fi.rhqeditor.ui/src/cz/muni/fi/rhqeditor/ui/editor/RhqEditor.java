@@ -1,4 +1,4 @@
-package cz.muni.fi.rhqeditor.ui;
+package cz.muni.fi.rhqeditor.ui.editor;
 
 import java.io.File;
 import java.util.HashMap;
@@ -108,6 +108,7 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import cz.muni.fi.rhqeditor.core.utils.DocumentProvider;
 import cz.muni.fi.rhqeditor.core.utils.ExtractorProvider;
 import cz.muni.fi.rhqeditor.core.utils.RhqPathExtractor;
+import cz.muni.fi.rhqeditor.ui.UiActivator;
 
 
 
@@ -189,7 +190,7 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
 				fRhqRecipeValidator.setExtractor(ext);	
 				fRhqRecipeValidator.setInputDocument(getSourceViewer().getDocument());
 				DocumentProvider provider = DocumentProvider.getInstance();
-				provider.attachDocumentToProject(getAntModel().getFile().getProject().getName(), getSourceViewer().getDocument());
+				provider.attachDocumentToProject(getAntModel().getFile().getProject(), getSourceViewer().getDocument());
 			}
 			
 //			fRhqRecipeValidator.setCoursorPosition(cursorPosition);
@@ -1132,15 +1133,17 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
 		if (shell != null && !shell.isDisposed()) {
 			shell.getDisplay().asyncExec(new Runnable() {
 				public void run() {
-					if (getSite().getShell() == null || getSite().getShell().isDisposed()) {
-						return;
-					}
-					Image titleImage= getTitleImage();
-					Image newImage= node.getImage();
-					if (titleImage != newImage) {
-						setTitleImage(newImage);
-					}
+					setTitleImage(getRhqTitleImage());
 				}
+//					if (getSite().getShell() == null || getSite().getShell().isDisposed()) {
+//						return;
+//					}
+//					Image titleImage= getTitleImage();
+//					Image newImage= node.getImage();
+//					if (titleImage != newImage) {
+//						setTitleImage(newImage);
+//					}
+//				}
 			});
 		}
 	}
@@ -1433,6 +1436,14 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
 	}
 	
 	
+	
+	private Image fRhqTitleImage;
+	
+	private Image getRhqTitleImage(){
+		if(fRhqTitleImage == null)
+			fRhqTitleImage = new Image(getSite().getShell().getDisplay(), UiActivator.getImageDescriptor("icons/rhq.gif").getImageData());	
+		return fRhqTitleImage;
+	}
 //	@Override
 //	public int hashCode(){
 //		return 37 * getProject().hashCode();

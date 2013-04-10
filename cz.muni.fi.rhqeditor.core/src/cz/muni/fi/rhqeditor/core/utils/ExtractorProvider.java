@@ -7,7 +7,11 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
 
-
+/**
+ * Singleton class, can be accessible via method getInstance
+ * @author syche
+ *
+ */
 public class ExtractorProvider {
 
 
