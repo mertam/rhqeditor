@@ -56,7 +56,7 @@ Only a single deployment unit is provisioned at a time by the provisioning proce
 			<attribute name="name"	visible="true" 	required="true">
 				The name of the user-defined property. Within the recipe, this property can be referred to by this name, in the format ${property_name}. 
 			</attribute>
-			<attribute  name="required"	visible="false" required="false" entity="boolean">
+			<attribute  name="required"	visible="true" required="false" entity="boolean">
 				Sets whether the property is required or optional for configuration. The default value is false, which means the property is optional. If this argument isn't given, then it is assumed that the property is optional. 
 			</attribute>
 			<attribute  name="description" 	visible="true" 	required="true">

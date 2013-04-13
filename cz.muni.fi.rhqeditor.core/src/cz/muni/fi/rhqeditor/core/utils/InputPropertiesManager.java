@@ -7,9 +7,6 @@ import java.util.regex.Pattern;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jface.text.IDocument;
-
-import cz.muni.fi.rhqeditor.core.rhqmodel.RhqModelReader;
 
 
 /**
@@ -40,37 +37,27 @@ public class InputPropertiesManager {
 	public ArrayList<InputProperty> getInputPropertiesFromRecipe(boolean forceSearchOnSavedFile) throws CoreException{
 		
 		//init searched object
-		StringBuilder sb;
-		if(!forceSearchOnSavedFile){
-			DocumentProvider provider = DocumentProvider.getInstance();
-			IDocument document = provider.getDocument(fProject);
-			String searchedContext = (document == null ? null : document.get());
-			if(searchedContext == null)
-				sb = RecipeReader.readRecipe(fProject);
-			else
-				sb = new StringBuilder(searchedContext);
-		}else{
-			sb = RecipeReader.readRecipe(fProject);
-		}
-		
+		String content;
+		RecipeReader reader = new RecipeReader(fProject);
+		content = reader.readRecipe(forceSearchOnSavedFile);
+		String namespacePrefix = reader.getRhqNamespacePrefix();
 		
 		//find properties
-		RhqModelReader reader = new RhqModelReader(fProject,0);
 		Pattern pattern = 
-				Pattern.compile("("+ reader.getRhqNamespacePrefix() +
+				Pattern.compile("("+ namespacePrefix +
 				RhqConstants.RHQ_TYPE_INPUT_PROPERTY + ")"+     				//rhq:input-property
 				"(\\s+\\w+\\s*=\"[\\w\\d\\s\\p{Punct}&&[^\"]]*\")*" +			//some attribute*
 				"\\s+name\\s*=\"[\\w\\d\\s\\p{Punct}&&[^\"]]+\"" +    			//name="..."
 				"(\\s+\\w+\\s*=\"[\\w\\d\\s\\p{Punct}&&[^\"]]*\")*" + 			//some attribute*
 				 "\\s*/?\\s*>", Pattern.DOTALL);								// /> or >
-        Matcher matcher = pattern.matcher(sb);
+        Matcher matcher = pattern.matcher(content);
         
         ArrayList<InputProperty>  result = new ArrayList<>();
         addDefaultProperties(result);
         int commentStartPosition, commentEndPosition;
         while(matcher.find()){
-        	if ((commentEndPosition = sb.substring(matcher.start(),sb.length()).indexOf("-->")) > -1) {
-				commentStartPosition = sb.substring(matcher.start(),sb.length()).indexOf("<!--");
+        	if ((commentEndPosition = content.substring(matcher.start(),content.length()).indexOf("-->")) > -1) {
+				commentStartPosition = content.substring(matcher.start(),content.length()).indexOf("<!--");
 				if(true && commentStartPosition > commentEndPosition){
 					// commented property
 					continue;
@@ -79,7 +66,7 @@ public class InputPropertiesManager {
         	
         	
         	InputProperty property = new InputProperty();
-        	String toAdd = sb.substring(matcher.start());
+        	String toAdd = content.substring(matcher.start());
         	property.setName(getAttributeValue(toAdd, "name"));
         	property.setType(getAttributeValue(toAdd, "type"));
         	property.setDescription(getAttributeValue(toAdd, "description"));

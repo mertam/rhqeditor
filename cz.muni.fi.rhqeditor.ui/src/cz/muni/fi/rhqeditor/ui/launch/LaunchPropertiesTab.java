@@ -16,15 +16,12 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.layout.FormAttachment;
-import org.eclipse.swt.layout.FormData;
-import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
@@ -37,7 +34,6 @@ import cz.muni.fi.rhqeditor.core.utils.InputPropertiesManager;
 import cz.muni.fi.rhqeditor.core.utils.InputProperty;
 import cz.muni.fi.rhqeditor.core.utils.RecipeReader;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
-import org.eclipse.swt.layout.GridLayout;
 
 
 public class LaunchPropertiesTab extends AbstractLaunchConfigurationTab{
@@ -95,6 +91,7 @@ public class LaunchPropertiesTab extends AbstractLaunchConfigurationTab{
         final TableEditor tableEditor = new TableEditor(fTable);
         
         fBtnUseDefaultRhqdeploydir = new Button(myComposite, SWT.CHECK);
+        fBtnUseDefaultRhqdeploydir.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
         fBtnUseDefaultRhqdeploydir.setSelection(true);
         fBtnUseDefaultRhqdeploydir.addSelectionListener(new SelectionAdapter() {
         	@Override
@@ -105,11 +102,10 @@ public class LaunchPropertiesTab extends AbstractLaunchConfigurationTab{
         });
         fBtnUseDefaultRhqdeploydir.setText("Use default rhq.deploy.dir "+
         		System.getProperty("file.separator")+RhqConstants.RHQ_DEFAULT_DEPLOY_DIR);
-        new Label(myComposite, SWT.NONE);
         
         fLblPathToDeploy = new Label(myComposite, SWT.NONE);
+        fLblPathToDeploy.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
         fLblPathToDeploy.setText("Path to deploy directory (rhq.deploy.dir)");
-        new Label(myComposite, SWT.NONE);
         
         fTxtDeployDir = new Text(myComposite, SWT.BORDER);
         GridData gd_fTxtDeployDir = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);

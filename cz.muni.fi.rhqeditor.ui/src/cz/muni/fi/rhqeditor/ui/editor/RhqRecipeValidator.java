@@ -22,6 +22,7 @@ import org.xml.sax.ext.DefaultHandler2;
 import cz.muni.fi.rhqeditor.core.rhqmodel.RhqAttribute;
 import cz.muni.fi.rhqeditor.core.rhqmodel.RhqModelReader;
 import cz.muni.fi.rhqeditor.core.rhqmodel.RhqTask;
+import cz.muni.fi.rhqeditor.core.utils.RecipeReader;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
 import cz.muni.fi.rhqeditor.core.utils.RhqPathExtractor;
 
@@ -40,7 +41,7 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 	private SAXParser		 	fParser				= null;
 
 	private IDocument			fDocument 			= null;
-	
+	private RecipeReader        fRecipeReader 		= null;
 	private String				fOpenArchiveName 	= null;
 	private HashMap<String, Integer > fExistingTargets	= null;
 	private HashMap<String,	Integer > fRequiredTargets  = null;
@@ -92,9 +93,9 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 		fDocument = idoc;
 	}
 	
-	private RhqModelReader getReader(){
+	private RhqModelReader getModelReader(){
 		if(fRhqModelReader == null)
-			fRhqModelReader = new RhqModelReader(fRhqPathExtractor.getProject(), 0);
+			fRhqModelReader = new RhqModelReader(0);
     	return fRhqModelReader;
 	}
 
@@ -146,7 +147,7 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 			Attributes attributes) throws SAXException {
 		
 		//if task isn't rhq task do nothing, except include
-		RhqTask currentTask = getReader().getTask(qName);
+		RhqTask currentTask = getModelReader().getTask(qName);
 		if(currentTask == null && !qName.equals("include")){
 			openElements.push(qName);
 			super.startElement(uri, localName, qName, attributes);
@@ -249,7 +250,7 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 			return;
 		}
 		openElements.pop();
-		if(qName.equals(getReader().getRhqNamespacePrefix() + RhqConstants.RHQ_TYPE_ARCHIVE)){
+		if(qName.equals(RecipeReader.getRhqNamespacePrefix(fDocument.get()) + RhqConstants.RHQ_TYPE_ARCHIVE)){
 			fOpenArchiveName = null;
 		}
 	}
@@ -273,7 +274,7 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 	 * @param atts
 	 */
 	private void checkAttributesAndSetMarkers(String elementName, Attributes atts){
-		RhqTask task = getReader().getTask(elementName);
+		RhqTask task = getModelReader().getTask(elementName);
 		if(task == null || atts == null)
 			return;
 		
@@ -299,7 +300,7 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 			return;
 		
 		for(String parent: child.getAllParentNames()){
-			if(parent.equals(getReader().removeNamespacePrefix(parentName)))
+			if(parent.equals(getModelReader().removeNamespacePrefix(parentName)))
 				return;
 		}
 		fRhqAnnotationModel.addMarker(locator.getLineNumber(), "Misplaced element "+child.getName(), IMarker.SEVERITY_WARNING);

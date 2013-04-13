@@ -80,7 +80,7 @@ public class ExportBundleWizardPage1 extends WizardPage {
         		fProjectName = fComboProject.getItem(fComboProject.getSelectionIndex());
         	}
         });
-        new Label(fContainer, SWT.NONE);
+   
         
         Label lblExportDir = new Label(fContainer, SWT.NONE);
         lblExportDir.setText("Export as:");

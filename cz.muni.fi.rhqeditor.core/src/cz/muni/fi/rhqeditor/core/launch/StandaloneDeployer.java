@@ -122,7 +122,7 @@ public class StandaloneDeployer {
 				
 				if(inputPropertyValue.equals(EMPTY_VALUE)){
 					//has default value?
-					if(property.getValue() != null){
+					if(property.getValue() != null && !property.getValue().isEmpty()){
 						deployCommand.append("-D" + property.getName() + "=" + property.getValue() + " ");
 						//print error if property is required, filter rhq.deploy.dir
 					} else if (property.isRequired() && !property.getName().equals(RhqConstants.RHQ_DEPLOY_DIR)){
@@ -186,7 +186,7 @@ public class StandaloneDeployer {
 						e1.printStackTrace();
 					}
 			      return Status.OK_STATUS;
-			}
+				}
 	       };
 	
 		deployment.schedule();  

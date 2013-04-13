@@ -10,8 +10,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.swt.widgets.Display;
 
-import cz.muni.fi.rhqeditor.core.rhqmodel.RhqModelReader;
-
 /**
  * class used for refactoring recipe content
  * 
@@ -75,7 +73,7 @@ public class RhqRecipeContentChange extends TextFileChange {
 					if (position == -1)
 						return;
 
-					String namespace = RhqModelReader
+					String namespace = RecipeReader
 							.getRhqNamespacePrefix(content);
 					content = addToTextToPosition(prepareTagToInsert(namespace+taskName, filename), content, position);
 					document.set(content);
@@ -104,7 +102,7 @@ public class RhqRecipeContentChange extends TextFileChange {
 		if (doc == null)
 			return position;
 		String content = doc.get();
-		String namespace = RhqModelReader.getRhqNamespacePrefix(content);
+		String namespace = RecipeReader.getRhqNamespacePrefix(content);
 
 		int lastValidOffset = -1;
 		// finds closing tag of existing element

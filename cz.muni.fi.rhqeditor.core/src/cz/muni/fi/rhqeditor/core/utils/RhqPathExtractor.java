@@ -440,26 +440,24 @@ public class RhqPathExtractor {
 	 * @param formerPath
 	 * @param newPath
 	 */
-	public void updatePaths(String formerPath, String newPath){
+	public void updatePaths(IPath formerPath, IPath newPath){
 		//update archives
 		 ArrayList<IPath> temp;
 		 for(Iterator<IPath> i = fArchiveContent.keySet().iterator(); i.hasNext();) {
-			 String name = i.next().toString();
-			 String newName = name.replaceFirst(formerPath, newPath);
-		     if(name.startsWith(formerPath)){
-					temp = fArchiveContent.get(name);
-					fArchiveContent.remove(name);
-					fArchiveContent.put(new Path(newName), temp);
+			 IPath currentPath = i.next();
+		     if(formerPath.isPrefixOf(currentPath)){
+					temp = fArchiveContent.get(currentPath);
+					fArchiveContent.remove(currentPath);
+					fArchiveContent.put(newPath.append(currentPath.removeFirstSegments(formerPath.segmentCount())), temp);
 				}
 		 }
 		
 		//update files
 		int index = 0;
 		for(Iterator<IPath> i = fAbsolutePathsFiles.iterator(); i.hasNext();) {
-			String currentPath = i.next().toString();
-			if(currentPath.startsWith(formerPath)){
-				String newName = currentPath.toString().replaceFirst(formerPath, newPath);
-				fAbsolutePathsFiles.set(index, new Path(newName));
+			IPath currentPath = i.next();
+			if(formerPath.isPrefixOf(currentPath)) {
+				fAbsolutePathsFiles.set(index, newPath.append(currentPath.removeFirstSegments(formerPath.segmentCount())));
 			}
 			index++;
 		}

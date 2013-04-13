@@ -199,6 +199,7 @@ public class ImportBundleArchiveWizardPage1 extends WizardPage {
 										if(worked < 95){
 											monitor.worked(++worked);
 										}
+										
 										DisplayedObject obj = new DisplayedObject();
 										obj.setName(file.getName());
 										obj.setPath(file.toPath());
@@ -213,7 +214,7 @@ public class ImportBundleArchiveWizardPage1 extends WizardPage {
 						
 						Collections.sort(list);
 						Display.getDefault().asyncExec(new Runnable() {
-				               public void run() {    	  
+				               public void run() {  
 				            	   fCheckBoxTableViewer.add(list.toArray());
 				               }
 				            });

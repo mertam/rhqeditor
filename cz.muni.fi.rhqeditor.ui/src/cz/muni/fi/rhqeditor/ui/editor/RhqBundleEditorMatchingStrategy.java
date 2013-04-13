@@ -26,11 +26,13 @@ public class RhqBundleEditorMatchingStrategy implements IEditorMatchingStrategy{
 			IFile file = fei.getFile();
 			
 			try {
+				System.out.println("strategy: " +  (file.getProject().hasNature(RhqConstants.RHQ_NATURE_ID) && file.getName().equals(RhqConstants.RHQ_RECIPE_FILE)));
 				return file.getProject().hasNature(RhqConstants.RHQ_NATURE_ID) && file.getName().equals(RhqConstants.RHQ_RECIPE_FILE);
 			} catch (CoreException e) {
 				//return false if exception occurs
 			}
 		}
+		System.out.println("strategy: FALSE");
 		return false;
 	}
 

@@ -43,7 +43,11 @@
             class="cz.muni.fi.rhqeditor.ui.editor.RhqEditor"
             icon="icons/rhq.gif"
             filenames="deploy.xml"
->
+            >
+            
+            <contentTypeBinding
+                  contentTypeId="cz.muni.fi.rhqeditor.ui.content-type1">
+            </contentTypeBinding>
       </editor>
    </extension>
 
@@ -167,8 +171,16 @@
             >
       </wizard>
 </extension>
-	
-
+	<extension
+	      point="org.eclipse.core.contenttype.contentTypes"
+	      >
+	      <content-type
+	      	name="cz.muni.fi.rhqeditor.contenttype"
+             id="cz.muni.fi.rhqeditor.ui.content-type1"
+             file-names="deploy.xml"
+             >
+	      </content-type>
+	</extension>
     
    
 </plugin>

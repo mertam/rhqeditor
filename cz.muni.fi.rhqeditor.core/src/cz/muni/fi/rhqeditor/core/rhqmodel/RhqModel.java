@@ -19,7 +19,7 @@ import org.w3c.dom.NodeList;
 import cz.muni.fi.rhqeditor.core.Activator;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
 
-public class RhqModel {
+class RhqModel {
 	private Map<String, RhqTask> fModel;
 	private List<String> fReplacements;
 	private static final RhqModel instance = new RhqModel();

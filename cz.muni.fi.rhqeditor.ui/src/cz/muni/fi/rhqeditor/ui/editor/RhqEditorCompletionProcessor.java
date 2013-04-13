@@ -104,6 +104,7 @@ import cz.muni.fi.rhqeditor.core.rhqmodel.RhqTask;
 import cz.muni.fi.rhqeditor.core.utils.ExtractorProvider;
 import cz.muni.fi.rhqeditor.core.utils.InputPropertiesManager;
 import cz.muni.fi.rhqeditor.core.utils.InputProperty;
+import cz.muni.fi.rhqeditor.core.utils.RecipeReader;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
 import cz.muni.fi.rhqeditor.core.utils.RhqPathExtractor;
 import cz.muni.fi.rhqeditor.ui.editor.TaskDescriptionProvider.ProposalNode;
@@ -230,6 +231,8 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
     
     
     private RhqModelReader fRhqModelReader;
+    
+    private RecipeReader fRecipeReader;
 	
 	public RhqEditorCompletionProcessor(AntModel model) {
 	//-------------------------------------------------------------------------
@@ -489,7 +492,7 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
                 
 //------------------
                 //find task, if not null then add proposals
-                RhqTask task = getReader().getTask(currentTaskString);
+                RhqTask task = getModelReader().getTask(currentTaskString);
                 if(task != null && task.getName().equals(RhqConstants.RHQ_TYPE_FILE) && attributeString.equals(RhqConstants.RHQ_ATTRIBUTE_NAME)){
           				proposals = addFilesProposals(document,textToSearch,prefix,attributeString);
   
@@ -501,7 +504,7 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
                 }
                 
                 if(task != null && task.getName().equals(RhqConstants.RHQ_TYPE_FILESET) && attributeString.equals(RhqConstants.RHQ_ATTRIBUTE_INCLUDES)){
-                	String archiveName = getReader().getParentArchiveFilename(document, cursorPosition);
+                	String archiveName = getRecipeReader().getParentArchiveFilename(document, cursorPosition);
                 	if(!archiveName.equals("")){
             			proposals = addArchiveContentProposals(document, prefix, archiveName);
                 	}
@@ -509,7 +512,7 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
                 }
                 
                 if(currentTaskString.equals("include") && attributeString.equalsIgnoreCase(RhqConstants.RHQ_ATTRIBUTE_NAME)){
-                	String archiveName = getReader().getParentArchiveFilename(document, cursorPosition);
+                	String archiveName = getRecipeReader().getParentArchiveFilename(document, cursorPosition);
                 	if(!archiveName.equals("")){
             			proposals = addArchiveContentProposals(document, prefix, archiveName);
                 	}
@@ -813,7 +816,7 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
         
     	//++++++++++++++++++++++++++++++++++
         //find task and add proposals if not null
-    	RhqTask task = getReader().getTask(taskName);
+    	RhqTask task = getModelReader().getTask(taskName);
     	if(task != null){
     		for(RhqAttribute attr: task.getAttributes()){
     			String replacementString = attr.getName()+"=\"\""; //$NON-NLS-1$
@@ -1246,12 +1249,12 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
         }
        //-------------
 //ADDED rhq task proposals
-       String noPrefix = getReader().removeNamespacePrefix(parentName);
-       for(RhqTask task: getReader().getMapOfTasks().values()){
+       String noPrefix = getModelReader().removeNamespacePrefix(parentName);
+       for(RhqTask task: getModelReader().getMapOfTasks().values()){
     	   //add task to proposal if (child of given RHQ task || child of given Ant task) && given prefix is prefix of namespace+taskname 
-    	   if(  (getReader().getRhqNamespacePrefix()+task.getName()).startsWith(prefix) &&
+    	   if(  (getRecipeReader().getRhqNamespacePrefix()+task.getName()).startsWith(prefix) &&
     			   (task.getParents().contains(new RhqTask(noPrefix)) || task.getAntParents().contains(noPrefix))) {
-    		   proposal = newCompletionProposal(document, prefix, getReader().getRhqNamespacePrefix()+task.getName());
+    		   proposal = newCompletionProposal(document, prefix, getRecipeReader().getRhqNamespacePrefix()+task.getName());
     		   proposals.add(proposal);   	   
     	   }
     	   if(noPrefix.equals(task.getName())){
@@ -1264,7 +1267,7 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
     	   
     	   //add task that can be placed wherever
     	   if(task.canBePlacedInAnyTask()){
-    		   proposal = newCompletionProposal(document, prefix, getReader().getRhqNamespacePrefix() + task.getName());
+    		   proposal = newCompletionProposal(document, prefix, getRecipeReader().getRhqNamespacePrefix() + task.getName());
 		   	   proposals.add(proposal);
     	   }
     	   
@@ -1330,9 +1333,9 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
 		boolean hasNestedElements= hasNestedElements(elementName);
 		String replacementString;
 //ADDED	handling rhq tasks
-		if(elementName.startsWith(getReader().getRhqNamespacePrefix())){
+		if(elementName.startsWith(getRecipeReader().getRhqNamespacePrefix())){
 //			RhqTask task = fRhqModel.get(removeNamespacePrefix(elementName));
-			RhqTask task = getReader().getTask(elementName);
+			RhqTask task = getModelReader().getTask(elementName);
 			hasNestedElements = (task == null ? false : task.isPaired());
 			replacementString = getRhqReplacementString(elementName,hasNestedElements);
 			proposalInfo = task.getDescription();	
@@ -1595,7 +1598,7 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
 //ADDED currentTaskString can be also RHQ task
                 if(currentTaskString != null && 
                 		(isKnownElement(currentTaskString) ||
-                				getReader().getTask(currentTaskString) != null)) {
+                				getModelReader().getTask(currentTaskString) != null)) {
                     return PROPOSAL_MODE_ATTRIBUTE_PROPOSAL;
                 }
             }                
@@ -1607,7 +1610,7 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
 //ADDED currentTaskString can be also RHQ task
         	if (currentTaskString != null && 
         			(isKnownElement(currentTaskString) ||
-            				getReader().getTask(currentTaskString) != null)) {
+            				getModelReader().getTask(currentTaskString) != null)) {
                 return PROPOSAL_MODE_ATTRIBUTE_VALUE_PROPOSAL;
             }
         } else {  // Possibly a Task proposal
@@ -2015,6 +2018,8 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
 			try {
 				service.busyCursorWhile(runnable);
 			} catch (InvocationTargetException e) {
+				e.printStackTrace();
+				System.out.println("");
 			} catch (InterruptedException e) {
 			}
 		}
@@ -2150,7 +2155,7 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
 	private void addRhqAttributeProposal(String taskName, String prefix, List proposals, String attrName, String replacementString, String displayString, boolean lookupDescription) {
     	
 		String proposalInfo = "";
-		RhqTask task = getReader().getTask(taskName);
+		RhqTask task = getModelReader().getTask(taskName);
 		if(task == null)
 			return;
 		String description;
@@ -2180,7 +2185,7 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
    
     
     private String getRhqReplacementString(String taskName, boolean nested){
-    	RhqTask task = getReader().getTask(taskName);
+    	RhqTask task = getModelReader().getTask(taskName);
     	if(task == null)
     		return "";
     	List<String> atts = new ArrayList<>();
@@ -2206,11 +2211,16 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
     }
         
     
-    private RhqModelReader getReader(){
-    	if(fRhqModelReader != null)
-    		return fRhqModelReader;
-    	fRhqModelReader = new RhqModelReader(antModel.getFile().getProject(), 0);
+    private RhqModelReader getModelReader(){
+    	if(fRhqModelReader  == null)
+    		fRhqModelReader = new RhqModelReader(0);
     	return fRhqModelReader;
+    }
+    
+    private RecipeReader getRecipeReader() {
+    	if(fRecipeReader == null)
+    		fRecipeReader = new RecipeReader(antModel.getFile().getProject());
+    	return fRecipeReader;
     }
 
     
