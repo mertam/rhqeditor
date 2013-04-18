@@ -12,19 +12,15 @@ public class RHQEditorNature implements IProjectNature {
 	
 	  @Override
 	  public void configure() throws CoreException {
-		  System.err.println("config called");
-	
 	  }
 	
 	  @Override
 	  public IProject getProject() {
-		 System.err.println("get called");
 	     return project;
 	  }
 	  
 	  @Override
 	  public void setProject(IProject value) {
-		  System.err.println("set called");
 	     project = value;
 	  }
 

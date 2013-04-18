@@ -13,7 +13,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWizard;
 
-import cz.muni.fi.rhqeditor.core.BundleExport;
+import cz.muni.fi.rhqeditor.core.utils.BundleExport;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
 
 public class ExportBundleWizard extends Wizard implements IWorkbenchWizard {

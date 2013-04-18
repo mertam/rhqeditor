@@ -18,7 +18,6 @@ public class RHQEditorNatureDescriptor implements IProjectNatureDescriptor{
 
 	@Override
 	public String[] getRequiredNatureIds() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -30,7 +29,6 @@ public class RHQEditorNatureDescriptor implements IProjectNatureDescriptor{
 
 	@Override
 	public boolean isLinkingAllowed() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 	

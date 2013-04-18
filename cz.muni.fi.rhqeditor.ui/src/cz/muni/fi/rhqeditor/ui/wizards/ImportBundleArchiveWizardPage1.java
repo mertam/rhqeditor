@@ -21,6 +21,7 @@ import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ICheckStateProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusAdapter;
@@ -37,8 +38,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.dialogs.WorkingSetGroup;
 
-import cz.muni.fi.rhqeditor.core.ArchiveReader;
+import cz.muni.fi.rhqeditor.core.utils.ArchiveReader;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
 
 public class ImportBundleArchiveWizardPage1 extends WizardPage {
@@ -64,6 +67,9 @@ public class ImportBundleArchiveWizardPage1 extends WizardPage {
 	//set of existing project in workspace
 	private HashSet<String> existingProjects = new HashSet<>();
 	
+	private IStructuredSelection selection;
+	
+	private WorkingSetGroup group;
 	
 	protected ImportBundleArchiveWizardPage1(String pageName) {
 		super(pageName);
@@ -73,16 +79,35 @@ public class ImportBundleArchiveWizardPage1 extends WizardPage {
 			System.out.println(project.getName());
 		}
 	}
+	
+	public void setSelection(IStructuredSelection selection) {
+		this.selection = selection;
+	}
 
+	
+	
 	@Override
 	public void createControl(Composite parent) {
-		Composite composite = new Composite(parent, SWT.BORDER);
-	    composite.setLayout(new GridLayout(3, false));
+//		Composite composite = (Composite) getControl();
+		Composite composite = new Composite(parent, SWT.NONE);
+		
+		initializeDialogUnits(composite);
+		
+		GridLayout gl_composite = new GridLayout();
+		gl_composite.verticalSpacing = 3;
+		gl_composite.horizontalSpacing = 3;
+		gl_composite.numColumns = 3;
+		composite.setLayout(gl_composite);
+        composite.setLayoutData(new GridData(GridData.FILL_BOTH));
+
+		setControl(composite);
+
 	    
-	    
+		
 	    setDescription("Import RHQ bundle");
+
 	    Label lblRootFolder = new Label(composite, SWT.NONE);
-	    lblRootFolder.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+	    lblRootFolder.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 	    lblRootFolder.setText("Root folder:");
 	    
 	    fCombo = new Combo(composite, SWT.NONE);
@@ -103,25 +128,28 @@ public class ImportBundleArchiveWizardPage1 extends WizardPage {
 	    	}
 	    });
 	    restoreComboState();
-	    fCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-	  
+	    GridData gd_fCombo = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
+	    gd_fCombo.widthHint = 413;
+	    fCombo.setLayoutData(gd_fCombo);
+	    
 	    btnBrowse = new Button(composite, SWT.NONE);
 	    btnBrowse.addSelectionListener(new SelectionAdapter() {
-	    	@Override
-	    	public void widgetSelected(SelectionEvent e) {
-	    		openSelectDirectoryDialog(new Shell());
-	    		if(lastSearchedPath != null && !lastSearchedPath.equals(fBudleImportDirectory)){
+	      	@Override
+	      	public void widgetSelected(SelectionEvent e) {
+	      		openSelectDirectoryDialog(new Shell());
+	      		if(lastSearchedPath != null && !lastSearchedPath.equals(fBudleImportDirectory)){
 		    		File dir = new File(fBudleImportDirectory);
 		    		System.out.println(dir.getAbsolutePath());
 		    		
 		    		getItemsFromDirectory(dir);
 		    		setComboAfterChange();
 		    		setComplete();
-	    		}
-	    		lastSearchedPath = fBudleImportDirectory;
-	    	}
-	    });
+	      		}
+	      		lastSearchedPath = fBudleImportDirectory;
+	      	}
+	      });
 	    btnBrowse.setText("Browse");
+	    btnBrowse.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 	    
 	    fCheckBoxTableViewer = CheckboxTableViewer.newCheckList(composite, SWT.BORDER | SWT.FULL_SELECTION | SWT.FILL);	
 	    table = fCheckBoxTableViewer.getTable();
@@ -158,7 +186,12 @@ public class ImportBundleArchiveWizardPage1 extends WizardPage {
 	      		
 	      	}
 	      });
-		setControl(composite);
+	    Composite set = new Composite(composite, SWT.NONE);
+	    set.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 3, 1));
+	    setControl(set);
+	    group = new WorkingSetGroup(set, selection, new String[]{"org.eclipse.ui.resourceWorkingSetPage"});
+	    set.setLayout(new GridLayout(1, false));
+	    setControl(composite);
 		setComplete();
 	}
 	
@@ -439,5 +472,8 @@ public class ImportBundleArchiveWizardPage1 extends WizardPage {
 
 	}
 	
+	public IWorkingSet[] getWorkingSets(){
+		return group.getSelectedWorkingSets();
+	}	
 }
 

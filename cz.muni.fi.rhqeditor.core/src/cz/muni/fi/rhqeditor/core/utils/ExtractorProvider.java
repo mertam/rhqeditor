@@ -12,29 +12,39 @@ import org.eclipse.core.resources.IProject;
  * @author syche
  *
  */
-public class ExtractorProvider {
+public enum ExtractorProvider {
 
-
-	    private static final ExtractorProvider instance = new ExtractorProvider();
-	    private Map<IProject,RhqPathExtractor> map;
+		INSTANCE;
+	    private Map<IProject,RhqPathExtractor> map = new HashMap<>();
 	    
-	    
-	    private ExtractorProvider() {
-	    	map = new HashMap<IProject, RhqPathExtractor>();
-	    }
+	    private ExtractorProvider() {}
 	 
-	    public static ExtractorProvider getInstance() {
-	        return instance;
+	    /**
+	     * returns RhaPathExtractor for given IProject
+	     * @param project
+	     * @return null if there is no extractor for this project
+	     */
+	    public RhqPathExtractor getExtractor(IProject project) {
+	    	return map.get(project);
 	    }
 	    
+	    
+	    /**
+	     * puts into extractor into cache for given project. Repleces existing one.
+	     * @param project
+	     * @param extractor
+	     */
 	    public void attachExtractorToProject(IProject project, RhqPathExtractor extractor){
 	    	map.put(project,extractor);
 	    }
-	    
-	    public Map<IProject,RhqPathExtractor> getMap(){
-	    	return Collections.unmodifiableMap(map);
-	    }	    
-	    
+	    	    
+	    public void deleteExtractorOfProject(IProject project) {
+	    	map.remove(project);
+	    }
+	    /**
+	     * return array of all listed projects
+	     * @return
+	     */
 		public String[] listProjects(){
 			ArrayList<String> projects = new ArrayList<>();
 			for(IProject proj: map.keySet()){

@@ -39,8 +39,10 @@ Import-Package:
  org.eclipse.jface.text.source,
  org.eclipse.jface.text.source.projection,
  org.eclipse.ui,
+ org.eclipse.ui.dialogs,
  org.eclipse.ui.editors.text,
  org.eclipse.ui.ide,
+ org.eclipse.ui.model,
  org.eclipse.ui.part,
  org.eclipse.ui.texteditor,
  org.eclipse.ui.views.contentoutline

@@ -19,22 +19,31 @@ import org.w3c.dom.NodeList;
 import cz.muni.fi.rhqeditor.core.Activator;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
 
-class RhqModel {
+class RhqModel_4_6_0 implements IRhqModel {
+	
 	private Map<String, RhqTask> fModel;
 	private List<String> fReplacements;
-	private static final RhqModel instance = new RhqModel();
+	private static final IRhqModel instance = new RhqModel_4_6_0();
 	
-	private RhqModel(){
+	private RhqModel_4_6_0(){
 		fModel = readDocument();
 	}
 	
-	public static RhqModel getInstance(){
+	public static IRhqModel getInstance(){
 		return instance;
 	}
 	
+	/* (non-Javadoc)
+	 * @see cz.muni.fi.rhqeditor.core.rhqmodel.IRhqModel#getModel()
+	 */
+	@Override
 	public Map<String,RhqTask> getModel(){
 		return fModel;
 	}
+	/* (non-Javadoc)
+	 * @see cz.muni.fi.rhqeditor.core.rhqmodel.IRhqModel#getReplacements()
+	 */
+	@Override
 	public List<String> getReplacements(){
 		return fReplacements;
 	}

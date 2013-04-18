@@ -185,11 +185,10 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
 			if(fRhqRecipeValidator == null){
 				fRhqRecipeValidator = new RhqRecipeValidator();
 				fRhqRecipeValidator.setAnnotationModel(fRhqAnnotationModel);
-				Map<IProject, RhqPathExtractor> m = ExtractorProvider.getInstance().getMap();
-				RhqPathExtractor ext = m.get(getAntModel().getFile().getProject());
+				RhqPathExtractor ext =ExtractorProvider.INSTANCE.getExtractor(getAntModel().getFile().getProject());
 				fRhqRecipeValidator.setExtractor(ext);	
 				fRhqRecipeValidator.setInputDocument(getSourceViewer().getDocument());
-				DocumentProvider provider = DocumentProvider.getInstance();
+				DocumentProvider provider = DocumentProvider.INSTANCE;
 				provider.attachDocumentToProject(getAntModel().getFile().getProject(), getSourceViewer().getDocument());
 			}
 			

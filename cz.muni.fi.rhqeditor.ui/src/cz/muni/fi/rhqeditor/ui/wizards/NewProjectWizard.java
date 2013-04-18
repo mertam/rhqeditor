@@ -1,24 +1,25 @@
 package cz.muni.fi.rhqeditor.ui.wizards;
 
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWizard;
+import org.eclipse.ui.PlatformUI;
 
 import cz.muni.fi.rhqeditor.core.RHQBundleProject;
-import cz.muni.fi.rhqeditor.ui.UiActivator;
 
 public class NewProjectWizard extends Wizard implements IWorkbenchWizard{
 	/**
 	 * @uml.property  name="page1"
 	 * @uml.associationEnd  
 	 */
-	private NewProjectWizardPage1 				page1;
+	private NewProjectWizardPage1	page1;
+	private IStructuredSelection 	selection;
 
 	
 	public NewProjectWizard()
@@ -28,12 +29,15 @@ public class NewProjectWizard extends Wizard implements IWorkbenchWizard{
 	
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
+		this.selection = selection;
 	}
 	
 	@Override
 	public void addPages(){
 		
-		page1 = new NewProjectWizardPage1("page 1","RHQ title",UiActivator.getImageDescriptor("icons/rhq.gif"));
+		page1  = new NewProjectWizardPage1("ProjectWizardPage1");
+		page1.setSelection(selection);
+		page1.setMessage("Create new RHQ bundle");
 		addPage(page1);
 	}
 
@@ -41,15 +45,17 @@ public class NewProjectWizard extends Wizard implements IWorkbenchWizard{
 	public boolean performFinish() {
 		try{
 			RHQBundleProject project = new RHQBundleProject();
-			
-			if(page1.getNewProjectPath() == null){
-				project.createProject(page1.getNewProjectName(), null);
-				project.createDefaultRecipe(page1.getNewProjectName(),page1.getBundleName(),page1.getBundleVersion());
+			IPath path = page1.getLocationPath();
+			if(path == null || path.equals(ResourcesPlugin.getWorkspace().getRoot().getLocation())){
+				project.createProject(page1.getProjectName(), null);
+				project.createDefaultRecipe(page1.getProjectName(),page1.getBundleName(),page1.getBundleVersion());
 			}else{
-				IPath path = Path.fromOSString(page1.getNewProjectPath());
-				project.createProject(page1.getNewProjectName(), path);
-				project.createDefaultRecipe(page1.getNewProjectName(),page1.getBundleName(),page1.getBundleVersion());
+				project.createProject(page1.getProjectName(), path);
+				project.createDefaultRecipe(page1.getProjectName(),page1.getBundleName(),page1.getBundleVersion());
 			}
+			PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(page1.getProjectHandle(), page1.getWorkingSets());
+			
+				
 		
 		}catch(CoreException ex)
 		{

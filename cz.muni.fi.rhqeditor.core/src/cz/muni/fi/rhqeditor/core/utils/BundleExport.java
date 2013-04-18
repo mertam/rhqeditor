@@ -1,4 +1,4 @@
-package cz.muni.fi.rhqeditor.core;
+package cz.muni.fi.rhqeditor.core.utils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,8 +18,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 
-import cz.muni.fi.rhqeditor.core.utils.ExtractorProvider;
-import cz.muni.fi.rhqeditor.core.utils.RhqPathExtractor;
 
 
 public class BundleExport {
@@ -37,9 +35,8 @@ public class BundleExport {
 	
 	
 	public int ExportBundle() throws IOException{
-		 
-		ExtractorProvider provider = ExtractorProvider.getInstance();
-		final RhqPathExtractor extractor = provider.getMap().get(fProject); 
+
+		final RhqPathExtractor extractor = ExtractorProvider.INSTANCE.getExtractor(fProject); 
 		
 		if(extractor.shouldBeListed())
 			extractor.listFiles();

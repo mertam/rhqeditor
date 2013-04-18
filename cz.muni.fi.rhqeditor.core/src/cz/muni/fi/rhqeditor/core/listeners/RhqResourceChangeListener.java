@@ -39,13 +39,20 @@ public class RhqResourceChangeListener implements IResourceChangeListener {
 	private ArrayList<IPath> fDeletedFiles = new ArrayList<>();
 	private Map<IPath, RefactoredPair> fRefactoredMap = new HashMap<IPath,RefactoredPair>();
 	
+	// reusable objects 
+	private Stack<IResourceDelta> stackDelta = new Stack<IResourceDelta>();
+	private IResource currentResource;
+	private IResourceDelta currentDelta;
+	private IResource changedResource;
+	private IResourceDelta rootDelta;
 
 	/**
-	 * When resource is chan
+	 * invoked when some change of resources occurs
 	 */
 	@Override
 	public void resourceChanged(IResourceChangeEvent event) {
 
+		//initialize objects for current change
 		fAddedFiles.clear();
 		fAddedFolders.clear();
 		fDeletedFiles.clear();
@@ -53,20 +60,25 @@ public class RhqResourceChangeListener implements IResourceChangeListener {
 		fRefactoredMap.clear();
 		fRefactoredMap.clear();
 		IProject project = null;
-		IResourceDelta rootDelta = event.getDelta();
-
-		// do nothing if project is closing
-		if (event.getType() == IResourceChangeEvent.PRE_CLOSE)
-			return;
-
-		// deleting whole project
-		if (event.getType() == IResourceChangeEvent.PRE_DELETE) {
-			IProject proj = (IProject) event.getResource();
-			LaunchConfigurationsManager.removeConfigurationsOfProject(proj);
+		rootDelta = event.getDelta();
+		
+		
+		// remove Extractor if project is closing
+		if (event.getType() == IResourceChangeEvent.PRE_CLOSE) {
+			project = (IProject) event.getResource();
+			ExtractorProvider.INSTANCE.deleteExtractorOfProject(project);
 			return;
 		}
-
-		IResource changedResource = rootDelta.getResource();
+		// deleting whole project
+		if (event.getType() == IResourceChangeEvent.PRE_DELETE) {
+			project = (IProject) event.getResource();
+			LaunchConfigurationsManager.removeConfigurationsOfProject(project);
+			ExtractorProvider.INSTANCE.deleteExtractorOfProject(project);
+			return;
+		}
+		
+		changedResource = rootDelta.getResource();
+		
 
 		if (changedResource.getType() == IResource.ROOT) {
 			IResourceDelta[] del = rootDelta.getAffectedChildren();
@@ -81,7 +93,44 @@ public class RhqResourceChangeListener implements IResourceChangeListener {
 
 		}
 
-		finalizeChanges();
+
+		if(!fRefactoredMap.isEmpty()){
+			refactorPairs();
+		}
+		
+		
+		// removes all folders from extractor
+		for (IPath deletedFolder : fDeletedFolders) {
+			project = getProjectFromPath(deletedFolder);
+			ExtractorProvider.INSTANCE.getExtractor(project)
+					.removeFolder(deletedFolder.removeFirstSegments(1));
+		}
+		for(IPath deletedFile : fDeletedFiles){
+			project = getProjectFromPath(deletedFile);
+			ExtractorProvider.INSTANCE.getExtractor(project)
+			.removeFolder(deletedFile.removeFirstSegments(1));
+		}
+		
+		for(IPath addedFile: fAddedFiles){
+			project = getProjectFromPath(addedFile);
+			
+			String extension = addedFile.getFileExtension();
+			if(extension.equalsIgnoreCase("zip") 
+					|| extension.equalsIgnoreCase("jar") ) {
+				ExtractorProvider.INSTANCE.getExtractor(project)
+					.addArchive(addedFile.removeFirstSegments(1));
+			} else {
+				ExtractorProvider.INSTANCE.getExtractor(project)
+					.addFile(addedFile.removeFirstSegments(1));
+			}
+		}
+		
+		for(IPath addedFolder: fAddedFolders){
+		    project = getProjectFromPath(addedFolder);
+		    ExtractorProvider.INSTANCE.getExtractor(project)
+				.addFolder(addedFolder.removeFirstSegments(1));
+		}
+		
 	}
 
 	private void refactorOverMultipleProjects(IResourceDelta[] deltas) {
@@ -116,15 +165,14 @@ public class RhqResourceChangeListener implements IResourceChangeListener {
 			return;
 		}
 
-		ExtractorProvider provider = ExtractorProvider.getInstance();
-		RhqPathExtractor extractor = provider.getMap().get(project);
+		RhqPathExtractor extractor = ExtractorProvider.INSTANCE.getExtractor(project);
 
 		// this should happen when project is opened for first time
 		if (extractor == null) {
 			ProjectInitializer scan = new ProjectInitializer();
 			scan.initProject(project);
 			// get extractor again
-			extractor = provider.getMap().get(project);
+			extractor = ExtractorProvider.INSTANCE.getExtractor(project);
 		}
 
 		// list all files in new job, used for opening projects
@@ -135,20 +183,18 @@ public class RhqResourceChangeListener implements IResourceChangeListener {
 		// ------------
 
 		// stack used for storing delta tree
-		Stack<IResourceDelta> stackDelta = new Stack<IResourceDelta>();
+		
 		for (IResourceDelta d : delta.getAffectedChildren()) {
 			stackDelta.push(d);
 		}
 
 		IPath removedResourcePath = null;
-		IResourceDelta currentDelta;
 
 		// go through all deltas
 		while (!stackDelta.isEmpty()) {
 			currentDelta = stackDelta.pop();
+			currentResource = currentDelta.getResource();
 			
-			
-			IResource currentResource = currentDelta.getResource();
 			RefactoredPair pair;
 			IPath key =  findMatchInRefactoredFiles(currentResource.getFullPath());
 			if(currentDelta.getMovedFromPath() != null){
@@ -181,6 +227,7 @@ public class RhqResourceChangeListener implements IResourceChangeListener {
 			
 			switch (currentDelta.getKind()) {
 			case IResourceDelta.ADDED:
+				System.out.println("added " + currentResource.getName());
 				// ignore added files into proj/.bin of proj/build
 				if (currentResource.getFullPath()
 						.removeFirstSegments(1).toString().startsWith(RhqConstants.RHQ_DEFAULT_BUILD_DIR) ||
@@ -196,8 +243,6 @@ public class RhqResourceChangeListener implements IResourceChangeListener {
 					fAddedFiles.add(path);
 
 				}
-
-				// foldername refactoring
 				if (currentResource instanceof IFolder) {
 					fAddedFolders.add(currentResource.getFullPath());
 				}
@@ -205,12 +250,23 @@ public class RhqResourceChangeListener implements IResourceChangeListener {
 				break;
 
 			case IResourceDelta.CHANGED:
+//				System.out.println("changed " + currentResource.getName());
 				// ingnore changes in proect/.bin
 				if (currentDelta.getResource().getFullPath()
 						.removeFirstSegments(1).toString().startsWith(".bin")) {
 					break;
 				}
-
+				
+				String fileExtension = currentResource.getFullPath().getFileExtension(); 
+				//check whether was changed content of some archive
+				if(fileExtension != null 
+						&& (fileExtension.equalsIgnoreCase("zip") 
+								|| fileExtension.equalsIgnoreCase("jar"))) {
+					System.out.println(currentResource.getFullPath());
+					extractor.reloadArchive(currentResource.getFullPath().removeFirstSegments(1));
+					break;
+				}
+				
 				// add affected children to stack
 				for (IResourceDelta d : currentDelta.getAffectedChildren()) {
 					stackDelta.push(d);
@@ -219,6 +275,7 @@ public class RhqResourceChangeListener implements IResourceChangeListener {
 				break;
 
 			case IResourceDelta.REMOVED:
+				System.out.println("removed " + currentResource.getName());
 				if (currentResource.getFullPath()
 						.removeFirstSegments(1).toString().startsWith(RhqConstants.RHQ_DEFAULT_BUILD_DIR) ||
 					currentResource.getFullPath()
@@ -246,42 +303,6 @@ public class RhqResourceChangeListener implements IResourceChangeListener {
 		}
 	}
 
-	private void finalizeChanges() {
-		
-		//refactoring (renaming or moving files)
-		for(RefactoredPair pair: fRefactoredMap.values()){
-			System.out.println("FROM :" +pair.getFrom() + " TO: "+pair.getTo());
-		}
-		if(!fRefactoredMap.isEmpty()){
-			refactorPairs();
-		}
-		
-		// removes all folders from extractor
-		for (IPath deletedFolder : fDeletedFolders) {
-			IProject project = getProjectFromPath(deletedFolder);
-			ExtractorProvider.getInstance().getMap().get(project)
-					.removeFolder(deletedFolder.removeFirstSegments(1));
-		}
-		for(IPath deletedFile : fDeletedFiles){
-			IProject project = getProjectFromPath(deletedFile);
-			ExtractorProvider.getInstance().getMap().get(project)
-			.removeFolder(deletedFile.removeFirstSegments(1));
-		}
-		
-		for(IPath addedFile: fAddedFiles){
-			IProject project = getProjectFromPath(addedFile);
-			ExtractorProvider.getInstance().getMap().get(project)
-				.addFile(addedFile.removeFirstSegments(1));
-		}
-		
-		for(IPath addedFolder: fAddedFolders){
-		    IProject project = getProjectFromPath(addedFolder);
-			ExtractorProvider.getInstance().getMap().get(project)
-				.addFolder(addedFolder.removeFirstSegments(1));
-		}
-		
-
-	}
 
 	
 	
@@ -290,6 +311,8 @@ public class RhqResourceChangeListener implements IResourceChangeListener {
 	 */
 	private void refactorPairs() {
 		IPath from,to;
+		IProject affectedProject, unaffectedProject;
+		
 		for(RefactoredPair pair: fRefactoredMap.values()) {
 			from = pair.getFrom();
 			to = pair.getTo();
@@ -297,11 +320,11 @@ public class RhqResourceChangeListener implements IResourceChangeListener {
 			if(from == null || to == null)
 				continue;
 			
-			IProject affectedProject = getProjectFromPath(to);
-			IProject unaffectedProject = getProjectFromPath(from);
+			affectedProject = getProjectFromPath(to);
+			unaffectedProject = getProjectFromPath(from);
 			
 			if(affectedProject.equals(unaffectedProject)) {
-				RhqPathExtractor extractor = ExtractorProvider.getInstance().getMap().get(affectedProject);
+				RhqPathExtractor extractor = ExtractorProvider.INSTANCE.getExtractor(affectedProject);
 				extractor.updatePaths(from.removeFirstSegments(1), to.removeFirstSegments(1));
 				
 				RhqRecipeContentChange change = new RhqRecipeContentChange(
@@ -310,7 +333,7 @@ public class RhqResourceChangeListener implements IResourceChangeListener {
 				change.refactorFileName(from.removeFirstSegments(1).toString(),
 						to.removeFirstSegments(1).toString());
 			} else {
-				RhqPathExtractor fromExtractor = ExtractorProvider.getInstance().getMap().get(unaffectedProject);
+				RhqPathExtractor fromExtractor =ExtractorProvider.INSTANCE.getExtractor(unaffectedProject);
 				
 				IResource resource = ResourcesPlugin.getWorkspace().getRoot().getFolder(to);
 				if(resource != null && resource.exists()){
@@ -320,7 +343,6 @@ public class RhqResourceChangeListener implements IResourceChangeListener {
 					fromExtractor.removeFile(from.removeFirstSegments(1));
 					fAddedFiles.add(to);
 				}
-				System.out.println("sss");
 			}	
 		}
 		

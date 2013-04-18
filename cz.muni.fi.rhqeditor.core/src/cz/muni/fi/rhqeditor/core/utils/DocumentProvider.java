@@ -16,16 +16,17 @@ import org.eclipse.jface.text.IDocument;
  * @author syche
  *
  */
-public class DocumentProvider {
+public enum DocumentProvider {
 
+	INSTANCE;
+
+	private Map<IProject, WeakReference<IDocument> > map = new HashMap<>();
 	
-	private static final DocumentProvider instance 	= new DocumentProvider();
-	private Map<IProject, WeakReference<IDocument> > map 	= new HashMap<>();
-	
-	public static DocumentProvider getInstance(){
-		return instance;
-	}
-	
+	/**
+	 * attaches document to given project, overwrites existing
+	 * @param project
+	 * @param doc
+	 */
 	public void attachDocumentToProject(IProject project, IDocument doc){
 		if(project == null || doc == null)
 			return;
@@ -34,6 +35,11 @@ public class DocumentProvider {
 	}
 	
 	
+	/**
+	 * returns document from map, if exists. 
+	 * @param project
+	 * @return
+	 */
 	public IDocument getDocument(IProject project){
 		clearMap();
 		WeakReference<IDocument> ref;
@@ -43,6 +49,9 @@ public class DocumentProvider {
 		return ref.get();
 	}
 	
+	/**
+	 * remove null references from map
+	 */
 	private void clearMap(){
 		List<IProject> toRemove = new ArrayList<>();
 		WeakReference<IDocument> ref;

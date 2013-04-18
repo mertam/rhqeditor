@@ -69,7 +69,7 @@ public class LaunchMainTab extends AbstractLaunchConfigurationTab {
 		fd_fComboProject.left = new FormAttachment(0, 124);
 		fComboProject.setLayoutData(fd_fComboProject);
 
-		ExtractorProvider provider = ExtractorProvider.getInstance();
+		ExtractorProvider provider = ExtractorProvider.INSTANCE;
 		String[] projects = provider.listProjects();
 		fComboProject.setItems(projects);
 		FormData fd_text = new FormData();
@@ -151,7 +151,7 @@ public class LaunchMainTab extends AbstractLaunchConfigurationTab {
 					RhqConstants.RHQ_LAUNCH_ATTR_USE_DEFAULT_DEPLOYER, true);
 
 			int selectedIndex = 0;
-			ExtractorProvider provider = ExtractorProvider.getInstance();
+			ExtractorProvider provider = ExtractorProvider.INSTANCE;
 			String[] projects = provider.listProjects();
 			fComboProject.setItems(projects);
 

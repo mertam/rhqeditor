@@ -35,14 +35,25 @@ public class RhqRecipeContentChange extends TextFileChange {
 		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
 				try {
-					System.out.println("from " + formerName);
-					System.out.println("to " + newName);
-					setSaveMode(KEEP_SAVE_STATE);
 					IDocument document = acquireDocument(null);
 					String content = document.get();
-
-					content = content.replaceAll("name=\"" + formerName,
-							"name=\"" + newName);
+					String namespacePrefix = RecipeReader.getRhqNamespacePrefix(content);
+					
+					//finds all rhq:file or rhq:archive tags with attribute name
+					Pattern pattern = 
+							Pattern.compile("("+ namespacePrefix + RhqConstants.RHQ_TYPE_FILE + "|"+ 
+							namespacePrefix + RhqConstants.RHQ_TYPE_ARCHIVE + ")"+     				
+							"(\\s+\\w+\\s*=\"[\\w\\d\\s\\p{Punct}&&[^\"]]*\")*" +			
+							"\\s+name\\s*=\"[\\w\\d\\s\\p{Punct}&&[^\"]]+\"" +    			
+							"(\\s+\\w+\\s*=\"[\\w\\d\\s\\p{Punct}&&[^\"]]*\")*" + 			
+							 "\\s*/?\\s*>", Pattern.DOTALL);		
+					setSaveMode(KEEP_SAVE_STATE);
+					
+					Matcher matcher = pattern.matcher(content);
+					while(matcher.find()){
+						content = content.replaceFirst("name\\s*=\\s*\"\\s*" + formerName,"name=\"" + newName);
+					}
+					
 					document.set(content);
 					performEdits(document);
 				} catch (CoreException | BadLocationException e) {
@@ -86,6 +97,7 @@ public class RhqRecipeContentChange extends TextFileChange {
 			}
 		});
 	}
+	
 
 	/**
 	 * find position in recipe to insert task,

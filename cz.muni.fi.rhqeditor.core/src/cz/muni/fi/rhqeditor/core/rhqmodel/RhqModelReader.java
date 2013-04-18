@@ -24,16 +24,12 @@ public class RhqModelReader {
 	 * @param proj
 	 */
 	public RhqModelReader(int version){
-		fModelMap = RhqModel.getInstance().getModel(); 
+		fModelMap = RhqModel_4_6_0.getInstance().getModel(); 
 		
 	}
 	
-	/**
-	 * return all replacement variables from model
-	 * @return list of replacement variables
-	 */
 	public List<String> getReplacements(){
-		return RhqModel.getInstance().getReplacements();
+		return RhqModel_4_6_0.getInstance().getReplacements();
 	}
 	
 	public Map<String, RhqTask> getMapOfTasks(){
@@ -53,7 +49,7 @@ public class RhqModelReader {
 	 * @param name
 	 * @return
 	 */
-    public String removeNamespacePrefix(String name){
+    public static String removeNamespacePrefix(String name){
     	int beginIndex = name.indexOf(":");
     	if(beginIndex < 0)
     		return name;

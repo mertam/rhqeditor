@@ -41,16 +41,14 @@ public class ProjectInitializer {
 	 */
 	public void initProject(IProject project){
 		
-		ExtractorProvider extProvider = ExtractorProvider.getInstance();
-		
 		//terminate if project is already initialized
-		if(extProvider.getMap().keySet().contains(project))
+		if(ExtractorProvider.INSTANCE.getExtractor(project) != null)
 			return;
 		
 		try {
 			if(project.isOpen() && project.hasNature(RhqConstants.RHQ_NATURE_ID)){
 				RhqPathExtractor extractor = new RhqPathExtractor(project);
-				extProvider.attachExtractorToProject(project, extractor);
+				ExtractorProvider.INSTANCE.attachExtractorToProject(project, extractor);
 			}
 		} catch (CoreException e) {
 			e.printStackTrace();

@@ -5,6 +5,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
@@ -59,7 +60,7 @@ public class LunchShortcut implements ILaunchShortcut {
 
 		} else {
 			try {
-				configs[0].launch(ILaunchManager.RUN_MODE, null);
+				configs[0].launch(ILaunchManager.RUN_MODE, new NullProgressMonitor());
 			} catch (CoreException e) {
 				e.printStackTrace();
 			}

@@ -1,4 +1,4 @@
-package cz.muni.fi.rhqeditor.core;
+package cz.muni.fi.rhqeditor.core.utils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -10,7 +10,6 @@ import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
 
 public class ArchiveReader {
 
@@ -56,7 +55,16 @@ public class ArchiveReader {
 
 	}
 
-	public static void unzipFile(String pathToArchive, String target)  throws IOException{
+	
+	
+	/**
+	 * unzips given file to target location
+	 * @param pathToArchive
+	 * @param target
+	 * @param temporary if true, file is marked as deleteOnExit
+	 * @throws IOException
+	 */
+	public static void unzipArchive(String pathToArchive, String target, boolean temporary)  throws IOException{
 	
 		ZipFile zipFile = new ZipFile(pathToArchive);
 
@@ -66,15 +74,22 @@ public class ArchiveReader {
 			ZipEntry entry = (ZipEntry) entries.nextElement();
 
 			if (entry.isDirectory()) {
-				(new File(target + RhqConstants.FILE_SEPARATOR
-						+ entry.getName())).mkdir();
+				File directory = new File(target + RhqConstants.FILE_SEPARATOR+ entry.getName());
+				directory.mkdir();
+				if(temporary) {
+					directory.deleteOnExit();
+				}
 				continue;
 			}
 
-			OutputStream out = new FileOutputStream(target
+			File newFile = new File(target
 					+ RhqConstants.FILE_SEPARATOR + entry.getName());
+			OutputStream out = new FileOutputStream(newFile);
 			copyInputStream(zipFile.getInputStream(entry), out);
 			out.close();
+			if(temporary) {
+				newFile.deleteOnExit();
+			}
 		}
 
 		zipFile.close();

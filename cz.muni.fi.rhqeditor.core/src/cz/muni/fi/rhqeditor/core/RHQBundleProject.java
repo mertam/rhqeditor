@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import cz.muni.fi.rhqeditor.core.launch.LaunchConfigurationsManager;
+import cz.muni.fi.rhqeditor.core.utils.ArchiveReader;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
 
 
@@ -101,9 +102,8 @@ public class RHQBundleProject {
 		String name = pathToArchive.removeFirstSegments(pathToArchive.segmentCount()-1).removeFileExtension().toString();
 		createProject(name, null);
 		IProject newProject = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
-		ArchiveReader.unzipFile(pathToArchive.toString(), newProject.getLocation().toString());
+		ArchiveReader.unzipArchive(pathToArchive.toString(), newProject.getLocation().toString(), false);
 		newProject.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
-		
 	}
 	
 	

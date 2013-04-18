@@ -278,6 +278,14 @@ public class RhqPathExtractor {
 
 	}
 	
+	/**
+	 * reloads content of given archive
+	 */
+	public void reloadArchive(IPath archive) {
+		fArchiveContent.remove(archive);
+		manageArchive(archive);
+	}
+	
 	
 	/**
 	 * Method places resource into corresponding set
@@ -349,6 +357,8 @@ public class RhqPathExtractor {
 		listArchiveContent.schedule();
 		
 	}
+	
+	
 	
 	/**
 	 * 

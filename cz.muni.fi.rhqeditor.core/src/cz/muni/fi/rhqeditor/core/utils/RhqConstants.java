@@ -7,7 +7,7 @@ import org.eclipse.core.runtime.Path;
 public class RhqConstants {
 
 	public static final int 	RHQ_VERSION_DEFAULT 	= 0;
-	public static final int 	RHQ_VERSION_4_5_1 		= 0;
+	public static final int 	RHQ_VERSION_4_6_0 		= 0;
 	
 									
 	public static final String PLUGIN_UI_ID = "cz.muni.fi.rhqeditor.ui";

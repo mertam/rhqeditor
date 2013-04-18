@@ -450,7 +450,7 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
     	ICompletionProposal[] proposals= null;
 		currentProposalMode= determineProposalMode(document, cursorPosition, prefix);
 		if(fRhqpathExtractor == null){
-			fRhqpathExtractor = ExtractorProvider.getInstance().getMap().get(antModel.getFile().getProject());
+			fRhqpathExtractor = ExtractorProvider.INSTANCE.getExtractor(antModel.getFile().getProject());
 		}
         switch (currentProposalMode) {
             case PROPOSAL_MODE_ATTRIBUTE_PROPOSAL:
@@ -2213,7 +2213,7 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
     
     private RhqModelReader getModelReader(){
     	if(fRhqModelReader  == null)
-    		fRhqModelReader = new RhqModelReader(0);
+    		fRhqModelReader = new RhqModelReader(RhqConstants.RHQ_VERSION_4_6_0);
     	return fRhqModelReader;
     }
     

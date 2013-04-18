@@ -28,7 +28,8 @@ public class RecipeReader {
 	private IProject  fProject;
 	
 	public RecipeReader(IProject project) {
-		fDocument = DocumentProvider.getInstance().getDocument(project);
+		fProject = project;
+		fDocument = DocumentProvider.INSTANCE.getDocument(project);
 	}
 	
 	
