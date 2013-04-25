@@ -347,6 +347,7 @@ public class RhqPathExtractor {
 					Collections.sort(filesOfArchive,fPathComparator);
 					fArchiveContent.put(pathToArchive, filesOfArchive);
 				} catch (IOException e) {
+					System.out.println("cannot open " + finalPath);
 					e.printStackTrace();
 					return Status.CANCEL_STATUS;
 				} 
@@ -368,48 +369,27 @@ public class RhqPathExtractor {
 	 */
 	private boolean validateRelativePath(String expresion, List<IPath> possiblePaths){
 		
-		StringBuilder buf = new StringBuilder();
-		String [] splitted = expresion.split(FILE_SEPARATOR);
-		for(String s: splitted){
-			if(s.equals("**")){
-				buf.append(".*");
-				buf.append(FILE_SEPARATOR);
-				continue;
-			}
-			if(s.equals("*")){
-				buf.append("\\w*");
-				buf.append(FILE_SEPARATOR);
-				continue;
-			}
-			
-			if(s.matches("\\w*")){
-				buf.append(s);
-				buf.append(FILE_SEPARATOR);
-				continue;
-			}
-			
-			if(s.matches("[[\\w\\.]\\*]+|[\\*]\\w\\.]]+")){
-				for(String s2: s.split("\\*")){
-					if(!s2.isEmpty()){
-						s2 = s2.replaceAll("\\.", "\\\\.");
-						buf.append(s2);
-					}
-					buf.append(".*");
+		String replacedExpresion = expresion.replaceAll("\\?", ".");
+		replacedExpresion = replacedExpresion.replaceAll("\\*\\*",".*" );
+		
+		StringBuilder regexBuilder = new StringBuilder();
+		for (int i = 0; i < replacedExpresion.length(); i++){
+			if(replacedExpresion.charAt(i) == '*') {
+				if(i > 0 && replacedExpresion.charAt(i-1) == '.') {
+					continue;
+				} else {
+					regexBuilder.append("[^/]*");
 				}
-				buf = new StringBuilder(buf.subSequence(0, buf.length() - ".*".length()));
-				buf.append(FILE_SEPARATOR);
-				continue;
+			} else {
+				regexBuilder.append(replacedExpresion.charAt(i));
 			}
 		}
-		//cheks whether there is additonal FILE_SEPARATOR
-		if(buf.length() > 0)
-			buf = new StringBuilder(buf.subSequence(0, buf.length() - FILE_SEPARATOR.length()));
-		
+	
 		
 		String currentPath;
 		for(IPath path: possiblePaths){
 			currentPath = path.toString();
-			if(currentPath.matches(buf.toString()))
+			if(currentPath.matches(replacedExpresion))
 				return true;
 		}
 		

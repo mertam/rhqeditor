@@ -16,7 +16,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.ui.PlatformUI;
 
-import cz.muni.fi.rhqeditor.core.RHQBundleProject;
+import cz.muni.fi.rhqeditor.core.RhqBundleProject;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
 
 public class ImportBundleArchiveWizard extends Wizard implements IWorkbenchWizard{
@@ -43,7 +43,7 @@ public class ImportBundleArchiveWizard extends Wizard implements IWorkbenchWizar
 	public boolean performFinish() {
 		page1.saveComboState();
 		
-		RHQBundleProject project = new RHQBundleProject();
+		RhqBundleProject project = new RhqBundleProject();
 		String archive = page1.getArchivePath();
 		if(archive == null)
 			return false;

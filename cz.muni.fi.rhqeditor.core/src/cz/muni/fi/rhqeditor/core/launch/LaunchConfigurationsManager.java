@@ -47,7 +47,6 @@ public class LaunchConfigurationsManager {
 		} catch (CoreException e) {
 			return configs.toArray(new ILaunchConfiguration[configs.size()]);
 		}
-System.out.println("");
 		return configs.toArray(new ILaunchConfiguration[configs.size()]);
 	}
 

@@ -5,6 +5,8 @@ import org.eclipse.core.runtime.Path;
 
 
 public class RhqConstants {
+	
+	private RhqConstants() {}
 
 	public static final int 	RHQ_VERSION_DEFAULT 	= 0;
 	public static final int 	RHQ_VERSION_4_6_0 		= 0;
@@ -66,11 +68,12 @@ public class RhqConstants {
 	public static final String RHQ_DEPLOY_ID = "rhq.deploy.id";
 	public static final String RHQ_DEPLOYER_PATH = "rhq.deployer.path";
 	public static final String RHQ_USE_DEFAULT_DEPLOYER = "rhq.default.deployer";
+	public static final String RHQ_LAST_USED_CONFIGURATION ="rhq.last.used.configuration";
 	
 	public static final String NOT_FOUND = "not found";
 	
-	public static final String RHQ_STANDALONE_DEPLOYER_URL = "cz/muni/fi/rhqeditor/core/launch/rhq-bundle-deployer-4.6.0.zip";
-	public static final String RHQ_MODEL_SOURCEFILE = "cz/muni/fi/rhqeditor/core/rhqmodel/rhq_tasks-4.6.0.xml";
+	public static final String RHQ_STANDALONE_DEPLOYER_URL = "bin/cz/muni/fi/rhqeditor/core/launch/rhq-bundle-deployer-4.6.0.zip";
+	public static final String RHQ_MODEL_SOURCEFILE = "bin/cz/muni/fi/rhqeditor/core/rhqmodel/rhq_tasks-4.6.0.xml";
 	public static final String RHQ_STANDALONE_DEPLOYER = "rhq-bundle-deployer-4.6.0.zip";
 	
 	public static final String RHQ_DEFAULT_BUILD_DIR = ".bin";

@@ -11,13 +11,10 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.ui.PlatformUI;
 
-import cz.muni.fi.rhqeditor.core.RHQBundleProject;
+import cz.muni.fi.rhqeditor.core.RhqBundleProject;
 
 public class NewProjectWizard extends Wizard implements IWorkbenchWizard{
-	/**
-	 * @uml.property  name="page1"
-	 * @uml.associationEnd  
-	 */
+
 	private NewProjectWizardPage1	page1;
 	private IStructuredSelection 	selection;
 
@@ -44,7 +41,7 @@ public class NewProjectWizard extends Wizard implements IWorkbenchWizard{
 	@Override
 	public boolean performFinish() {
 		try{
-			RHQBundleProject project = new RHQBundleProject();
+			RhqBundleProject project = new RhqBundleProject();
 			IPath path = page1.getLocationPath();
 			if(path == null || path.equals(ResourcesPlugin.getWorkspace().getRoot().getLocation())){
 				project.createProject(page1.getProjectName(), null);

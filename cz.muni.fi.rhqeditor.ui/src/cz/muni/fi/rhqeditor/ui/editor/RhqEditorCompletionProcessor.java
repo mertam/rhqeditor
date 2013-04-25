@@ -1267,8 +1267,10 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
     	   
     	   //add task that can be placed wherever
     	   if(task.canBePlacedInAnyTask()){
-    		   proposal = newCompletionProposal(document, prefix, getRecipeReader().getRhqNamespacePrefix() + task.getName());
-		   	   proposals.add(proposal);
+    		   if((getRecipeReader().getRhqNamespacePrefix() + task.getName()).startsWith(prefix)) {
+    			   proposal = newCompletionProposal(document, prefix, getRecipeReader().getRhqNamespacePrefix() + task.getName());
+    			   proposals.add(proposal);
+    		   }
     	   }
     	   
 

@@ -41,7 +41,6 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 	private SAXParser		 	fParser				= null;
 
 	private IDocument			fDocument 			= null;
-	private RecipeReader        fRecipeReader 		= null;
 	private String				fOpenArchiveName 	= null;
 	private HashMap<String, Integer > fExistingTargets	= null;
 	private HashMap<String,	Integer > fRequiredTargets  = null;
@@ -49,11 +48,9 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 	private RhqModelReader fRhqModelReader = null;
 	
 	//contains all rhq tasks and required atts
-//	private static HashMap<String, ArrayList<String> >   fRequiredAtts = null;
-	
 	private static final String EMPTY_STRING = "";
 	private Stack<String> openElements;
-	Locator locator;
+	private Locator locator;
 	
 	
 	
@@ -169,6 +166,11 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 				break;
 			attrPath = new Path(attrValue);
 			
+			if(attrPath.toString().startsWith(RhqConstants.RHQ_DEFAULT_BUILD_DIR) ||
+					attrPath.toString().startsWith(RhqConstants.RHQ_DEFAULT_DEPLOY_DIR)) {
+				fRhqAnnotationModel.addMarker(locator.getLineNumber(), "Forbidden destination", IMarker.SEVERITY_ERROR);
+				break;
+			}
 			if(!fRhqPathExtractor.isPathToArchiveValid(attrPath))
 				fRhqAnnotationModel.addMarker(locator.getLineNumber(), "Archive not found", IMarker.SEVERITY_WARNING);
  			fOpenArchiveName = null;
@@ -198,6 +200,11 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 						"File can't have specified destinationFile and destinationDir at the same time", IMarker.SEVERITY_WARNING);
 			}
 				
+			if(attrPath.toString().startsWith(RhqConstants.RHQ_DEFAULT_BUILD_DIR) ||
+					attrPath.toString().startsWith(RhqConstants.RHQ_DEFAULT_DEPLOY_DIR)) {
+				fRhqAnnotationModel.addMarker(locator.getLineNumber(), "Forbidden destination", IMarker.SEVERITY_ERROR);
+				break;
+			}
 			if(!fRhqPathExtractor.isPathToFileValid(attrPath))
 				fRhqAnnotationModel.addMarker(locator.getLineNumber(), "File not found", IMarker.SEVERITY_WARNING);			
 
@@ -300,7 +307,7 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 			return;
 		
 		for(String parent: child.getAllParentNames()){
-			if(parent.equals(getModelReader().removeNamespacePrefix(parentName)))
+			if(parent.equals(RhqModelReader.removeNamespacePrefix(parentName)))
 				return;
 		}
 		fRhqAnnotationModel.addMarker(locator.getLineNumber(), "Misplaced element "+child.getName(), IMarker.SEVERITY_WARNING);

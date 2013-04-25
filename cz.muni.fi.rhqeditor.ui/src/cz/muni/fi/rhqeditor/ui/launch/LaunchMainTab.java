@@ -32,6 +32,7 @@ public class LaunchMainTab extends AbstractLaunchConfigurationTab {
 
 	// swt list of possible projects
 	private Combo fComboProject;
+	
 	private Text fTextDeployerPath;
 	private Label fLblProject;
 	private Label fLblPathToLocal;
@@ -43,8 +44,6 @@ public class LaunchMainTab extends AbstractLaunchConfigurationTab {
 
 	/**
 	 * creates content of tab
-	 * 
-	 * @wbp.parser.entryPoint
 	 */
 	@Override
 	public void createControl(Composite parent) {

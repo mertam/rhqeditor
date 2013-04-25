@@ -26,7 +26,7 @@ import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
 
 
 
-public class RHQBundleProject {
+public class RhqBundleProject {
 			
 	
 	/**

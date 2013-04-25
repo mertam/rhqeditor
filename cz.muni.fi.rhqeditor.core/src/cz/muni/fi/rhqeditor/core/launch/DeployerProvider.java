@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.Set;
 
+import cz.muni.fi.rhqeditor.core.Activator;
 import cz.muni.fi.rhqeditor.core.utils.ArchiveReader;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
 
@@ -32,37 +33,65 @@ public enum DeployerProvider {
     private DeployerProvider() {
     }
  
-//    public static DeployerProvider getInstance() {
-//        return instance;
-//    }
-    
-    public String getDirectory(){
-    	return fDeployerDirPath.toString();
+    /**
+     * @return returns java.nio.file.Path representing current deployer path (rhq-ant or rhq-ant.bat)
+     */
+    public Path getDeployerPath(){
+    	return fDeployerPath;
     }
     
-    public void setDirectory(String prefix) throws IOException {
+    /**
+     * sets current create directory in temp folder for unpacking deployer files
+     * @param prefix prefix of the directory name
+     * @throws IOException 
+     */
+    private void setDirectory(String prefix) throws IOException {
     	fDeployerDirPath = Files.createTempDirectory(prefix);
     	fDeployerDirPath.toFile().deleteOnExit();
     	
     }
     
-    public Path getDeployerPath(){
-    	return fDeployerPath;
+    /**
+     * initializes local deployer
+     * @return String reprezenting path to local deployer
+     */
+    public String initializeLocalDeployer() {
+		try {
+			initializeDeployer(Activator.getFileURL(RhqConstants.RHQ_STANDALONE_DEPLOYER_URL));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		Path path = getDeployerPath();
+		if (path == null || !isExexutable()) {
+			return RhqConstants.NOT_FOUND;
+		}
+		return path.toString();
     }
     
-    public boolean isExexutable(){
+
+    
+    /**
+     * determinate whether is fDeployerPath executable
+     * @return false if fDeployerPath is null of not executable
+     */
+    private boolean isExexutable(){
     	if(fDeployerPath == null)
     		return false;
     	return Files.isExecutable(fDeployerPath);
     }
     
-    public void initializeDeployer(URL zippedDeployer) throws IOException{
+    /**
+     * initialize deployer
+     * @param zippedDeployer URL of archive to unzip
+     * @throws IOException
+     */
+    private void initializeDeployer(URL zippedDeployer) throws IOException{
  
     		//avoid multiple initialization
-    		if(isDeployerExecutable())
+    		if(isExexutable())
     			return;
     		
-    		setDirectory("deployer");
+    		setDirectory("rhq_standalone_deployer");
 			InputStream in = zippedDeployer.openStream();													
 			String pathToArchive = fDeployerDirPath.toString() + FILE_SEPARATOR + RhqConstants.RHQ_STANDALONE_DEPLOYER;
 			File f = new File(pathToArchive);
@@ -84,35 +113,24 @@ public enum DeployerProvider {
 	    				deployerDir+FILE_SEPARATOR+"bin"+FILE_SEPARATOR+"rhq-ant");
 			}
 			setPermisions();
-			if(!isDeployerExecutable())
+			if(!isExexutable())
 				throw new IOException("Deployer isn't executable");
 			
     }
     
-    /**
-     * checks whether is deployer runnable
-     * @return
-     */
-    private boolean isDeployerExecutable(){
-    	if(fDeployerPath == null)
-    		return false;
-    	return (new File(fDeployerPath.toString())).canExecute();
-    }
     	
     /**
      * adds posix permission to run deployer, if unix-like system is used.
      */
-    private void setPermisions(){
+    private void setPermisions() throws IOException{
     	if(!isExexutable()){
     		if(System.getProperty("os.name").equalsIgnoreCase("Windows")) {
+    			//do nothing?
     		} else {
-    			 try {
-					Set<PosixFilePermission> perms = Files.getPosixFilePermissions(fDeployerPath);
-					perms.add(PosixFilePermission.OWNER_EXECUTE);
-					Files.setPosixFilePermissions(fDeployerPath, perms);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+				Set<PosixFilePermission> perms = Files.getPosixFilePermissions(fDeployerPath);
+				perms.add(PosixFilePermission.OWNER_EXECUTE);
+				Files.setPosixFilePermissions(fDeployerPath, perms);
+				
     		}
     	}
     	

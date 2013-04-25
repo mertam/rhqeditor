@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.file.Path;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -23,7 +22,6 @@ import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 
-import cz.muni.fi.rhqeditor.core.Activator;
 import cz.muni.fi.rhqeditor.core.utils.InputPropertiesManager;
 import cz.muni.fi.rhqeditor.core.utils.InputProperty;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
@@ -78,13 +76,13 @@ public class StandaloneDeployer {
 			String pathToDeployer = null;
 			// initialize standalone deployer
 			if (useDefaultDeployer) {
-				pathToDeployer = initializeLocalDeployer();
+				pathToDeployer = DeployerProvider.INSTANCE.initializeLocalDeployer();
 			} else {
 				pathToDeployer = configuration.getAttribute(
 						RhqConstants.RHQ_LAUNCH_ATTR_LOCAL_DEPLOYER,
 						RhqConstants.NOT_FOUND);
 			}
-
+			
 			if (pathToDeployer.equals(RhqConstants.NOT_FOUND))
 				return;
 
@@ -122,6 +120,8 @@ public class StandaloneDeployer {
 			fConsoleStream = fConsole.newMessageStream();
 			boolean continueDeploying = true;
 
+			
+			//load input properties and values
 			String inputPropertyValue;
 			for (InputProperty property : propManager
 					.getInputPropertiesFromRecipe(false)) {
@@ -211,25 +211,6 @@ public class StandaloneDeployer {
 		deployment.schedule();
 	}
 
-	/**
-	 * initialize local deployer and returns path to it or NOT_FOUND
-	 * 
-	 * @return
-	 */
-	private String initializeLocalDeployer() {
-		DeployerProvider provider = DeployerProvider.INSTANCE;
-		try {
-			provider.initializeDeployer(Activator
-					.getFileURL(RhqConstants.RHQ_STANDALONE_DEPLOYER_URL));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		Path path = provider.getDeployerPath();
-		if (path == null || !provider.isExexutable()) {
-			return RhqConstants.NOT_FOUND;
-		}
-		return path.toString();
-	}
 
 	private void initializeDeployment() {
 		try {

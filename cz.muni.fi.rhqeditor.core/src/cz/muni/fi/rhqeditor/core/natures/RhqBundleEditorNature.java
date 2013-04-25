@@ -6,7 +6,7 @@ import org.eclipse.core.runtime.CoreException;
    
 
 
-public class RHQEditorNature implements IProjectNature {
+public class RhqBundleEditorNature implements IProjectNature {
 
 	  private IProject project;
 	
@@ -26,7 +26,5 @@ public class RHQEditorNature implements IProjectNature {
 
 	  @Override
 	  public void deconfigure() throws CoreException {
-		// TODO Auto-generated method stub
-			
 	  }
    }

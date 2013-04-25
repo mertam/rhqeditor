@@ -63,12 +63,12 @@ public class RhqEditorSourceViewerConfiguration extends AntSourceViewerConfigura
 	    /* (non-Javadoc)
 	     * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getContentAssistant(ISourceViewer)
 	     */
+	    @Override
 	    public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
 	        fContentAssistant= new ContentAssistant();
 	        
 //ADDED cast to AntEditorCompletionProcessor ant setPathExtractor
 	        RhqEditorCompletionProcessor proc = new RhqEditorCompletionProcessor(fEditor.getAntModel());
-//	        proc.setPathExtractor(fRhqPathExtractor);
 	        AntEditorCompletionProcessor processor = (AntEditorCompletionProcessor) proc;
 	        
 //------	        
@@ -109,6 +109,7 @@ public class RhqEditorSourceViewerConfiguration extends AntSourceViewerConfigura
 	    /* (non-Javadoc)
 	     * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getReconciler(org.eclipse.jface.text.source.ISourceViewer)
 	     */
+	    @Override
 	    public IReconciler getReconciler(ISourceViewer sourceViewer) {
 		    NotifyingReconciler reconciler= new NotifyingReconciler(new XMLReconcilingStrategy(fEditor));
 		    reconciler.setDelay(XMLReconcilingStrategy.DELAY);
@@ -119,6 +120,7 @@ public class RhqEditorSourceViewerConfiguration extends AntSourceViewerConfigura
 		/*
 		 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getAnnotationHover(org.eclipse.jface.text.source.ISourceViewer)
 		 */
+	    @Override
 		public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer) {
 			return new XMLAnnotationHover();
 		}
@@ -126,6 +128,7 @@ public class RhqEditorSourceViewerConfiguration extends AntSourceViewerConfigura
 		/*
 		 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getInformationControlCreator(org.eclipse.jface.text.source.ISourceViewer)
 		 */
+		@Override
 		public IInformationControlCreator getInformationControlCreator(ISourceViewer sourceViewer) {
 			return new IInformationControlCreator() {
 	            public IInformationControl createInformationControl(Shell parent) {
@@ -137,6 +140,7 @@ public class RhqEditorSourceViewerConfiguration extends AntSourceViewerConfigura
 		/*
 		 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getTextHover(org.eclipse.jface.text.source.ISourceViewer, java.lang.String)
 		 */
+		@Override
 		public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType) {
 			if (fTextHover == null) {
 				fTextHover= new XMLTextHover(fEditor);
@@ -173,6 +177,7 @@ public class RhqEditorSourceViewerConfiguration extends AntSourceViewerConfigura
 	    /* (non-Javadoc)
 	     * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getContentFormatter(org.eclipse.jface.text.source.ISourceViewer)
 	     */
+		@Override
 		public IContentFormatter getContentFormatter(ISourceViewer sourceViewer) {
 			 
 			MultiPassContentFormatter formatter = new MultiPassContentFormatter(
@@ -192,6 +197,7 @@ public class RhqEditorSourceViewerConfiguration extends AntSourceViewerConfigura
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getInformationPresenter(org.eclipse.jface.text.source.ISourceViewer)
 		 */
+		@Override
 		public IInformationPresenter getInformationPresenter(ISourceViewer sourceViewer) {
 			InformationPresenter presenter= new InformationPresenter(getInformationPresenterControlCreator());
 			presenter.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
@@ -224,6 +230,7 @@ public class RhqEditorSourceViewerConfiguration extends AntSourceViewerConfigura
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getIndentPrefixes(org.eclipse.jface.text.source.ISourceViewer, java.lang.String)
 		 */
+		@Override
 		public String[] getIndentPrefixes(ISourceViewer sourceViewer, String contentType) {
 			List list= new ArrayList();
 
@@ -263,6 +270,7 @@ public class RhqEditorSourceViewerConfiguration extends AntSourceViewerConfigura
 		/*
 		 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getAutoEditStrategies(org.eclipse.jface.text.source.ISourceViewer, java.lang.String)
 		 */
+		@Override
 		public IAutoEditStrategy[] getAutoEditStrategies(ISourceViewer sourceViewer, String contentType) {
 			if (AntEditorPartitionScanner.XML_COMMENT.equals(contentType)) {
 				return super.getAutoEditStrategies(sourceViewer, contentType);

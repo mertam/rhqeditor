@@ -2,11 +2,14 @@ package cz.muni.fi.rhqeditor.ui.launch;
 
 import org.eclipse.core.internal.resources.File;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.ILaunchShortcut;
@@ -27,6 +30,9 @@ import cz.muni.fi.rhqeditor.ui.editor.RhqEditor;
  */
 public class LunchShortcut implements ILaunchShortcut {
 
+	
+	private IEclipsePreferences fPrefs;
+	
 	@Override
 	public void launch(ISelection selection, String mode) {
 		IProject project = getProjectFromSelection(selection);
@@ -60,6 +66,25 @@ public class LunchShortcut implements ILaunchShortcut {
 
 		} else {
 			try {
+				String lastUsedConfig; 
+				IScopeContext projectScope = new ProjectScope(proj);
+				fPrefs = projectScope.getNode(RhqConstants.RHQ_PROPERTY_NODE);	
+				
+				lastUsedConfig = fPrefs.get(RhqConstants.RHQ_LAST_USED_CONFIGURATION, RhqConstants.NOT_FOUND);
+				if( lastUsedConfig.equals(RhqConstants.NOT_FOUND)) {
+					//use first config
+					configs[0].launch(ILaunchManager.RUN_MODE, new NullProgressMonitor());
+					return;
+				}
+				
+				for(ILaunchConfiguration config : configs) {
+					if(config.getName().endsWith(lastUsedConfig)) {
+						//run last used config
+						config.launch(ILaunchManager.RUN_MODE, new NullProgressMonitor());
+						return;
+					}
+				}
+				//run first when something happen ?
 				configs[0].launch(ILaunchManager.RUN_MODE, new NullProgressMonitor());
 			} catch (CoreException e) {
 				e.printStackTrace();

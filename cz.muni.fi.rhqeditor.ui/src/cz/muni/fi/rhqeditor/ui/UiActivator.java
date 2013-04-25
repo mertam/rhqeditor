@@ -23,7 +23,6 @@ public class UiActivator extends AbstractUIPlugin {
 	 * The constructor
 	 */
 	public UiActivator() {
-		System.out.println("UI activator called");
 		ProjectInitializer scan = new ProjectInitializer();
 		scan.initAllProjects();
 	}

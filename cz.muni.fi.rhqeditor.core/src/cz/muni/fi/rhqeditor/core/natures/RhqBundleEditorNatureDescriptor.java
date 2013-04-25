@@ -2,7 +2,7 @@ package cz.muni.fi.rhqeditor.core.natures;
 
 import org.eclipse.core.resources.IProjectNatureDescriptor;
 
-public class RHQEditorNatureDescriptor implements IProjectNatureDescriptor{
+public class RhqBundleEditorNatureDescriptor implements IProjectNatureDescriptor{
 
 	private final String NATURE_ID = "cz.muni.fi.rhqeditor.natures.rhqeditornature";
 	

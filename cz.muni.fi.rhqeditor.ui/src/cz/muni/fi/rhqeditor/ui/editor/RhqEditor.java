@@ -116,7 +116,7 @@ import cz.muni.fi.rhqeditor.ui.UiActivator;
 /**
  * The actual editor implementation for Eclipse's Ant integration.
  */
-public class RhqEditor extends AntEditor implements IReconcilingParticipant, IProjectionListener {
+public class RhqEditor extends AntEditor {
 
 	
 	
@@ -171,20 +171,14 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
 		 */
 		public void selectionChanged(SelectionChangedEvent event) {
 			
-//ADDED	markers analize
+//ADDED	markers analyze
 			
-			try{
-				if(fRhqAnnotationModel == null)
-					fRhqAnnotationModel = new RhqAnnotationModel(getAntModel().getFile());
-			}catch (Exception e) {
-				e.printStackTrace();
-			}
-//			}
+
 			
 			//if this is first change of recipe, init validator, path extractor and document provider
 			if(fRhqRecipeValidator == null){
 				fRhqRecipeValidator = new RhqRecipeValidator();
-				fRhqRecipeValidator.setAnnotationModel(fRhqAnnotationModel);
+				fRhqRecipeValidator.setAnnotationModel(getRhqAnnotationModel());
 				RhqPathExtractor ext =ExtractorProvider.INSTANCE.getExtractor(getAntModel().getFile().getProject());
 				fRhqRecipeValidator.setExtractor(ext);	
 				fRhqRecipeValidator.setInputDocument(getSourceViewer().getDocument());
@@ -192,24 +186,23 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
 				provider.attachDocumentToProject(getAntModel().getFile().getProject(), getSourceViewer().getDocument());
 			}
 			
-//			fRhqRecipeValidator.setCoursorPosition(cursorPosition);
 			fRhqRecipeValidator.validateRecipe();
 //---------------------
 
-			AntModel model= getAntModel();
-			ISelection selection= event.getSelection();
-			AntElementNode node= null;
-			if (selection instanceof ITextSelection) {
-				ITextSelection textSelection= (ITextSelection)selection;
-				int offset= textSelection.getOffset();
-				node= model.getNode(offset, false);
-				updateOccurrenceAnnotations(textSelection, model);
-			}
+//			AntModel model= getAntModel();
+//			ISelection selection= event.getSelection();
+//			AntElementNode node= null;
+//			if (selection instanceof ITextSelection) {
+//				ITextSelection textSelection= (ITextSelection)selection;
+//				int offset= textSelection.getOffset();
+//				node= model.getNode(offset, false);
+//				updateOccurrenceAnnotations(textSelection, model);
+//			}
 		
 //			if (AntUIPlugin.getDefault().getPreferenceStore().getBoolean(IAntUIPreferenceConstants.OUTLINE_LINK_WITH_EDITOR)) {
-				synchronizeOutlinePage(node, true);
+//				synchronizeOutlinePage(node, true);
 //			}
-			setSelection(node, false);
+//			setSelection(node, false);
 		}
 	}
 	
@@ -454,119 +447,68 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
 
 	/**
 	 * Selection changed listener for the outline view.
-	 * @uml.property  name="fSelectionChangedListener"
-	 * @uml.associationEnd  multiplicity="(1 1)"
 	 */
-    protected ISelectionChangedListener fSelectionChangedListener = new ISelectionChangedListener(){
-        public void selectionChanged(SelectionChangedEvent event) {
-        	fSelectionSetFromOutline= false;
-            doSelectionChanged(event);
-            fSelectionSetFromOutline= true;
-        }
-    };
+//    protected ISelectionChangedListener fSelectionChangedListener = new ISelectionChangedListener(){
+//        public void selectionChanged(SelectionChangedEvent event) {
+//        	fSelectionSetFromOutline= false;
+//            doSelectionChanged(event);
+//            fSelectionSetFromOutline= true;
+//        }
+//    };
     
-    /**
-	 * @uml.property  name="fAntModelListener"
-	 * @uml.associationEnd  
-	 */
     private IAntModelListener fAntModelListener;
     
     
     
     /**
 	 * The page that shows the outline.
-	 * @uml.property  name="fOutlinePage"
-	 * @uml.associationEnd  
 	 */
     protected AntEditorContentOutlinePage fOutlinePage;
     
-	
-	/**
-	 * @uml.property  name="fInitialReconcile"
-	 */
 	private boolean fInitialReconcile= true;
 	
 	/**
 	 * The editor selection changed listener.
 	 * @since   3.0
-	 * @uml.property  name="fEditorSelectionChangedListener"
-	 * @uml.associationEnd  inverse="this$0:cz.muni.fi.rhqeditor.ui.RhqEditor$EditorSelectionChangedListener"
 	 */
 	private EditorSelectionChangedListener fEditorSelectionChangedListener;
 
-	/**
-	 * @uml.property  name="fProjectionSupport"
-	 * @uml.associationEnd  
-	 */
 	private ProjectionSupport fProjectionSupport;
 	
-	/**
-	 * @uml.property  name="fFoldingStructureProvider"
-	 * @uml.associationEnd  
-	 */
 	private AntFoldingStructureProvider fFoldingStructureProvider;
 	
-	/**
-	 * @uml.property  name="fSelectionSetFromOutline"
-	 */
 	private boolean fSelectionSetFromOutline= false;
 
-    /**
-	 * @uml.property  name="fFoldingGroup"
-	 * @uml.associationEnd  
-	 */
     private FoldingActionGroup fFoldingGroup;
 	
 	/**
 	 * Holds the current occurrence annotations.
 	 * @since   3.1
-	 * @uml.property  name="fOccurrenceAnnotations"
-	 * @uml.associationEnd  multiplicity="(0 -1)"
 	 */
 	private Annotation[] fOccurrenceAnnotations= null;
 
-	/**
-	 * @uml.property  name="fOccurrencesFinderJob"
-	 * @uml.associationEnd  inverse="this$0:cz.muni.fi.rhqeditor.ui.RhqEditor$OccurrencesFinderJob"
-	 */
 	private OccurrencesFinderJob fOccurrencesFinderJob;
-	/**
-	 * @uml.property  name="fOccurrencesFinderJobCanceler"
-	 * @uml.associationEnd  inverse="this$0:cz.muni.fi.rhqeditor.ui.RhqEditor$OccurrencesFinderJobCanceler"
-	 */
+	
 	private OccurrencesFinderJobCanceler fOccurrencesFinderJobCanceler;
 	
-	/**
-	 * @uml.property  name="fForcedMarkOccurrencesSelection"
-	 * @uml.associationEnd  
-	 */
 	private ITextSelection fForcedMarkOccurrencesSelection;
 	/**
 	 * The internal shell activation listener for updating occurrences.
 	 * @since   3.1
-	 * @uml.property  name="fActivationListener"
-	 * @uml.associationEnd  inverse="this$0:cz.muni.fi.rhqeditor.ui.RhqEditor$ActivationListener"
 	 */
 	private ActivationListener fActivationListener= new ActivationListener();
 	
-	/**
-	 * @uml.property  name="fMarkOccurrenceAnnotations"
-	 */
 	private boolean fMarkOccurrenceAnnotations;
-	/**
-	 * @uml.property  name="fStickyOccurrenceAnnotations"
-	 */
+
 	private boolean fStickyOccurrenceAnnotations;
     
-    /**
-	 * @uml.property  name="fAntModel"
-	 * @uml.associationEnd  
-	 */
     private AntModel fAntModel;
     
     private RhqAnnotationModel fRhqAnnotationModel = null;
     
     private RhqRecipeValidator fRhqRecipeValidator = null;
+    
+	private Image fRhqTitleImage = null;
     
   
 
@@ -607,6 +549,7 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
 	 * @see org.eclipse.ui.editors.text.TextEditor#initializeEditor()
 	 * Called from TextEditor.<init>
 	 */
+    @Override
     protected void initializeEditor() {
 		setPreferenceStore(AntUIPlugin.getDefault().getCombinedPreferenceStore());
 		setCompatibilityMode(false);
@@ -650,36 +593,36 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
 	 */
-    public Object getAdapter(Class key) {
-        if (key.equals(IContentOutlinePage.class)) {
-			return getOutlinePage();
-        }
-        
-        if (fProjectionSupport != null) {
-        	Object adapter= fProjectionSupport.getAdapter(getSourceViewer(), key);
-        	if (adapter != null) {
-            	return adapter;
-            }
-        }
-
-        if (key == IShowInTargetList.class) {
-			return new IShowInTargetList() {
-				public String[] getShowInTargetIds() {
-					return new String[] { JavaUI.ID_PACKAGES, IPageLayout.ID_RES_NAV };
-				}
-			};
-		}
-        
-        if (key == IToggleBreakpointsTarget.class) {
-			return new ToggleLineBreakpointAction();
-		}
-        
-        if (key == IRunToLineTarget.class) {
-			return new RunToLineAdapter();
-		}
-        
-        return super.getAdapter(key);
-    }
+//    public Object getAdapter(Class key) {
+//        if (key.equals(IContentOutlinePage.class)) {
+//			return getOutlinePage();
+//        }
+//        
+//        if (fProjectionSupport != null) {
+//        	Object adapter= fProjectionSupport.getAdapter(getSourceViewer(), key);
+//        	if (adapter != null) {
+//            	return adapter;
+//            }
+//        }
+//
+//        if (key == IShowInTargetList.class) {
+//			return new IShowInTargetList() {
+//				public String[] getShowInTargetIds() {
+//					return new String[] { JavaUI.ID_PACKAGES, IPageLayout.ID_RES_NAV };
+//				}
+//			};
+//		}
+//        
+//        if (key == IToggleBreakpointsTarget.class) {
+//			return new ToggleLineBreakpointAction();
+//		}
+//        
+//        if (key == IRunToLineTarget.class) {
+//			return new RunToLineAdapter();
+//		}
+//        
+//        return super.getAdapter(key);
+//    }
 
 	private AntEditorContentOutlinePage getOutlinePage() {
 		if (fOutlinePage == null) {
@@ -708,91 +651,94 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
         return part != null && part.equals(this);
     }
     
-    public void setSelection(AntElementNode reference, boolean moveCursor) {
-    	if (fSelectionSetFromOutline) {
-    		//the work has all just been done via a selection setting in the outline
-    		fSelectionSetFromOutline= false;
-    		return;
-    	}
-        if (reference == null) {
-        	if (moveCursor) {
-        		 resetHighlightRange();
-                 markInNavigationHistory();
-        	}
-        	return;
-        }
-		
-		if (moveCursor) {
-			markInNavigationHistory();
-		}
-		
-    	while (reference.getImportNode() != null) {
-    		reference= reference.getImportNode();
-    	}
-    	if (reference.isExternal()) {
-    		return;
-    	}
-        
-        ISourceViewer sourceViewer= getSourceViewer();
-        if (sourceViewer == null) {
-            return;
-        }
-        StyledText textWidget= sourceViewer.getTextWidget();
-        if (textWidget == null) {
-            return;
-        }
-            
-        try {
-            int offset= reference.getOffset();
-            if (offset < 0) {
-                return;
-            }
-            int length= reference.getSelectionLength();
-            int highLightLength= reference.getLength();
-               
-            textWidget.setRedraw(false);
-            
-            if (highLightLength > 0) {
-                setHighlightRange(offset, highLightLength, moveCursor);
-            }
-            
-            if (!moveCursor) {
-                return;
-            }
-                                        
-            if (offset > -1 && length > 0) {
-                sourceViewer.revealRange(offset, length);
-                // Selected region begins one index after offset
-                sourceViewer.setSelectedRange(offset, length);
-                markInNavigationHistory();
-            }
-        } catch (IllegalArgumentException x) {
-        	AntUIPlugin.log(x);
-        } finally {
-            textWidget.setRedraw(true);
-        }
-    }
+//    public void setSelection(AntElementNode reference, boolean moveCursor) {
+//    	if (fSelectionSetFromOutline) {
+//    		//the work has all just been done via a selection setting in the outline
+//    		fSelectionSetFromOutline= false;
+//    		return;
+//    	}
+//        if (reference == null) {
+//        	if (moveCursor) {
+//        		 resetHighlightRange();
+//                 markInNavigationHistory();
+//        	}
+//        	return;
+//        }
+//		
+//		if (moveCursor) {
+//			markInNavigationHistory();
+//		}
+//		
+//    	while (reference.getImportNode() != null) {
+//    		reference= reference.getImportNode();
+//    	}
+//    	if (reference.isExternal()) {
+//    		return;
+//    	}
+//        
+//        ISourceViewer sourceViewer= getSourceViewer();
+//        if (sourceViewer == null) {
+//            return;
+//        }
+//        StyledText textWidget= sourceViewer.getTextWidget();
+//        if (textWidget == null) {
+//            return;
+//        }
+//            
+//        try {
+//            int offset= reference.getOffset();
+//            if (offset < 0) {
+//                return;
+//            }
+//            int length= reference.getSelectionLength();
+//            int highLightLength= reference.getLength();
+//               
+//            textWidget.setRedraw(false);
+//            
+//            if (highLightLength > 0) {
+//                setHighlightRange(offset, highLightLength, moveCursor);
+//            }
+//            
+//            if (!moveCursor) {
+//                return;
+//            }
+//                                        
+//            if (offset > -1 && length > 0) {
+//                sourceViewer.revealRange(offset, length);
+//                // Selected region begins one index after offset
+//                sourceViewer.setSelectedRange(offset, length);
+//                markInNavigationHistory();
+//            }
+//        } catch (IllegalArgumentException x) {
+//        	AntUIPlugin.log(x);
+//        } finally {
+//            textWidget.setRedraw(true);
+//        }
+//    }
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#affectsTextPresentation(org.eclipse.jface.util.PropertyChangeEvent)
 	 */
-	protected boolean affectsTextPresentation(PropertyChangeEvent event) {
-		return super.affectsTextPresentation(event);
-	}
-//funny
-//		return ((RhqEditorSourceViewerConfiguration)getSourceViewerConfiguration()).affectsTextPresentation(event);
-////		return ((AntEditorSourceViewerConfiguration)getSourceViewerConfiguration()).affectsTextPresentation(event);
+//	protected boolean affectsTextPresentation(PropertyChangeEvent event) {
+//		return super.affectsTextPresentation(event);
 //	}
-//	
+
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#handlePreferenceStoreChanged(org.eclipse.jface.util.PropertyChangeEvent)
 	 */
+//ADDED
+	@Override
 	protected void handlePreferenceStoreChanged(PropertyChangeEvent event) {
-//wtf???
-		RhqEditorSourceViewerConfiguration x = (RhqEditorSourceViewerConfiguration)getSourceViewerConfiguration();
-		super.setSourceViewerConfiguration(new AntEditorSourceViewerConfiguration(this));
-		super.handlePreferenceStoreChanged(event);
-		setSourceViewerConfiguration(x);
+		//backkup old RHQ confing, create new Ant confing, apply changes and change to old configuration
+		RhqEditorSourceViewerConfiguration oldConfig = (RhqEditorSourceViewerConfiguration)getSourceViewerConfiguration();
+		try{
+			super.setSourceViewerConfiguration(new AntEditorSourceViewerConfiguration(this));
+			super.handlePreferenceStoreChanged(event);
+		} catch (Exception e) {
+			//this prevents editor from being in inconsistent state if some error appears.
+		}
+		setSourceViewerConfiguration(oldConfig);
 		
 	}
 
@@ -800,14 +746,14 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
 	/*
 	 * @see org.eclipse.ui.editors.text.TextEditor#doSetInput(org.eclipse.ui.IEditorInput)
 	 */
-	protected void doSetInput(IEditorInput input) throws CoreException {
-		fAntModel= null;
-		super.doSetInput(input);
-		setOutlinePageInput();
-		if (fFoldingStructureProvider != null) {
-			fFoldingStructureProvider.setDocument(getDocumentProvider().getDocument(input));
-		}
-	}
+//	protected void doSetInput(IEditorInput input) throws CoreException {
+//		fAntModel= null;
+//		super.doSetInput(input);
+//		setOutlinePageInput();
+//		if (fFoldingStructureProvider != null) {
+//			fFoldingStructureProvider.setDocument(getDocumentProvider().getDocument(input));
+//		}
+//	}
 
 	private void setOutlinePageInput() {
 		if (fOutlinePage != null) {
@@ -816,16 +762,14 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
 	}
 	
 	/**
-	 * Returns the Ant model for the current editor input of this editor.
+	 * Returns the Ant model for the current editor input of this editor. 
 	 * @return the Ant model for this editor or <code>null</code>
 	 */
+	@Override
 	public AntModel getAntModel() {
+		//use ant model from parent
         if (fAntModel == null) {
-            IDocumentProvider provider= getDocumentProvider();
-            if (provider instanceof AntEditorDocumentProvider) {
-                AntEditorDocumentProvider documentProvider= (AntEditorDocumentProvider) provider;
-                fAntModel= documentProvider.getAntModel(getEditorInput());
-            }
+        	fAntModel = super.getAntModel();
         }
 		return fAntModel;
 	}
@@ -841,93 +785,93 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
 		return viewer;
 	}
 	
-	/**
-	 * Set the given message as error message to this editor's status line.
-	 * @param msg message to be set
-	 */
-	protected void setStatusLineErrorMessage(String msg) {
-		IEditorStatusLine statusLine= (IEditorStatusLine) getAdapter(IEditorStatusLine.class);
-		if (statusLine != null)
-			statusLine.setMessage(true, msg, null);
-	}
+//	/**
+//	 * Set the given message as error message to this editor's status line.
+//	 * @param msg message to be set
+//	 */
+//	protected void setStatusLineErrorMessage(String msg) {
+//		IEditorStatusLine statusLine= (IEditorStatusLine) getAdapter(IEditorStatusLine.class);
+//		if (statusLine != null)
+//			statusLine.setMessage(true, msg, null);
+//	}
 
-	public void openReferenceElement() {
-		ISelection selection= getSelectionProvider().getSelection();
-		Object target= null;
-		if (selection instanceof ITextSelection) {
-			ITextSelection textSelection= (ITextSelection)selection;
-			ISourceViewer viewer= getSourceViewer();
-			int textOffset= textSelection.getOffset();
-			IRegion region= XMLTextHover.getRegion(viewer, textOffset);
-			target= findTarget(region);
-		}
-		
-		openTarget(target);
-	}
+//	public void openReferenceElement() {
+//		ISelection selection= getSelectionProvider().getSelection();
+//		Object target= null;
+//		if (selection instanceof ITextSelection) {
+//			ITextSelection textSelection= (ITextSelection)selection;
+//			ISourceViewer viewer= getSourceViewer();
+//			int textOffset= textSelection.getOffset();
+//			IRegion region= XMLTextHover.getRegion(viewer, textOffset);
+//			target= findTarget(region);
+//		}
+//		
+//		openTarget(target);
+//	}
 	
-	protected void openTarget(Object node) {
-		String errorMessage= null;
-		if (node instanceof AntElementNode) {
-			errorMessage= openNode((AntElementNode) node);
-			if (errorMessage == null) {
-				return;
-			}
-		} else if (node instanceof String){
-			errorMessage= openInEditor((String) node, getAntModel().getEditedFile());
-			if (errorMessage == null) {
-				return;
-			}
-		}
-		if (errorMessage == null || errorMessage.length() == 0) {
-			errorMessage= AntEditorMessages.getString("AntEditor.3"); //$NON-NLS-1$
-		}
-		setStatusLineErrorMessage(errorMessage);
-		getSite().getShell().getDisplay().beep();
-	}
+//	protected void openTarget(Object node) {
+//		String errorMessage= null;
+//		if (node instanceof AntElementNode) {
+//			errorMessage= openNode((AntElementNode) node);
+//			if (errorMessage == null) {
+//				return;
+//			}
+//		} else if (node instanceof String){
+//			errorMessage= openInEditor((String) node, getAntModel().getEditedFile());
+//			if (errorMessage == null) {
+//				return;
+//			}
+//		}
+//		if (errorMessage == null || errorMessage.length() == 0) {
+//			errorMessage= AntEditorMessages.getString("AntEditor.3"); //$NON-NLS-1$
+//		}
+//		setStatusLineErrorMessage(errorMessage);
+//		getSite().getShell().getDisplay().beep();
+//	}
 
 	/**
      * @param region The region to find the navigation target
      * @return the navigation target at the specified region
      */
-    public Object findTarget(IRegion region) {
-        ISourceViewer viewer = getSourceViewer();
-        AntElementNode node= null;
-       
-		if (region != null) {
-			IDocument document= viewer.getDocument();
-			String text= null;
-			try {
-				text= document.get(region.getOffset(), region.getLength());
-			} catch (BadLocationException e) {
-			}
-			if (text != null && text.length() > 0) {
-				AntModel model= getAntModel();
-				if (model == null) {
-					return null;
-				}
-				node= model.getReferenceNode(text);
-				if (node == null) {
-					node= model.getTargetNode(text);
-					if (node == null) {
-						node= model.getPropertyNode(text);
-						if (node == null) {
-							String path= model.getPath(text, region.getOffset());
-							if (path != null) {
-								path = model.getProjectNode().getProject().replaceProperties(path);
-								return path;
-							}
-                            
-                            node= model.getDefininingTaskNode(text);
-                            if (node == null) {
-                                node= model.getMacroDefAttributeNode(text);
-                            }
-						}
-					}
-				}
-			}
-		}
-		return node;
-    }
+//    public Object findTarget(IRegion region) {
+//        ISourceViewer viewer = getSourceViewer();
+//        AntElementNode node= null;
+//       
+//		if (region != null) {
+//			IDocument document= viewer.getDocument();
+//			String text= null;
+//			try {
+//				text= document.get(region.getOffset(), region.getLength());
+//			} catch (BadLocationException e) {
+//			}
+//			if (text != null && text.length() > 0) {
+//				AntModel model= getAntModel();
+//				if (model == null) {
+//					return null;
+//				}
+//				node= model.getReferenceNode(text);
+//				if (node == null) {
+//					node= model.getTargetNode(text);
+//					if (node == null) {
+//						node= model.getPropertyNode(text);
+//						if (node == null) {
+//							String path= model.getPath(text, region.getOffset());
+//							if (path != null) {
+//								path = model.getProjectNode().getProject().replaceProperties(path);
+//								return path;
+//							}
+//                            
+//                            node= model.getDefininingTaskNode(text);
+//                            if (node == null) {
+//                                node= model.getMacroDefAttributeNode(text);
+//                            }
+//						}
+//					}
+//				}
+//			}
+//		}
+//		return node;
+//    }
 
 
     private String openNode(AntElementNode node) {
@@ -970,22 +914,23 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#editorContextMenuAboutToShow(org.eclipse.jface.action.IMenuManager)
 	 */
-	public void editorContextMenuAboutToShow(IMenuManager menu) {
-		super.editorContextMenuAboutToShow(menu);
-		
-		if (getAntModel() != null) {
-			IAction action= getAction("renameInFile"); //$NON-NLS-1$
-		    menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT, new Separator(ITextEditorActionConstants.GROUP_EDIT));
-			menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT, action);
-			
-			action= getAction("ContentFormat"); //$NON-NLS-1$
-			menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT, action);
-		}
-	}
+//	public void editorContextMenuAboutToShow(IMenuManager menu) {
+//		super.editorContextMenuAboutToShow(menu);
+//		
+//		if (getAntModel() != null) {
+//			IAction action= getAction("renameInFile"); //$NON-NLS-1$
+//		    menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT, new Separator(ITextEditorActionConstants.GROUP_EDIT));
+//			menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT, action);
+//			
+//			action= getAction("ContentFormat"); //$NON-NLS-1$
+//			menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT, action);
+//		}
+//	}
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.IWorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
 		
@@ -1030,40 +975,41 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
 		return super.isTabsToSpacesConversionEnabled(); //provide package visibility
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IWorkbenchPart#dispose()
-	 */
-	public void dispose() {
-		if (fEditorSelectionChangedListener != null)  {
-			fEditorSelectionChangedListener.uninstall(getSelectionProvider());
-			fEditorSelectionChangedListener= null;
-		}
-		
-		((ProjectionViewer)getViewer()).removeProjectionListener(this);
-		if (fProjectionSupport != null) {
-			fProjectionSupport.dispose();
-			fProjectionSupport= null;
-		}
-		
-		uninstallOccurrencesFinder();
-		
-		if (fActivationListener != null) {
-			Shell shell= getEditorSite().getShell();
-			if (shell != null && !shell.isDisposed()) {
-				shell.removeShellListener(fActivationListener);
-			}
-			fActivationListener= null;
-		}
-		
-		AntModelCore.getDefault().removeAntModelListener(fAntModelListener);
-		fAntModel= null;
-
-		super.dispose();
-	}
+//	/* (non-Javadoc)
+//	 * @see org.eclipse.ui.IWorkbenchPart#dispose()
+//	 */
+//	public void dispose() {
+//		if (fEditorSelectionChangedListener != null)  {
+//			fEditorSelectionChangedListener.uninstall(getSelectionProvider());
+//			fEditorSelectionChangedListener= null;
+//		} 	
+//		
+//		((ProjectionViewer)getViewer()).removeProjectionListener(this);
+//		if (fProjectionSupport != null) {
+//			fProjectionSupport.dispose();
+//			fProjectionSupport= null;
+//		}
+//		
+//		uninstallOccurrencesFinder();
+//		
+//		if (fActivationListener != null) {
+//			Shell shell= getEditorSite().getShell();
+//			if (shell != null && !shell.isDisposed()) {
+//				shell.removeShellListener(fActivationListener);
+//			}
+//			fActivationListener= null;
+//		}
+//		
+//		AntModelCore.getDefault().removeAntModelListener(fAntModelListener);
+//		fAntModel= null;
+//
+//		super.dispose();
+//	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.ISaveablePart#doSave(org.eclipse.core.runtime.IProgressMonitor)
-	 */
+//	/* (non-Javadoc)
+//	 * @see org.eclipse.ui.ISaveablePart#doSave(org.eclipse.core.runtime.IProgressMonitor)
+//	 */
+	@Override
 	public void doSave(IProgressMonitor monitor) {
 		super.doSave(monitor);
 		AntModel model= getAntModel();
@@ -1147,26 +1093,26 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
 		}
 	}
 
-	public void synchronizeOutlinePage(boolean checkIfOutlinePageActive) {
-		if (getSelectionProvider() == null) {
-			return;
-		}
-		AntElementNode node= getNode();
-		synchronizeOutlinePage(node, checkIfOutlinePageActive);
-		
-	}
-	
-	protected void synchronize(boolean checkIfOutlinePageActive) {
-		if (getSelectionProvider() == null) {
-			return;
-		}
-		AntElementNode node= getNode();
-		if (AntUIPlugin.getDefault().getPreferenceStore().getBoolean(IAntUIPreferenceConstants.OUTLINE_LINK_WITH_EDITOR)) {
-			synchronizeOutlinePage(node, checkIfOutlinePageActive);
-		}
-		setSelection(node, false);
-		
-	}
+//	public void synchronizeOutlinePage(boolean checkIfOutlinePageActive) {
+//		if (getSelectionProvider() == null) {
+//			return;
+//		}
+//		AntElementNode node= getNode();
+//		synchronizeOutlinePage(node, checkIfOutlinePageActive);
+//		
+//	}
+//	
+//	protected void synchronize(boolean checkIfOutlinePageActive) {
+//		if (getSelectionProvider() == null) {
+//			return;
+//		}
+//		AntElementNode node= getNode();
+//		if (AntUIPlugin.getDefault().getPreferenceStore().getBoolean(IAntUIPreferenceConstants.OUTLINE_LINK_WITH_EDITOR)) {
+//			synchronizeOutlinePage(node, checkIfOutlinePageActive);
+//		}
+//		setSelection(node, false);
+//		
+//	}
 	
 	private AntElementNode getNode() {
 		AntModel model= getAntModel();
@@ -1183,14 +1129,14 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
 		return node;
 	}
 	
-	protected void synchronizeOutlinePage(AntElementNode node, boolean checkIfOutlinePageActive) {
-		if (fOutlinePage != null && !(checkIfOutlinePageActive && isAntOutlinePageActive())) {
-			fOutlinePage.removePostSelectionChangedListener(fSelectionChangedListener);
-			fOutlinePage.select(node);
-			fOutlinePage.addPostSelectionChangedListener(fSelectionChangedListener);
-		}
-	}
-	
+//	protected void synchronizeOutlinePage(AntElementNode node, boolean checkIfOutlinePageActive) {
+//		if (fOutlinePage != null && !(checkIfOutlinePageActive && isAntOutlinePageActive())) {
+//			fOutlinePage.removePostSelectionChangedListener(fSelectionChangedListener);
+//			fOutlinePage.select(node);
+//			fOutlinePage.addPostSelectionChangedListener(fSelectionChangedListener);
+//		}
+//	}
+//	
 	/* (non-Javadoc)
 	 * @see org.eclipse.ant.internal.ui.editor.text.IReconcilingParticipant#reconciled()
 	 */
@@ -1235,114 +1181,6 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
 		return service.getActivePart();
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#doSetSelection(org.eclipse.jface.viewers.ISelection)
-	 */
-	protected void doSetSelection(ISelection selection) {
-		super.doSetSelection(selection);
-		synchronizeOutlinePage(true);
-	}
-
-    /**
-     * Returns the viewer associated with this editor
-     * @return The viewer associated with this editor
-     */
-    public ISourceViewer getViewer() {
-        return getSourceViewer();
-    }
-
-    protected FoldingActionGroup getFoldingActionGroup() {
-        return fFoldingGroup;
-    }
-
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.text.source.projection.IProjectionListener#projectionEnabled()
-     */
-    public void projectionEnabled() {
-    	fFoldingStructureProvider= new AntFoldingStructureProvider(this);
-		fFoldingStructureProvider.setDocument(getDocumentProvider().getDocument(getEditorInput()));
-		fFoldingStructureProvider.updateFoldingRegions(getAntModel());
-		IPreferenceStore preferenceStore = AntUIPlugin.getDefault().getPreferenceStore();
-		preferenceStore.setValue(AntEditorPreferenceConstants.EDITOR_FOLDING_ENABLED, true);
-    }
-
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.text.source.projection.IProjectionListener#projectionDisabled()
-     */
-    public void projectionDisabled() {
-    	fFoldingStructureProvider= null;
-    	IPreferenceStore preferenceStore = AntUIPlugin.getDefault().getPreferenceStore();
-		preferenceStore.setValue(AntEditorPreferenceConstants.EDITOR_FOLDING_ENABLED, false);
-    }
-    
-    /* (non-Javadoc)
-	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#initializeKeyBindingScopes()
-	 */
-	protected void initializeKeyBindingScopes() {
-		setKeyBindingScopes(new String[] { "org.eclipse.ant.ui.AntEditorScope" });  //$NON-NLS-1$
-	}
-	
-	protected IPreferenceStore getEditorPreferenceStore() {
-		return getPreferenceStore();
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#collectContextMenuPreferencePages()
-	 * @since 3.1
-	 */
-	protected String[] collectContextMenuPreferencePages() {
-		String[] ids= super.collectContextMenuPreferencePages();
-		String[] more= new String[ids.length + 6];
-		more[0]= "org.eclipse.ant.ui.AntEditorPreferencePage"; //$NON-NLS-1$
-		more[1]= "org.eclipse.ant.ui.AntCodeFormatterPreferencePage"; //$NON-NLS-1$
-		more[2]= "org.eclipse.ant.ui.AntCodeAssistPreferencePage"; //$NON-NLS-1$
-		more[3]= "org.eclipse.ant.ui.TemplatesPreferencePage"; //$NON-NLS-1$
-		more[4]= "org.eclipse.ant.ui.AntPreferencePage"; //$NON-NLS-1$
-		more[5]= "org.eclipse.ant.ui.AntRuntimePreferencePage"; //$NON-NLS-1$
-		System.arraycopy(ids, 0, more, 6, ids.length);
-		return more;
-	}
-	
-	/**
-	 * Updates the occurrences annotations based
-	 * on the current selection.
-	 * 
-	 * @param selection the text selection
-	 * @param antModel the model for the buildfile
-	 * @since 3.1
-	 */
-	protected void updateOccurrenceAnnotations(ITextSelection selection, AntModel antModel) {
-
-		if (fOccurrencesFinderJob != null)
-			fOccurrencesFinderJob.cancel();
-
-		if (!fMarkOccurrenceAnnotations) {
-			return;
-		}
-		
-		if (selection == null || antModel == null) {
-			return;
-		}
-		
-		IDocument document= getSourceViewer().getDocument();
-		if (document == null) {
-			return;
-		}
-		
-		List positions= null;
-		
-		OccurrencesFinder finder= new OccurrencesFinder(this, antModel, document, selection.getOffset());
-		positions= finder.perform();
-		
-		if (positions == null || positions.size() == 0) {
-			if (!fStickyOccurrenceAnnotations) {
-				removeOccurrenceAnnotations();
-			}
-			return;
-		}	
-		fOccurrencesFinderJob= new OccurrencesFinderJob(document, positions, selection);
-		fOccurrencesFinderJob.run(new NullProgressMonitor());
-	}
 	
 	private void removeOccurrenceAnnotations() {
 		IDocumentProvider documentProvider= getDocumentProvider();
@@ -1378,78 +1216,21 @@ public class RhqEditor extends AntEditor implements IReconcilingParticipant, IPr
         fOccurrenceAnnotations= null;
     }
 
-	protected void installOccurrencesFinder() {
-		fMarkOccurrenceAnnotations= true;
-		
-		if (getSelectionProvider() != null) {
-			ISelection selection= getSelectionProvider().getSelection();
-			if (selection instanceof ITextSelection) {
-				fForcedMarkOccurrencesSelection= (ITextSelection) selection;
-				updateOccurrenceAnnotations(fForcedMarkOccurrencesSelection, getAntModel());
-			}
-		}
-		if (fOccurrencesFinderJobCanceler == null) {
-			fOccurrencesFinderJobCanceler= new OccurrencesFinderJobCanceler();
-			fOccurrencesFinderJobCanceler.install();
-		}
-	}
 	
-	protected void uninstallOccurrencesFinder() {
-		fMarkOccurrenceAnnotations= false;
-		
-		if (fOccurrencesFinderJob != null) {
-			fOccurrencesFinderJob.cancel();
-			fOccurrencesFinderJob= null;
-		}
-
-		if (fOccurrencesFinderJobCanceler != null) {
-			fOccurrencesFinderJobCanceler.uninstall();
-			fOccurrencesFinderJobCanceler= null;
-		}
-		
-		removeOccurrenceAnnotations();
-	}
-	
-	public boolean isMarkingOccurrences() {
-		return fMarkOccurrenceAnnotations;
-	}
-
-
-	/**
-	 * The editor has entered or exited linked mode.
-	 * @param inLinkedMode whether an enter or exit has occurred
-	 * @param affectsOccurrences whether to change the state of the occurrences finder
-	 */
-	public void setInLinkedMode(boolean inLinkedMode, boolean affectsOccurrences) {
-		if (inLinkedMode) {
-			getAntModel().setShouldReconcile(false);
-			if (affectsOccurrences) {
-				uninstallOccurrencesFinder();
-			}
-		} else {
-			getAntModel().setShouldReconcile(true);
-			if (affectsOccurrences) {
-				installOccurrencesFinder();
-			}
-		}
-	}
-	
-	
-	
-	private Image fRhqTitleImage;
-	
+	//ADDED
 	private Image getRhqTitleImage(){
 		if(fRhqTitleImage == null)
 			fRhqTitleImage = new Image(getSite().getShell().getDisplay(), UiActivator.getImageDescriptor("icons/rhq.gif").getImageData());	
 		return fRhqTitleImage;
 	}
-//	@Override
-//	public int hashCode(){
-//		return 37 * getProject().hashCode();
-//	}
-	
+    //ADDED
+	public RhqAnnotationModel getRhqAnnotationModel() {
+		if(fRhqAnnotationModel == null)
+			fRhqAnnotationModel = new RhqAnnotationModel(getAntModel().getFile());
+		return fRhqAnnotationModel;
+	}
 	//ADDED
 	public IProject getProject(){
-		return fAntModel.getFile().getProject();
+		return super.getAntModel().getFile().getProject();
 	}
 }
