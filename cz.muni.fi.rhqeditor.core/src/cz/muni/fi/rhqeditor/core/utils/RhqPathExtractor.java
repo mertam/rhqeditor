@@ -200,7 +200,7 @@ public class RhqPathExtractor {
 		if(paths == null)
 			return false;
 		
-		if(path.toString().contains("*")){
+		if(path.toString().contains("*") || path.toString().contains("?")) {
 			return validateRelativePath(path.toString(), paths);
 		}
 		
@@ -369,27 +369,33 @@ public class RhqPathExtractor {
 	 */
 	private boolean validateRelativePath(String expresion, List<IPath> possiblePaths){
 		
-		String replacedExpresion = expresion.replaceAll("\\?", ".");
-		replacedExpresion = replacedExpresion.replaceAll("\\*\\*",".*" );
+		String replacedfrom = expresion.replaceAll("\\.", "\\\\.");
+		replacedfrom = replacedfrom.replaceAll("\\?", ".");
+		replacedfrom = replacedfrom.replaceAll("\\*\\*",".*" );
 		
 		StringBuilder regexBuilder = new StringBuilder();
-		for (int i = 0; i < replacedExpresion.length(); i++){
-			if(replacedExpresion.charAt(i) == '*') {
-				if(i > 0 && replacedExpresion.charAt(i-1) == '.') {
-					continue;
+		for (int i = 0; i < replacedfrom.length(); i++){
+			if(replacedfrom.charAt(i) == '*') {
+				if(i > 1 && replacedfrom.charAt(i-1) == '.') {
+					if(replacedfrom.charAt(i-2) == '\\') 
+							// \.*
+							regexBuilder.append("[^/]*");
+						else
+							// .*
+							regexBuilder.append("*");
 				} else {
 					regexBuilder.append("[^/]*");
 				}
 			} else {
-				regexBuilder.append(replacedExpresion.charAt(i));
+				regexBuilder.append(replacedfrom.charAt(i));
 			}
 		}
-	
+		System.out.println(regexBuilder);
 		
 		String currentPath;
 		for(IPath path: possiblePaths){
 			currentPath = path.toString();
-			if(currentPath.matches(replacedExpresion))
+			if(currentPath.matches(regexBuilder.toString()))
 				return true;
 		}
 		

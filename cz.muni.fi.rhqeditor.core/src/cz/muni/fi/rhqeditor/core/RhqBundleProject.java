@@ -99,7 +99,10 @@ public class RhqBundleProject {
 	 * @throws IOException
 	 */
 	public void createProjectFromBundle(IPath pathToArchive) throws CoreException, IOException{
-		String name = pathToArchive.removeFirstSegments(pathToArchive.segmentCount()-1).removeFileExtension().toString();
+		String name = pathToArchive.lastSegment();
+		//assume archive ends with .zip or .jar
+		if (name.length() > 4)
+			name = name.substring(0, name.length() - 4);
 		createProject(name, null);
 		IProject newProject = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
 		ArchiveReader.unzipArchive(pathToArchive.toString(), newProject.getLocation().toString(), false);
