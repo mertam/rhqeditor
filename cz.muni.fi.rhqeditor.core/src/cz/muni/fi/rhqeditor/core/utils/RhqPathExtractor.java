@@ -124,7 +124,7 @@ public class RhqPathExtractor {
 		if(prefix == null || prefix.isEmpty())
 			return getContentOfArchive(archiveName);
 		
-		List<IPath> files = fArchiveContent.get(archiveName);
+		List<IPath> files = fArchiveContent.get(new Path(archiveName));
 		if(files == null)
 			return Collections.emptyList();
 		return getListAccordingToPrefix(files, prefix);

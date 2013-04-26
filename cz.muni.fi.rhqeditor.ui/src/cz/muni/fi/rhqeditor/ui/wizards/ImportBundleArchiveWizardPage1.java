@@ -43,6 +43,8 @@ import org.eclipse.ui.dialogs.WorkingSetGroup;
 
 import cz.muni.fi.rhqeditor.core.utils.ArchiveReader;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
+import org.eclipse.swt.events.TraverseListener;
+import org.eclipse.swt.events.TraverseEvent;
 
 public class ImportBundleArchiveWizardPage1 extends WizardPage {
 	private Table table;
@@ -111,20 +113,27 @@ public class ImportBundleArchiveWizardPage1 extends WizardPage {
 	    lblRootFolder.setText("Root folder:");
 	    
 	    fCombo = new Combo(composite, SWT.NONE);
+	    fCombo.addTraverseListener(new TraverseListener() {
+	    	public void keyTraversed(TraverseEvent arg0) {
+	    		scanProjects();
+		    }
+	    	
+	    });
+	    fCombo.addSelectionListener(new SelectionAdapter() {
+	    	@Override
+	    	public void widgetDefaultSelected(SelectionEvent e) {
+	    		scanProjects();
+		   	}
+	    	
+	    	@Override
+	    	public void widgetSelected(SelectionEvent e) {
+	    		scanProjects();
+	    	}
+	    });
 	    fCombo.addFocusListener(new FocusAdapter() {
 	    	@Override
 	    	public void focusLost(FocusEvent e) {
-	    		fBudleImportDirectory = fCombo.getText();
-	    		if(lastSearchedPath != null && !lastSearchedPath.equals(fBudleImportDirectory)){
-	    			File dir = new File(fBudleImportDirectory);
-	    			System.out.println(dir.getAbsolutePath());
-	    		
-	    			getItemsFromDirectory(dir);
-	    			setComboAfterChange();
-	    			setComplete();
-	    		}
-	    		
-	    		lastSearchedPath = fBudleImportDirectory;
+	    		scanProjects();
 	    	}
 	    });
 	    restoreComboState();
@@ -187,7 +196,7 @@ public class ImportBundleArchiveWizardPage1 extends WizardPage {
 	      	}
 	      });
 	    Composite set = new Composite(composite, SWT.NONE);
-	    set.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 3, 1));
+	    set.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 3, 1));
 	    setControl(set);
 	    group = new WorkingSetGroup(set, selection, new String[]{"org.eclipse.ui.resourceWorkingSetPage"});
 	    set.setLayout(new GridLayout(1, false));
@@ -199,6 +208,19 @@ public class ImportBundleArchiveWizardPage1 extends WizardPage {
 		fCheckBoxTableViewer.setCheckedElements(obj);
 	}
 	
+	private void scanProjects() {
+		fBudleImportDirectory = fCombo.getText();
+		if(lastSearchedPath != null && !lastSearchedPath.equals(fBudleImportDirectory)){
+			File dir = new File(fBudleImportDirectory);
+			System.out.println(dir.getAbsolutePath());
+		
+			getItemsFromDirectory(dir);
+			setComboAfterChange();
+			setComplete();
+		}
+		
+		lastSearchedPath = fBudleImportDirectory;
+	}
 	
 	private void getItemsFromDirectory(final File dir){
 		table.clearAll();

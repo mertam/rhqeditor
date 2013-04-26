@@ -2150,8 +2150,8 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
     	for(IPath pathToFile : files){
     		 proposals.add(attributeValueProposal(document, prefix, pathToFile.toString()));
     	}
+    	System.out.println();
     	return (ICompletionProposal[])proposals.toArray(new ICompletionProposal[proposals.size()]);
-    	
     }
     
 	private void addRhqAttributeProposal(String taskName, String prefix, List proposals, String attrName, String replacementString, String displayString, boolean lookupDescription) {

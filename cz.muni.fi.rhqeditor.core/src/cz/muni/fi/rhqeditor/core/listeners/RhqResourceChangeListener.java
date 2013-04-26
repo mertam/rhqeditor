@@ -262,7 +262,7 @@ public class RhqResourceChangeListener implements IResourceChangeListener {
 				if(fileExtension != null 
 						&& (fileExtension.equalsIgnoreCase("zip") 
 								|| fileExtension.equalsIgnoreCase("jar"))) {
-					System.out.println(currentResource.getFullPath());
+					System.out.println("changed" + currentResource.getFullPath());
 					extractor.reloadArchive(currentResource.getFullPath().removeFirstSegments(1));
 					break;
 				}

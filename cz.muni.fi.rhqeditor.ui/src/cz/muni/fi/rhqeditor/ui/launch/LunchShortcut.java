@@ -28,6 +28,7 @@ import cz.muni.fi.rhqeditor.ui.editor.RhqEditor;
  * @author syche
  * 
  */
+@SuppressWarnings("restriction")
 public class LunchShortcut implements ILaunchShortcut {
 
 	
