@@ -7,7 +7,7 @@
       name="cz.muni.fi.rhqeditor.natures.rhqeditornature">
       <runtime>
          <run
-               class="z.muni.fi.rhqeditor.core.natures.RhqBundleEditorNature">
+               class="cz.muni.fi.rhqeditor.core.natures.RhqBundleEditorNature">
          </run>
       </runtime>
    </extension>
