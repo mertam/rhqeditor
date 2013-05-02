@@ -61,7 +61,6 @@ public class RhqPathExtractor {
 	 */
 	private PathComparator fPathComparator		= null;	
 	
-	private final String FILE_SEPARATOR = System.getProperty("file.separator");
 	
 	/**
 	 * 

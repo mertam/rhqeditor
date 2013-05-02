@@ -5,7 +5,6 @@ import java.util.HashMap;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.debug.internal.ui.SWTFactory;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
@@ -56,14 +55,14 @@ public class LaunchPropertiesTab extends AbstractLaunchConfigurationTab{
 	@Override
 	public void createControl(Composite parent) {
 		System.out.println("create control");
-		Composite myComposite = SWTFactory.createComposite(parent, 2, 1, GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
+		Composite myComposite = new Composite(parent, SWT.NONE);
         setControl(myComposite);
         myComposite.setLayout(new GridLayout(2,false));
        
         
         fViewer = new TableViewer(myComposite, SWT.BORDER | SWT.FULL_SELECTION | SWT.FILL);
         fTable = fViewer.getTable();
-        GridData gd_fTable = new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1);
+        GridData gd_fTable = new GridData(SWT.FILL, SWT.FILL , false, false, 2, 1);
         gd_fTable.heightHint = 239;
         fTable.setLayoutData(gd_fTable);
         fTable.setHeaderVisible(true);

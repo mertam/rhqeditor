@@ -1,6 +1,7 @@
 package cz.muni.fi.rhqeditor.ui.launch;
 
-import org.eclipse.core.internal.resources.File;
+//import org.eclipse.core.internal.resources.File;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
@@ -28,7 +29,6 @@ import cz.muni.fi.rhqeditor.ui.editor.RhqEditor;
  * @author syche
  * 
  */
-@SuppressWarnings("restriction")
 public class LunchShortcut implements ILaunchShortcut {
 
 	
@@ -100,8 +100,8 @@ public class LunchShortcut implements ILaunchShortcut {
 			IStructuredSelection structuredSelection = (IStructuredSelection) selection;
 			Object firstElement = structuredSelection.getFirstElement();
 
-			if (firstElement instanceof File) {
-				File file = (File) firstElement;
+			if (firstElement instanceof IFile) {
+				IFile file = (IFile) firstElement;
 				project = file.getProject();
 			} else if (firstElement instanceof IAdaptable) {
 				project = (IProject) ((IAdaptable) firstElement)

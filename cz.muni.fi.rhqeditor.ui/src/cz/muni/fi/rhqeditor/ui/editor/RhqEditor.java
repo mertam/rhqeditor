@@ -12,22 +12,14 @@ import org.eclipse.ant.internal.ui.AntUIPlugin;
 import org.eclipse.ant.internal.ui.AntUtil;
 import org.eclipse.ant.internal.ui.ExternalHyperlink;
 import org.eclipse.ant.internal.ui.IAntUIHelpContextIds;
-import org.eclipse.ant.internal.ui.IAntUIPreferenceConstants;
 import org.eclipse.ant.internal.ui.editor.AntAutoEditStrategy;
 import org.eclipse.ant.internal.ui.editor.AntEditor;
-import org.eclipse.ant.internal.ui.editor.AntEditorMessages;
 import org.eclipse.ant.internal.ui.editor.AntEditorSourceViewerConfiguration;
 import org.eclipse.ant.internal.ui.editor.AntSourceViewerInformationControl;
-import org.eclipse.ant.internal.ui.editor.OccurrencesFinder;
 import org.eclipse.ant.internal.ui.editor.actions.FoldingActionGroup;
 import org.eclipse.ant.internal.ui.editor.actions.RenameInFileAction;
-import org.eclipse.ant.internal.ui.editor.actions.RunToLineAdapter;
-import org.eclipse.ant.internal.ui.editor.actions.ToggleLineBreakpointAction;
 import org.eclipse.ant.internal.ui.editor.outline.AntEditorContentOutlinePage;
-import org.eclipse.ant.internal.ui.editor.text.AntEditorDocumentProvider;
 import org.eclipse.ant.internal.ui.editor.text.AntFoldingStructureProvider;
-import org.eclipse.ant.internal.ui.editor.text.IReconcilingParticipant;
-import org.eclipse.ant.internal.ui.editor.text.XMLTextHover;
 import org.eclipse.ant.internal.ui.model.AntElementNode;
 import org.eclipse.ant.internal.ui.model.AntModel;
 import org.eclipse.ant.internal.ui.model.AntModelChangeEvent;
@@ -37,19 +29,12 @@ import org.eclipse.ant.internal.ui.model.IAntModelListener;
 import org.eclipse.ant.internal.ui.preferences.AntEditorPreferenceConstants;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.debug.ui.actions.IRunToLineTarget;
-import org.eclipse.debug.ui.actions.IToggleBreakpointsTarget;
-import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
@@ -58,7 +43,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
-import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ISelectionValidator;
 import org.eclipse.jface.text.ISynchronizable;
 import org.eclipse.jface.text.ITextInputListener;
@@ -73,7 +57,6 @@ import org.eclipse.jface.text.source.IOverviewRuler;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
-import org.eclipse.jface.text.source.projection.IProjectionListener;
 import org.eclipse.jface.text.source.projection.ProjectionSupport;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -89,21 +72,15 @@ import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPartService;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IDE;
-import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.texteditor.IDocumentProvider;
-import org.eclipse.ui.texteditor.IEditorStatusLine;
-import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.ContentOutline;
-import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import cz.muni.fi.rhqeditor.core.utils.DocumentProvider;
 import cz.muni.fi.rhqeditor.core.utils.ExtractorProvider;
@@ -176,17 +153,16 @@ public class RhqEditor extends AntEditor {
 
 			
 			//if this is first change of recipe, init validator, path extractor and document provider
-			if(fRhqRecipeValidator == null){
-				fRhqRecipeValidator = new RhqRecipeValidator();
-				fRhqRecipeValidator.setAnnotationModel(getRhqAnnotationModel());
-				RhqPathExtractor ext =ExtractorProvider.INSTANCE.getExtractor(getAntModel().getFile().getProject());
-				fRhqRecipeValidator.setExtractor(ext);	
-				fRhqRecipeValidator.setInputDocument(getSourceViewer().getDocument());
+			//skip validating if project hasn't been set yet.
+			if(fRhqRecipeValidator == null && getProject() != null){
 				DocumentProvider provider = DocumentProvider.INSTANCE;
-				provider.attachDocumentToProject(getAntModel().getFile().getProject(), getSourceViewer().getDocument());
+				provider.attachDocumentToProject(getProject(), getSourceViewer().getDocument());
+				fRhqRecipeValidator = new RhqRecipeValidator(getProject());
+				fRhqRecipeValidator.setAnnotationModel(getRhqAnnotationModel());
 			}
 			
-			fRhqRecipeValidator.validateRecipe();
+			if(fRhqRecipeValidator != null)
+				fRhqRecipeValidator.validateRecipe();
 //---------------------
 
 //			AntModel model= getAntModel();

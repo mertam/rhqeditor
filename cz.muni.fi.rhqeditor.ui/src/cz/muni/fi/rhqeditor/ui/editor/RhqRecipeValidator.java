@@ -10,6 +10,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.text.IDocument;
@@ -22,6 +23,9 @@ import org.xml.sax.ext.DefaultHandler2;
 import cz.muni.fi.rhqeditor.core.rhqmodel.RhqAttribute;
 import cz.muni.fi.rhqeditor.core.rhqmodel.RhqModelReader;
 import cz.muni.fi.rhqeditor.core.rhqmodel.RhqTask;
+import cz.muni.fi.rhqeditor.core.utils.DocumentProvider;
+import cz.muni.fi.rhqeditor.core.utils.ExtractorProvider;
+import cz.muni.fi.rhqeditor.core.utils.InputPropertiesManager;
 import cz.muni.fi.rhqeditor.core.utils.RecipeReader;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
 import cz.muni.fi.rhqeditor.core.utils.RhqPathExtractor;
@@ -45,7 +49,9 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 	private HashMap<String, Integer > fExistingTargets	= null;
 	private HashMap<String,	Integer > fRequiredTargets  = null;
 	
+	
 	private RhqModelReader fRhqModelReader = null;
+	private InputPropertiesManager fInputPropertiesManager;
 	
 	//contains all rhq tasks and required atts
 	private static final String EMPTY_STRING = "";
@@ -60,7 +66,10 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 	 * @throws ParserConfigurationException
 	 * @throws SAXException
 	 */
-	public RhqRecipeValidator() {
+	public RhqRecipeValidator(IProject project) {
+		fRhqPathExtractor = ExtractorProvider.INSTANCE.getExtractor(project);
+		fDocument = DocumentProvider.INSTANCE.getDocument(project);
+		fInputPropertiesManager = new InputPropertiesManager(project.getName());
 		openElements = new Stack<>();
 		fRequiredTargets = new HashMap<String, Integer>();
 		fExistingTargets = new HashMap<String, Integer>();
@@ -78,17 +87,6 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 		fRhqAnnotationModel = model;
 	}
 	
-	public void setExtractor(RhqPathExtractor ext){
-		fRhqPathExtractor = ext;
-	}
-	
-	/**
-	 * crates parsable byte array from given IDocument
-	 * @param idoc
-	 */
-	public void setInputDocument(IDocument idoc){
-		fDocument = idoc;
-	}
 	
 	private RhqModelReader getModelReader(){
 		if(fRhqModelReader == null)
@@ -130,8 +128,8 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 			fOpenArchiveName = null;
 			fExistingTargets.clear();
 			fRequiredTargets.clear();
-			
-
+			//init property map on each validation
+			fInputPropertiesManager.initalizeAntPropertyMap();
 	}
 	
 	@Override
@@ -162,8 +160,14 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 		case  RhqConstants.RHQ_TYPE_ARCHIVE:
 			
 			attrValue = attributes.getValue(RhqConstants.RHQ_ATTRIBUTE_NAME);
-			if(attrValue == null)
+			if(attrValue == null || attrValue.equals(EMPTY_STRING)){
+				fOpenArchiveName = EMPTY_STRING;
 				break;
+			}
+			
+			//try to fix properties in filename
+			attrValue = unpropertizePath(attrValue);
+			
 			attrPath = new Path(attrValue);
 			
 			if(attrPath.toString().startsWith(RhqConstants.RHQ_DEFAULT_BUILD_DIR) ||
@@ -171,27 +175,34 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 				fRhqAnnotationModel.addMarker(locator.getLineNumber(), "Forbidden destination", IMarker.SEVERITY_ERROR);
 				break;
 			}
-			if(!fRhqPathExtractor.isPathToArchiveValid(attrPath))
-				fRhqAnnotationModel.addMarker(locator.getLineNumber(), "Archive not found", IMarker.SEVERITY_WARNING);
- 			fOpenArchiveName = null;
-			attrValue = attributes.getValue(RhqConstants.RHQ_ATTRIBUTE_NAME);
-			if(attrValue == null){
-				fOpenArchiveName = EMPTY_STRING;
-				break;
+			
+			
+			
+			//check whether archive name consist property variable
+			if(!isPropertized(attrValue)) {
+				//ignore check if name contains property variable
+				if (!fRhqPathExtractor.isPathToArchiveValid(attrPath))
+					fRhqAnnotationModel.addMarker(locator.getLineNumber(), "Archive not found", IMarker.SEVERITY_WARNING);
 			}
+			
+			
 			fOpenArchiveName = attrValue;
+			System.out.println("open archive: " + fOpenArchiveName);
 			break;
 			
 		case  RhqConstants.RHQ_TYPE_FILE:
 			
 			attrValue = attributes.getValue("name");
-			if(attrValue == null)
+			if (attrValue == null || attrValue.equals(EMPTY_STRING)) {
 				break;
+			}
+			//try to fix properties in filename
+			attrValue = unpropertizePath(attrValue);
 			
 			attrPath = new Path(attrValue);
 			
 			//ignore rhq:file name=file.${property}
-			if(attrValue.matches(".*\\$\\{.*\\}.*"))
+			if( isPropertized(attrPath.toString()))
 				break;
 			
 			//file can have only one only destinationDir or destinationFile, not both
@@ -206,22 +217,27 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 				break;
 			}
 			if(!fRhqPathExtractor.isPathToFileValid(attrPath))
-				fRhqAnnotationModel.addMarker(locator.getLineNumber(), "File not found", IMarker.SEVERITY_WARNING);			
+				fRhqAnnotationModel.addMarker(locator.getLineNumber(), "File '"+ attrValue+"' not found", IMarker.SEVERITY_WARNING);			
 
 			break;
 		
 		case RhqConstants.RHQ_TYPE_FILESET:
+			//fileset in rhq:ignore is not validated
 			attrValue = attributes.getValue(RhqConstants.RHQ_ATTRIBUTE_INCLUDES);
 			//includes not found or no parent archive open
-			if(attrValue == null || fOpenArchiveName == null )
+			if(attrValue == null || attrValue.equals(EMPTY_STRING)|| fOpenArchiveName == null || isPropertized(fOpenArchiveName) ) {
 				break;
-			
+			}
+			//try to fix properties in filename
+			attrValue = unpropertizePath(attrValue);
 			attrPath = new Path(attrValue);
+			
 			if(fOpenArchiveName.equals(EMPTY_STRING)){
 				fRhqAnnotationModel.addMarker(locator.getLineNumber(), "Unrecognized path to archive", IMarker.SEVERITY_WARNING);
-			}else{
-				if(!fRhqPathExtractor.isPathToArchiveFileValid(attrPath, fOpenArchiveName))
-					fRhqAnnotationModel.addMarker(locator.getLineNumber(), "There's no such file in archive", IMarker.SEVERITY_WARNING);
+			} else if ( !isPropertized(attrPath.toString())
+					&& !fRhqPathExtractor.isPathToArchiveFileValid(attrPath, fOpenArchiveName)) {
+						//validate filenames if archive name contains no property
+						fRhqAnnotationModel.addMarker(locator.getLineNumber(), "There's no file '"+ attrValue +"' in archive " + fOpenArchiveName	, IMarker.SEVERITY_WARNING);
 			}
 			
 			break;
@@ -229,16 +245,17 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 		case "include":
 			attrValue = attributes.getValue(RhqConstants.RHQ_ATTRIBUTE_NAME);
 			//only include with parent archive matters
-			if(attrValue == null || fOpenArchiveName == null){
-				return;
+			if(attrValue == null || attrValue.equals(EMPTY_STRING)|| fOpenArchiveName == null || isPropertized(fOpenArchiveName) ) {
+				break;
 			}
-			
+			//try to fix properties in filename
+			attrValue = unpropertizePath(attrValue);
 		    attrPath = new Path(attrValue);
 		    if(fOpenArchiveName.equals(EMPTY_STRING)){
 				fRhqAnnotationModel.addMarker(locator.getLineNumber(), "Unrecognized path to archive", IMarker.SEVERITY_WARNING);
-			}else{
-				if(!fRhqPathExtractor.isPathToArchiveFileValid(attrPath, fOpenArchiveName))
-					fRhqAnnotationModel.addMarker(locator.getLineNumber(), "There's no such file in archive", IMarker.SEVERITY_WARNING);
+		    } else if ( !isPropertized(attrPath.toString())
+					&& !fRhqPathExtractor.isPathToArchiveFileValid(attrPath, fOpenArchiveName)) {
+						fRhqAnnotationModel.addMarker(locator.getLineNumber(), "There's no file '"+ attrValue +"' in archive " + fOpenArchiveName, IMarker.SEVERITY_WARNING);
 			}
 			
 		    break;
@@ -312,6 +329,28 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 		}
 		fRhqAnnotationModel.addMarker(locator.getLineNumber(), "Misplaced element "+child.getName(), IMarker.SEVERITY_WARNING);
 	}
+	
+	/**
+	 * checks whether given filename contains some property (sytax ${....} )
+	 */
+	private boolean isPropertized(String filename) {
+		return filename.matches(".*\\$\\{.*\\}.*");
+	}
+	
+	/**
+	 * returns given string with replaced values of known properties
+	 * @param path
+	 * @return
+	 */
+	private String unpropertizePath( String path ) {
+		if(isPropertized(path)) {
+			return fInputPropertiesManager.resolveNameWithProperty(path);
+		}
+		return path;
+	}
+	
+	
+	
 	
 
 }

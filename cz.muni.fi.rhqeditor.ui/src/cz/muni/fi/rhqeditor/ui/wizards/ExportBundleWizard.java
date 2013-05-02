@@ -10,6 +10,8 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWizard;
 
@@ -37,7 +39,6 @@ public class ExportBundleWizard extends Wizard implements IWorkbenchWizard {
 	}
 	
 	
-
 	@Override
 	public void addPages() {
 		fPage1 = new ExportBundleWizardPage1("exportPage", "Export RHQ bundle project into bundle", null);
@@ -57,11 +58,23 @@ public class ExportBundleWizard extends Wizard implements IWorkbenchWizard {
 		
 		BundleExport export = new BundleExport(ResourcesPlugin.getWorkspace().getRoot().getProject(projectName), fPage1.getTargetFile());
 		try {
-			int result = export.ExportBundle();
-			switch(result){
-			case SWT.OK: return true;
-			case SWT.NO: return true;
-			case SWT.CANCEL: return false;
+			if(!export.exportBundle(false)) {
+				Shell shell = new Shell();
+		    	shell.setSize(300, 100);
+		        MessageBox messageDialog = new MessageBox(shell, SWT.ICON_QUESTION | SWT.CANCEL | SWT.NO | SWT.YES);
+		        messageDialog.setText("Overwrite file");
+		        messageDialog.setMessage("File "+ fPage1.getTargetFile() +" exists, overwrite?");
+		        
+		        int result = messageDialog.open();
+		        
+				switch(result){
+				case SWT.YES: 
+					export.exportBundle(true);
+					return true;
+				case SWT.NO: return true;
+				case SWT.CANCEL: return false;
+			}
+			
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

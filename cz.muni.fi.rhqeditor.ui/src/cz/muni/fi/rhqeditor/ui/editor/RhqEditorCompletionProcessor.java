@@ -445,8 +445,7 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
      * Returns the proposals for the specified document.
      */
     protected ICompletionProposal[] getProposalsFromDocument(IDocument document, String prefix) {
-//Added 
-//    	fRhqNamespacePrefix = getRhqNamespacePrefix(document);
+
     	ICompletionProposal[] proposals= null;
 		currentProposalMode= determineProposalMode(document, cursorPosition, prefix);
 		if(fRhqpathExtractor == null){
@@ -492,6 +491,9 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
                 
 //------------------
                 //find task, if not null then add proposals
+                InputPropertiesManager ips = new InputPropertiesManager(antModel.getFile().getProject().getName());
+                //try to resolve property
+                prefix = ips.resolveNameWithProperty(prefix);
                 RhqTask task = getModelReader().getTask(currentTaskString);
                 if(task != null && task.getName().equals(RhqConstants.RHQ_TYPE_FILE) && attributeString.equals(RhqConstants.RHQ_ATTRIBUTE_NAME)){
           				proposals = addFilesProposals(document,textToSearch,prefix,attributeString);
@@ -505,6 +507,7 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
                 
                 if(task != null && task.getName().equals(RhqConstants.RHQ_TYPE_FILESET) && attributeString.equals(RhqConstants.RHQ_ATTRIBUTE_INCLUDES)){
                 	String archiveName = getRecipeReader().getParentArchiveFilename(document, cursorPosition);
+                	archiveName = ips.resolveNameWithProperty(archiveName);
                 	if(!archiveName.equals("")){
             			proposals = addArchiveContentProposals(document, prefix, archiveName);
                 	}
@@ -513,6 +516,7 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
                 
                 if(currentTaskString.equals("include") && attributeString.equalsIgnoreCase(RhqConstants.RHQ_ATTRIBUTE_NAME)){
                 	String archiveName = getRecipeReader().getParentArchiveFilename(document, cursorPosition);
+                	archiveName = ips.resolveNameWithProperty(archiveName);
                 	if(!archiveName.equals("")){
             			proposals = addArchiveContentProposals(document, prefix, archiveName);
                 	}
@@ -1533,7 +1537,7 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
         			|| ';' == token
 //ADDED ':' to assumption, to get prefix of namespace
         			|| ':' == token
-//ADDED ':' to assumption, to get prefix of paths i.e. <rhq:task path="dir/..."
+//ADDED '/' to assumption, to get prefix of paths i.e. <rhq:task path="dir/..."
         			|| '/' == token)
         			
                 && !('$' == token)) {
@@ -2150,7 +2154,6 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
     	for(IPath pathToFile : files){
     		 proposals.add(attributeValueProposal(document, prefix, pathToFile.toString()));
     	}
-    	System.out.println();
     	return (ICompletionProposal[])proposals.toArray(new ICompletionProposal[proposals.size()]);
     }
     

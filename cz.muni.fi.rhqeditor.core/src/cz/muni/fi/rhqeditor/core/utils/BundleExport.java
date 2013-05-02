@@ -14,52 +14,60 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.Shell;
+
+import cz.muni.fi.rhqeditor.core.ProjectInitializer;
 
 
-
+/**
+ * class used for exporting RHQ bundle
+ * @author syche
+ *
+ */
 public class BundleExport {
 
-
-	public IProject fProject = null;
-	public String fTargetFile;
+   
+	private IProject fProject = null;
+	private String fTargetFile;
+	private RhqPathExtractor fExtractor;
 		
-	public BundleExport(IProject proj, String targetDir){
+	public BundleExport(IProject proj, String targetFile){
+		if(proj == null)
+			throw new IllegalArgumentException("Project not found");
+		if(targetFile == null)
+			throw new IllegalArgumentException("Wrong target file");
+		
 		fProject = proj;
-		fTargetFile = targetDir;
+		fTargetFile = targetFile;
+		
+		fExtractor = ExtractorProvider.INSTANCE.getExtractor(fProject); 
+		if(fExtractor == null) {
+			//init project if it hasn't been inited yet. Probably should not happen.
+			new ProjectInitializer().initProject(proj);
+		}
+			
 	}
 	
 	
 	
-	
-	public int ExportBundle() throws IOException{
+	/**
+	 * exports bundle into file given in constructor. Overwrites existing file if 'overwrite' is true
+	 * @param overwrite
+	 * @return
+	 * @throws IOException
+	 */
+	public boolean exportBundle(boolean overwrite) throws IOException{
 
-		final RhqPathExtractor extractor = ExtractorProvider.INSTANCE.getExtractor(fProject); 
 		
-		if(extractor.shouldBeListed())
-			extractor.listFiles();
-		System.out.println(fTargetFile);
+		if(fExtractor.shouldBeListed())
+			fExtractor.listFiles();
 	   
 	    final File file = new File(fTargetFile);
-	    if(file.exists()){
-	    	// Message
-	    	Shell shell = new Shell();
-	    	shell.setSize(300, 100);
-	        MessageBox messageDialog = new MessageBox(shell, SWT.ICON_QUESTION | SWT.CANCEL | SWT.NO | SWT.YES);
-	        messageDialog.setText("Overwrite file");
-	        messageDialog.setMessage("File "+ fTargetFile +" exists, overwrite?");
-	        int returnCode = messageDialog.open();
-	        if(returnCode == SWT.NO)
-	        	return SWT.NO;
-	        if(returnCode == SWT.CANCEL)
-	        	return SWT.CANCEL;
+	    if(file.exists() && !overwrite){
+	    	return false;
 	    }
 		
 		
-	    System.out.println(fProject.getLocation());
-	    Job export = new Job("export bundle") {
+	    Job export = new Job("Export RHQ bundle") {
 			
 	    
 			@Override
@@ -70,7 +78,7 @@ public class BundleExport {
 						) {
 					 	   byte[] buf = new byte[1024];
 					       IFile currentFile;
-					       for (IPath file: extractor.getAllFiles() ) {
+					       for (IPath file: fExtractor.getAllFiles() ) {
 					    	   if(file.toString().startsWith("."))
 					    		   continue;
 					           currentFile = fProject.getFile(file);
@@ -100,7 +108,7 @@ public class BundleExport {
 				
 		};
 		export.schedule();
-		return SWT.OK;
+		return true;
 		
 	    
 	}
