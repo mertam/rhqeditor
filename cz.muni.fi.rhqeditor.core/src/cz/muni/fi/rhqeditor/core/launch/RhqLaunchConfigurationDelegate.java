@@ -5,6 +5,8 @@ import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.debug.core.ILaunch;
@@ -12,6 +14,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.LaunchConfigurationDelegate;
 import org.osgi.service.prefs.BackingStoreException;
 
+import cz.muni.fi.rhqeditor.core.Activator;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
 
 
@@ -45,8 +48,7 @@ public class RhqLaunchConfigurationDelegate extends LaunchConfigurationDelegate 
 		try {
 			prefs.flush();
 		} catch (BackingStoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Activator.getLog().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_CORE_ID,"RhqLaunchConfigurationDelegate.launch " + e.getMessage()));
 		}
 		
 	}

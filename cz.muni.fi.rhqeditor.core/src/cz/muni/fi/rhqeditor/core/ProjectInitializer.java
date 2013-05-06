@@ -3,6 +3,8 @@ package cz.muni.fi.rhqeditor.core;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import cz.muni.fi.rhqeditor.core.listeners.RhqResourceChangeListener;
 import cz.muni.fi.rhqeditor.core.utils.ExtractorProvider;
@@ -51,7 +53,7 @@ public class ProjectInitializer {
 				ExtractorProvider.INSTANCE.attachExtractorToProject(project, extractor);
 			}
 		} catch (CoreException e) {
-			e.printStackTrace();
+			Activator.getLog().log(new Status(IStatus.ERROR,RhqConstants.PLUGIN_CORE_ID,"ProjectInitializer.initProject" + e.getMessage()));
 		}
 	}
 

@@ -11,6 +11,9 @@ import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
 import cz.muni.fi.rhqeditor.core.Activator;
 import cz.muni.fi.rhqeditor.core.utils.ArchiveReader;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
@@ -59,7 +62,7 @@ public enum DeployerProvider {
 		try {
 			initializeDeployer(Activator.getFileURL(RhqConstants.RHQ_STANDALONE_DEPLOYER_URL));
 		} catch (IOException e) {
-			e.printStackTrace();
+			Activator.getLog().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_CORE_ID,"DeployerProvider.initializeLocalDeployer " + e.getMessage()));
 		}
 		Path path = getDeployerPath();
 		if (path == null || !isExexutable()) {
@@ -87,34 +90,34 @@ public enum DeployerProvider {
      */
     private void initializeDeployer(URL zippedDeployer) throws IOException{
  
-    		//avoid multiple initialization
-    		if(isExexutable())
-    			return;
-    		
-    		setDirectory("rhq_standalone_deployer");
-			InputStream in = zippedDeployer.openStream();													
-			String pathToArchive = fDeployerDirPath.toString() + FILE_SEPARATOR + RhqConstants.RHQ_STANDALONE_DEPLOYER;
-			File f = new File(pathToArchive);
-			FileOutputStream out = new FileOutputStream(f);
-			f.deleteOnExit();
-			ArchiveReader.copyInputStream(in, out);
-			ArchiveReader.unzipArchive(pathToArchive, fDeployerDirPath.toString(),true);
-			
-			out.close();
-			in.close();
-			//removes .zip
-			String deployerDir = RhqConstants.RHQ_STANDALONE_DEPLOYER.toString().substring(0,RhqConstants.RHQ_STANDALONE_DEPLOYER.length() - 4);
-			
-			if(System.getProperty("os.name").equals("Windows")) {
-				fDeployerPath = FileSystems.getDefault().getPath(fDeployerDirPath +FILE_SEPARATOR+
-						deployerDir+FILE_SEPARATOR+"bin"+FILE_SEPARATOR+"rhq-ant.bat");
-			} else {
-	    		fDeployerPath = FileSystems.getDefault().getPath(fDeployerDirPath +FILE_SEPARATOR+
-	    				deployerDir+FILE_SEPARATOR+"bin"+FILE_SEPARATOR+"rhq-ant");
-			}
-			setPermisions();
-			if(!isExexutable())
-				throw new IOException("Deployer isn't executable");
+		//avoid multiple initialization
+		if(isExexutable())
+			return;
+		
+		setDirectory("rhq_standalone_deployer");
+		InputStream in = zippedDeployer.openStream();													
+		String pathToArchive = fDeployerDirPath.toString() + FILE_SEPARATOR + RhqConstants.RHQ_STANDALONE_DEPLOYER;
+		File f = new File(pathToArchive);
+		FileOutputStream out = new FileOutputStream(f);
+		f.deleteOnExit();
+		ArchiveReader.copyInputStream(in, out);
+		ArchiveReader.unzipArchive(pathToArchive, fDeployerDirPath.toString(),true);
+		
+		out.close();
+		in.close();
+		//removes .zip
+		String deployerDir = RhqConstants.RHQ_STANDALONE_DEPLOYER.toString().substring(0,RhqConstants.RHQ_STANDALONE_DEPLOYER.length() - 4);
+		
+		if(System.getProperty("os.name").equals("Windows")) {
+			fDeployerPath = FileSystems.getDefault().getPath(fDeployerDirPath +FILE_SEPARATOR+
+					deployerDir+FILE_SEPARATOR+"bin"+FILE_SEPARATOR+"rhq-ant.bat");
+		} else {
+    		fDeployerPath = FileSystems.getDefault().getPath(fDeployerDirPath +FILE_SEPARATOR+
+    				deployerDir+FILE_SEPARATOR+"bin"+FILE_SEPARATOR+"rhq-ant");
+		}
+		setPermisions();
+		if(!isExexutable())
+			throw new IOException("Deployer isn't executable");
 			
     }
     

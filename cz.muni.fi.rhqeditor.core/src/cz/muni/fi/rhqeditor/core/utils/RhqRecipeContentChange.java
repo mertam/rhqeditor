@@ -5,10 +5,14 @@ import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.swt.widgets.Display;
+
+import cz.muni.fi.rhqeditor.core.Activator;
 
 /**
  * class used for refactoring recipe content
@@ -57,7 +61,7 @@ public class RhqRecipeContentChange extends TextFileChange {
 					document.set(content);
 					performEdits(document);
 				} catch (CoreException | BadLocationException e) {
-					e.printStackTrace();
+					Activator.getLog().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_CORE_ID,"RhqRecipeContentChange.refactorFileName " + e.getMessage()));
 				}
 			}
 		});
@@ -91,7 +95,7 @@ public class RhqRecipeContentChange extends TextFileChange {
 					performEdits(document);
 
 				} catch (BadLocationException | CoreException e) {
-					e.printStackTrace();
+					Activator.getLog().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_CORE_ID,"RhqRecipeContentChange.addTask " + e.getMessage()));
 				}
 
 			}

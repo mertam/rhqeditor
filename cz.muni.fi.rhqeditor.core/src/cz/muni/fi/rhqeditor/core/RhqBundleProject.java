@@ -141,10 +141,6 @@ public class RhqBundleProject {
 	    IFolder folder = project.getFolder(".bin");
 	    if(!folder.exists())
 	    	folder.create(true, true, null);
-	    
-	    
-	   
-
 	}
 	
 	

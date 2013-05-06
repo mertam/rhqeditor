@@ -7,6 +7,8 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.swt.SWT;
@@ -15,8 +17,10 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWizard;
 
+import cz.muni.fi.rhqeditor.core.Activator;
 import cz.muni.fi.rhqeditor.core.utils.BundleExport;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
+import cz.muni.fi.rhqeditor.ui.UiActivator;
 
 public class ExportBundleWizard extends Wizard implements IWorkbenchWizard {
 
@@ -47,7 +51,7 @@ public class ExportBundleWizard extends Wizard implements IWorkbenchWizard {
 			if(checkNature())
 				fPage1.setProject(fProject.getName());
 		} catch (CoreException e) {
-			e.printStackTrace();
+			Activator.getLog().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_UI_ID,"ExportBundleWizard.addPages " + e.getMessage()));
 		}
 		super.addPages();
 	}
@@ -77,8 +81,7 @@ public class ExportBundleWizard extends Wizard implements IWorkbenchWizard {
 			
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			UiActivator.getLogger().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_UI_ID,"ExportBundleeWizard.performFinish " + e.getMessage()));
 		}
 		return true;
 	}

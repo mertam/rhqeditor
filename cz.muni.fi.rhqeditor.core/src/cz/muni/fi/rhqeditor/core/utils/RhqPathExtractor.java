@@ -28,6 +28,8 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
+import cz.muni.fi.rhqeditor.core.Activator;
+
 
 /**
  * This class provides functionality for extracting all files from project directory and all sub directories.
@@ -269,6 +271,7 @@ public class RhqPathExtractor {
 			}
 		
 		} catch (CoreException e) {
+			Activator.getLog().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_CORE_ID,"RhqPathExtractor.listFiles " + e.getMessage()));
 			fShouldBeJobScheduled.compareAndSet(false, true);
 		}
 		
@@ -346,8 +349,7 @@ public class RhqPathExtractor {
 					Collections.sort(filesOfArchive,fPathComparator);
 					fArchiveContent.put(pathToArchive, filesOfArchive);
 				} catch (IOException e) {
-					System.out.println("cannot open " + finalPath);
-					e.printStackTrace();
+					Activator.getLog().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_CORE_ID,"RhqPathExtractor.manageArchive" + e.getMessage()));
 					return Status.CANCEL_STATUS;
 				} 
 				return Status.OK_STATUS;
@@ -505,8 +507,8 @@ public class RhqPathExtractor {
 					manageResource(resource);
 			}
 		}
-		} catch (CoreException ex){
-			ex.printStackTrace();
+		} catch (CoreException e){
+			Activator.getLog().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_CORE_ID,"RhqPathExtractor.addFolder" + e.getMessage()));
 		}
 	}
 	

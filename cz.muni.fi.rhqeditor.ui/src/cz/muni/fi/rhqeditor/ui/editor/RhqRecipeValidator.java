@@ -12,7 +12,9 @@ import javax.xml.parsers.SAXParserFactory;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.text.IDocument;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -29,6 +31,7 @@ import cz.muni.fi.rhqeditor.core.utils.InputPropertiesManager;
 import cz.muni.fi.rhqeditor.core.utils.RecipeReader;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
 import cz.muni.fi.rhqeditor.core.utils.RhqPathExtractor;
+import cz.muni.fi.rhqeditor.ui.UiActivator;
 
 
 /**
@@ -112,8 +115,7 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 			//do nothing if document isn't well formed
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			UiActivator.getLogger().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_UI_ID, e.getMessage()));
 		}
 	}
 	

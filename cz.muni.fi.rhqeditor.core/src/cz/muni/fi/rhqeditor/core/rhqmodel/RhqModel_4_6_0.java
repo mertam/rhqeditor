@@ -11,6 +11,8 @@ import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -196,7 +198,7 @@ class RhqModel_4_6_0 implements IRhqModel {
 			return tasks;
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			Activator.getLog().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_CORE_ID,"RhqModel_4_6_0.readDocument " + e.getMessage()));
 		}
 
 		return null;

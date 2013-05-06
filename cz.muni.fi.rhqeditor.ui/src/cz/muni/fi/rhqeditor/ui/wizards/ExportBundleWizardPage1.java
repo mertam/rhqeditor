@@ -41,7 +41,6 @@ public class ExportBundleWizardPage1 extends WizardPage {
 	protected ExportBundleWizardPage1(String pageName, String title,
 			ImageDescriptor titleImage) {
 		super(pageName, title, titleImage);
-		// TODO Auto-generated constructor stub
 	}
 	
 

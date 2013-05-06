@@ -18,6 +18,7 @@ import org.eclipse.ui.PlatformUI;
 
 import cz.muni.fi.rhqeditor.core.RhqBundleProject;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
+import cz.muni.fi.rhqeditor.ui.UiActivator;
 
 public class ImportBundleArchiveWizard extends Wizard implements IWorkbenchWizard{
 
@@ -56,9 +57,11 @@ public class ImportBundleArchiveWizard extends Wizard implements IWorkbenchWizar
 			}
 		} catch (CoreException e){
 			ErrorDialog.openError(new Shell(), "Project creationg error", e.getMessage(),e.getStatus());
+			UiActivator.getLogger().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_UI_ID,"ImportBundleArchiveWizard.performFinish " + e.getMessage()));
 		} catch (IOException e) {
 			ErrorDialog.openError(new Shell(), "Project importing error", e.getMessage(),new Status(IStatus.ERROR,
 					RhqConstants.PLUGIN_UI_ID, "Import error occured"));
+			UiActivator.getLogger().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_UI_ID,"ImportBundleArchiveWizard.performFinish " + e.getMessage()));
 		}
 		return true;
 	}

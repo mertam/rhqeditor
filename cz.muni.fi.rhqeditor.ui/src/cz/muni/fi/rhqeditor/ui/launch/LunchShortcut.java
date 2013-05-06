@@ -22,6 +22,7 @@ import org.eclipse.ui.IEditorPart;
 
 import cz.muni.fi.rhqeditor.core.launch.LaunchConfigurationsManager;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
+import cz.muni.fi.rhqeditor.ui.UiActivator;
 import cz.muni.fi.rhqeditor.ui.editor.RhqEditor;
 
 /**
@@ -88,7 +89,7 @@ public class LunchShortcut implements ILaunchShortcut {
 				//run first when something happen ?
 				configs[0].launch(ILaunchManager.RUN_MODE, new NullProgressMonitor());
 			} catch (CoreException e) {
-				e.printStackTrace();
+				UiActivator.getLogger().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_UI_ID,"LunchShortcut.launch " + e.getMessage()));
 			}
 		}
 

@@ -6,9 +6,12 @@ import java.util.List;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModel;
 
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
+import cz.muni.fi.rhqeditor.ui.UiActivator;
 
 
 public class RhqAnnotationModel extends ResourceMarkerAnnotationModel{
@@ -32,7 +35,7 @@ public class RhqAnnotationModel extends ResourceMarkerAnnotationModel{
 		IMarker[] field = markers.toArray(new IMarker[markers.size()]);
 		deleteMarkers(field);
 		}catch(CoreException e){
-			e.printStackTrace();
+			UiActivator.getLogger().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_UI_ID,"RhqAnnotationModel.removeMarkers " + e.getMessage()));
 		}
 	}
 	
@@ -52,7 +55,7 @@ public class RhqAnnotationModel extends ResourceMarkerAnnotationModel{
 				type = IMarker.SEVERITY_WARNING;
 			marker.setAttribute(IMarker.SEVERITY, type	);
 		} catch (CoreException e) {
-			e.printStackTrace();
+			UiActivator.getLogger().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_UI_ID,"RhqAnnotationModel.addMarker " + e.getMessage()));
 		}
 	}
 	

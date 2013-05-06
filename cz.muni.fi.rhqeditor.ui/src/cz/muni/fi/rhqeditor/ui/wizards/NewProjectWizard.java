@@ -3,6 +3,8 @@ package cz.muni.fi.rhqeditor.ui.wizards;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -12,6 +14,8 @@ import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.ui.PlatformUI;
 
 import cz.muni.fi.rhqeditor.core.RhqBundleProject;
+import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
+import cz.muni.fi.rhqeditor.ui.UiActivator;
 
 public class NewProjectWizard extends Wizard implements IWorkbenchWizard{
 
@@ -19,8 +23,7 @@ public class NewProjectWizard extends Wizard implements IWorkbenchWizard{
 	private IStructuredSelection 	selection;
 
 	
-	public NewProjectWizard()
-	{
+	public NewProjectWizard() {
 		super();
 	}
 	
@@ -30,7 +33,7 @@ public class NewProjectWizard extends Wizard implements IWorkbenchWizard{
 	}
 	
 	@Override
-	public void addPages(){
+	public void addPages() {
 		
 		page1  = new NewProjectWizardPage1("ProjectWizardPage1");
 		page1.setSelection(selection);
@@ -40,24 +43,21 @@ public class NewProjectWizard extends Wizard implements IWorkbenchWizard{
 
 	@Override
 	public boolean performFinish() {
-		try{
+		try {
 			RhqBundleProject project = new RhqBundleProject();
 			IPath path = page1.getLocationPath();
-			if(path == null || path.equals(ResourcesPlugin.getWorkspace().getRoot().getLocation())){
+			if (path == null || path.equals(ResourcesPlugin.getWorkspace().getRoot().getLocation())) {
 				project.createProject(page1.getProjectName(), null);
 				project.createDefaultRecipe(page1.getProjectName(),page1.getBundleName(),page1.getBundleVersion());
-			}else{
+			} else {
 				project.createProject(page1.getProjectName(), path);
 				project.createDefaultRecipe(page1.getProjectName(),page1.getBundleName(),page1.getBundleVersion());
 			}
 			PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(page1.getProjectHandle(), page1.getWorkingSets());
-			
-				
 		
-		}catch(CoreException ex)
-		{
-			ErrorDialog.openError(new Shell(), "Project creationg error", ex.getMessage(),ex.getStatus());
-			ex.printStackTrace();
+		} catch (CoreException e) {
+			ErrorDialog.openError(new Shell(), "Project creationg error", e.getMessage(),e.getStatus());
+			UiActivator.getLogger().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_UI_ID,"NewProjectWizard.performFinish " + e.getMessage()));
 		}
 		return true;
 	}

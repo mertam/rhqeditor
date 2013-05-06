@@ -2,12 +2,15 @@ package cz.muni.fi.rhqeditor.core;
 
 import java.net.URL;
 
+import org.eclipse.core.runtime.ILog;
+import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
 public class Activator implements BundleActivator {
 
 	private static BundleContext context;
+	private static ILog fLogger;
 
 	static BundleContext getContext() {
 		return context;
@@ -19,6 +22,7 @@ public class Activator implements BundleActivator {
 	 */
 	public void start(BundleContext bundleContext) throws Exception {
 		context = bundleContext;
+		fLogger = Platform.getLog(context.getBundle());
 	}
 
 	/*
@@ -36,6 +40,10 @@ public class Activator implements BundleActivator {
 	 */
 	public static URL getFileURL(String file){
 		return  context.getBundle().getEntry(file);
+	}
+	
+	public static ILog getLog() {
+		return fLogger;
 	}
 
 }

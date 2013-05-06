@@ -15,7 +15,10 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
+import cz.muni.fi.rhqeditor.core.Activator;
 import cz.muni.fi.rhqeditor.core.ProjectInitializer;
 import cz.muni.fi.rhqeditor.core.launch.LaunchConfigurationsManager;
 import cz.muni.fi.rhqeditor.core.utils.ExtractorProvider;
@@ -161,7 +164,7 @@ public class RhqResourceChangeListener implements IResourceChangeListener {
 					|| !project.hasNature(RhqConstants.RHQ_NATURE_ID))
 				return;
 		} catch (CoreException e) {
-			e.printStackTrace();
+			Activator.getLog().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_CORE_ID,"RhqResourceChangeListener.handleProjectChange " + e.getMessage()));
 			return;
 		}
 

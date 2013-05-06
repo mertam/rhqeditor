@@ -3,6 +3,8 @@ package cz.muni.fi.rhqeditor.ui.launch;
 import java.util.HashMap;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
@@ -33,6 +35,7 @@ import cz.muni.fi.rhqeditor.core.utils.InputPropertiesManager;
 import cz.muni.fi.rhqeditor.core.utils.InputProperty;
 import cz.muni.fi.rhqeditor.core.utils.RecipeReader;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
+import cz.muni.fi.rhqeditor.ui.UiActivator;
 
 
 public class LaunchPropertiesTab extends AbstractLaunchConfigurationTab{
@@ -134,33 +137,33 @@ public class LaunchPropertiesTab extends AbstractLaunchConfigurationTab{
 		         Point pt = new Point(event.x, event.y);
 		         int index = fTable.getTopIndex();
 		         while (index < fTable.getItemCount()) {
-		           boolean visible = false;
-		           final TableItem item = fTable.getItem(index);
+		        	 boolean visible = false;
+		        	 final TableItem item = fTable.getItem(index);
 		           
 		             Rectangle rect = item.getBounds(1);
 		             if (rect.contains(pt)) {
-		               final int column = 1;
-		               final Text text = new Text(fTable, SWT.NONE);
-		               Listener textListener = new Listener() {
+		            	 final int column = 1;
+		            	 final Text text = new Text(fTable, SWT.NONE);
+		            	 Listener textListener = new Listener() {
 		                 public void handleEvent(final Event e) {
-		                   switch (e.type) {
-		                   case SWT.FocusOut:
-		                     item.setText(column, text.getText());
-		                     text.dispose();
-		                     break;
-		                   case SWT.Traverse:
-		                     switch (e.detail) {
-		                     case SWT.TRAVERSE_RETURN:
-		                       item
-		                           .setText(column, text
+		                	 switch (e.type) {
+		                	 case SWT.FocusOut:
+		                		 item.setText(column, text.getText());
+		                		 text.dispose();
+		                		 break;
+		                	 case SWT.Traverse:
+		                     
+		                		 switch (e.detail) {
+		                		 	case SWT.TRAVERSE_RETURN:
+		                		 		item.setText(column, text
 		                               .getText());
-		                     // FALL THROUGH
-		                     case SWT.TRAVERSE_ESCAPE:
-		                       text.dispose();
-		                       e.doit = false;
-		                     }
-		                     break;
-		                   }
+		                		 		// FALL THROUGH
+		                		 	case SWT.TRAVERSE_ESCAPE:
+		                		 		text.dispose();
+		                		 		e.doit = false;
+		                		 }
+		                		 break;
+		                	 }
 		                 }
 		               };
 		               text.addListener(SWT.FocusOut, textListener);
@@ -230,7 +233,7 @@ public class LaunchPropertiesTab extends AbstractLaunchConfigurationTab{
 			
 			
 		} catch(CoreException e){
-			
+			UiActivator.getLogger().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_UI_ID,"LaunchPropertiesTab.initializeFrom " + e.getMessage()));
 		}
 	}
 
@@ -280,7 +283,7 @@ public class LaunchPropertiesTab extends AbstractLaunchConfigurationTab{
 
 		} catch(CoreException e){
 			//loading property error
-			e.printStackTrace();
+			UiActivator.getLogger().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_UI_ID,"LaunchPropertiesTab.initializeTable " + e.getMessage()));
 		}
 		
 	}

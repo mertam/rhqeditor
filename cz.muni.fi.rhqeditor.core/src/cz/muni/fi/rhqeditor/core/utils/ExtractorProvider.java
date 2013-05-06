@@ -35,6 +35,7 @@ public enum ExtractorProvider {
 	     * @param extractor
 	     */
 	    public void attachExtractorToProject(IProject project, RhqPathExtractor extractor){
+	    	
 	    	map.put(project,extractor);
 	    }
 	    	    

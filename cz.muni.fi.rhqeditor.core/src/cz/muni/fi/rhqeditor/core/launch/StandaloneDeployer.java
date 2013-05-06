@@ -22,6 +22,7 @@ import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 
+import cz.muni.fi.rhqeditor.core.Activator;
 import cz.muni.fi.rhqeditor.core.utils.InputPropertiesManager;
 import cz.muni.fi.rhqeditor.core.utils.InputProperty;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
@@ -160,8 +161,7 @@ public class StandaloneDeployer {
 			System.out.println(deployCommand);
 
 		} catch (CoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Activator.getLog().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_CORE_ID,"StandaloneDeployer.deploy " + e.getMessage()));
 		}
 
 		if (monitor.isCanceled()) {
@@ -200,9 +200,8 @@ public class StandaloneDeployer {
 				}
 				try {
 					fProject.refreshLocal(IResource.DEPTH_INFINITE, null);
-				} catch (CoreException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+				} catch (CoreException e) {
+					Activator.getLog().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_CORE_ID,"StandaloneDeployer.deploy.run " + e.getMessage()));
 				}
 				return Status.OK_STATUS;
 			}
@@ -241,8 +240,7 @@ public class StandaloneDeployer {
 										+ res.getName()), true, null);
 			}
 		} catch (CoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Activator.getLog().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_CORE_ID,"StandaloneDeployer.initializeDeployment " + e.getMessage()));
 		}
 	}
 

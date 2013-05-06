@@ -10,6 +10,11 @@ import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
+import cz.muni.fi.rhqeditor.core.Activator;
+
 
 public class ArchiveReader {
 
@@ -50,6 +55,7 @@ public class ArchiveReader {
 			ZipEntry entry = archive.getEntry(RhqConstants.RHQ_RECIPE_FILE);
 			return entry != null;
 		} catch (IOException e) {
+			Activator.getLog().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_CORE_ID,"ArchiveReader.isBundle" + e.getMessage()));
 		}
 		return false;
 

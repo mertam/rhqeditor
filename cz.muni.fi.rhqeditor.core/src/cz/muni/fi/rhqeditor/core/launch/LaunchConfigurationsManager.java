@@ -4,12 +4,15 @@ import java.util.ArrayList;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 
+import cz.muni.fi.rhqeditor.core.Activator;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
 
 
@@ -45,6 +48,7 @@ public class LaunchConfigurationsManager {
 				}
 			}
 		} catch (CoreException e) {
+			Activator.getLog().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_CORE_ID,"LaunchConfigurationsManager.getConfigurationsForProject " + e.getMessage()));
 			return configs.toArray(new ILaunchConfiguration[configs.size()]);
 		}
 		return configs.toArray(new ILaunchConfiguration[configs.size()]);
@@ -95,8 +99,7 @@ public class LaunchConfigurationsManager {
 				config.delete();
 			}
 		} catch (CoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Activator.getLog().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_CORE_ID,"LaunchConfigurationsManager.removeConfigurationsOfProject " + e.getMessage()));
 		}
 	}
 }

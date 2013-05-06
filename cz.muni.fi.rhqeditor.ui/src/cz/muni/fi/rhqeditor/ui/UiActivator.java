@@ -2,6 +2,8 @@ package cz.muni.fi.rhqeditor.ui;
 
 import java.net.URL;
 
+import org.eclipse.core.runtime.ILog;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -18,7 +20,7 @@ public class UiActivator extends AbstractUIPlugin {
 
 	// The shared instance
 	private static UiActivator plugin;
-	
+	private static ILog fLogger;
 	/**
 	 * The constructor
 	 */
@@ -34,6 +36,7 @@ public class UiActivator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		fLogger = Platform.getLog(context.getBundle());
 	}
 
 	/*
@@ -69,5 +72,8 @@ public class UiActivator extends AbstractUIPlugin {
 	public static URL getFileURL(String file){
 		return  plugin.getBundle().getEntry(file);
 	}
-
+	
+	public static ILog getLogger() {
+		return fLogger;
+	}
 }
