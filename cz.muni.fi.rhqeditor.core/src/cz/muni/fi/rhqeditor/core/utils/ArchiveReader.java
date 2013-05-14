@@ -50,12 +50,14 @@ public class ArchiveReader {
 	 * @return true if contains deploy.xml
 	 */
 	public static boolean isBundle(File file) {
-
+		
 		try (ZipFile archive = new ZipFile(file, ZipFile.OPEN_READ);) {
 			ZipEntry entry = archive.getEntry(RhqConstants.RHQ_RECIPE_FILE);
 			return entry != null;
 		} catch (IOException e) {
-			Activator.getLog().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_CORE_ID,"ArchiveReader.isBundle" + e.getMessage()));
+			e.printStackTrace();
+			System.out.println(file);
+			Activator.getLog().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_CORE_ID,"ERROR while opening file +" +file+" " + e.getMessage()));
 		}
 		return false;
 
@@ -75,7 +77,7 @@ public class ArchiveReader {
 		ZipFile zipFile = new ZipFile(pathToArchive);
 
 		Enumeration<? extends ZipEntry> entries = zipFile.entries();
-
+		
 		while (entries.hasMoreElements()) {
 			ZipEntry entry = (ZipEntry) entries.nextElement();
 

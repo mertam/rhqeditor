@@ -1,6 +1,8 @@
 package cz.muni.fi.rhqeditor.ui.launch;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
@@ -21,6 +23,9 @@ import org.eclipse.swt.widgets.Text;
 
 import cz.muni.fi.rhqeditor.core.utils.ExtractorProvider;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
+import cz.muni.fi.rhqeditor.ui.UiActivator;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.ModifyEvent;
 
 
 public class LaunchMainTab extends AbstractLaunchConfigurationTab {
@@ -44,6 +49,7 @@ public class LaunchMainTab extends AbstractLaunchConfigurationTab {
 
 	/**
 	 * creates content of tab
+	 * @wbp.parser.entryPoint
 	 */
 	@Override
 	public void createControl(Composite parent) {
@@ -77,7 +83,7 @@ public class LaunchMainTab extends AbstractLaunchConfigurationTab {
 		grpDeployerSettings = new Group(myComposite, SWT.NONE);
 		grpDeployerSettings.setText("Deployer settings");
 		FormData fd_grpDeployerSettings = new FormData();
-		fd_grpDeployerSettings.bottom = new FormAttachment(100, -128);
+		fd_grpDeployerSettings.bottom = new FormAttachment(100, -165);
 		fd_grpDeployerSettings.top = new FormAttachment(fComboProject, 6);
 		fd_grpDeployerSettings.left = new FormAttachment(0, 5);
 		fd_grpDeployerSettings.right = new FormAttachment(0, 440);
@@ -96,36 +102,41 @@ public class LaunchMainTab extends AbstractLaunchConfigurationTab {
 					}
 				});
 				
-						fBtnUseDafaultDeployer.setSelection(fUseDefault);
-						fBtnUseDafaultDeployer.setText("Use dafault deployer (version 4.5.1)");
+		fBtnUseDafaultDeployer.setSelection(fUseDefault);
+		fBtnUseDafaultDeployer.setText("Use dafault deployer (version 4.6.0)");
+		
+		// for default purposes
+		fBtnUseDafaultDeployer.setSelection(true);
 						
-								// for default purposes
-								fBtnUseDafaultDeployer.setSelection(true);
-								
-										fLblPathToLocal = new Label(grpDeployerSettings, SWT.NONE);
-										fLblPathToLocal.setBounds(10, 51, 157, 14);
-										//				fd_text.top = new FormAttachment(fLblPathToLocal, 6);
-														fLblPathToLocal.setText("Path to local standalone deployer:");
-														
-																fTextDeployerPath = new Text(grpDeployerSettings, SWT.BORDER);
-																fTextDeployerPath.setBounds(10, 71, 354, 24);
-																fTextDeployerPath.setTouchEnabled(true);
-																fTextDeployerPath.setMessage("Path to local deployer");
+		fLblPathToLocal = new Label(grpDeployerSettings, SWT.NONE);
+		fLblPathToLocal.setBounds(10, 51, 157, 14);
+		//				fd_text.top = new FormAttachment(fLblPathToLocal, 6);
+		fLblPathToLocal.setText("Path to local standalone deployer:");
+
+		fTextDeployerPath = new Text(grpDeployerSettings, SWT.BORDER);
+		fTextDeployerPath.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				updateLaunchConfigurationDialog();
+			}
+		});
+		fTextDeployerPath.setBounds(10, 71, 354, 24);
+		fTextDeployerPath.setTouchEnabled(true);
+		fTextDeployerPath.setMessage("Path to local deployer");
 																
-																		fBtnBrowseDeployer = new Button(grpDeployerSettings, SWT.NONE);
-																		fBtnBrowseDeployer.setBounds(370, 71, 55, 26);
-																		
-																				// selection of deployer
-																				fBtnBrowseDeployer.addSelectionListener(new SelectionAdapter() {
-																					@Override
-																					public void widgetSelected(SelectionEvent e) {
-																						Shell shell = new Shell();
-																						openSelectFileDialog(shell);
-																						updateLaunchConfigurationDialog();
-																					}
-																				});
-																				fd_text.right = new FormAttachment(fBtnBrowseDeployer, -6);
-																				fBtnBrowseDeployer.setText("Browse...");
+		fBtnBrowseDeployer = new Button(grpDeployerSettings, SWT.NONE);
+		fBtnBrowseDeployer.setBounds(370, 71, 55, 26);
+		
+				// selection of deployer
+		fBtnBrowseDeployer.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Shell shell = new Shell();
+				openSelectFileDialog(shell);
+				updateLaunchConfigurationDialog();
+			}
+		});
+		fd_text.right = new FormAttachment(fBtnBrowseDeployer, -6);
+		fBtnBrowseDeployer.setText("Browse...");
 		enableLocalDeployerWidgets(false);
 
 	}
@@ -162,18 +173,18 @@ public class LaunchMainTab extends AbstractLaunchConfigurationTab {
 			fTextDeployerPath.setText(flocalDeployer);
 
 			fComboProject.select(selectedIndex);
+			
 			fBtnUseDafaultDeployer.setSelection(fUseDefault);
 			enableLocalDeployerWidgets(!fUseDefault);
 			// updateLaunchConfigurationDialog();
 		} catch (CoreException e) {
-			e.printStackTrace();
+			UiActivator.getLogger().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_UI_ID,"LaunchMainTab.initializeFrom " + e.getMessage()));
 			// use default setting when error occurs
 
 			try {
 				setDefaults(configuration.getWorkingCopy());
 			} catch (CoreException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				UiActivator.getLogger().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_UI_ID,"LaunchMainTab.initializeFrom " + e1.getMessage()));
 			}
 		}
 
@@ -181,8 +192,11 @@ public class LaunchMainTab extends AbstractLaunchConfigurationTab {
 
 	@Override
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
+		int selectionIndex = fComboProject.getSelectionIndex();
+		if (selectionIndex  > -1) {
 		configuration.setAttribute(RhqConstants.RHQ_LAUNCH_ATTR_PROJECT,
-				fComboProject.getItem(fComboProject.getSelectionIndex()));
+				fComboProject.getItem(selectionIndex));
+		}
 		configuration.setAttribute(
 				RhqConstants.RHQ_LAUNCH_ATTR_USE_DEFAULT_DEPLOYER,
 				fBtnUseDafaultDeployer.getSelection());

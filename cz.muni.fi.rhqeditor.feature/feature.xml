@@ -4,16 +4,16 @@
       label="RHQ Editor"
       version="1.0.0.qualifier">
 
-   <description url="http://www.example.com/description">
-      Add description.
+   <description>
+      This feature provides RHQ bundle editor. Contains set of Eclipse plugins (based on Eclipse juno) that helps you create RHQ bundle.
    </description>
 
-   <copyright url="http://www.example.com/copyright">
-      Add copyright
+   <copyright>
+  
    </copyright>
 
-   <license url="http://www.example.com/license">
-      FOSS
+   <license>
+ 	This software is distributed under FLOSS licence.
    </license>
       
    <plugin

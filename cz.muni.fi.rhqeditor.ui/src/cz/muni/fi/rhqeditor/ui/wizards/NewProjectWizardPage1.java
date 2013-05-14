@@ -32,7 +32,7 @@ public class NewProjectWizardPage1 extends WizardNewProjectCreationPage{
 	
 	@Override
 	public void createControl(Composite parent) {
-
+		this.setMessage("Create new RHQ bundle project");
 		super.createControl(parent);    
 		Composite container = (Composite) getControl();
 		

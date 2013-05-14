@@ -82,6 +82,7 @@ public class ExportBundleWizardPage1 extends WizardPage {
                   
                   lblDummylabel = new Label(fContainer, SWT.NONE);
                   lblDummylabel.setText("dummyLabel");
+                  lblDummylabel.setVisible(false);
              
                   
                   Label lblExportDir = new Label(fContainer, SWT.NONE);
@@ -165,6 +166,7 @@ public class ExportBundleWizardPage1 extends WizardPage {
 	}
 	
 	protected boolean validateFileName(){
+		if (RhqConstants.isSupportedArchive(fBundleName))
 		if(fBundleName.endsWith(RhqConstants.RHQ_ARCHIVE_JAR_SUFFIX)
 				|| fBundleName.endsWith(RhqConstants.RHQ_ARCHIVE_ZIP_SUFFIX))
 			return true;

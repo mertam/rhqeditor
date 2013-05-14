@@ -117,9 +117,7 @@ public class RhqResourceChangeListener implements IResourceChangeListener {
 		for(IPath addedFile: fAddedFiles){
 			project = getProjectFromPath(addedFile);
 			
-			String extension = addedFile.getFileExtension();
-			if(extension.equalsIgnoreCase("zip") 
-					|| extension.equalsIgnoreCase("jar") ) {
+			if (RhqConstants.isSupportedArchive(addedFile)) {
 				ExtractorProvider.INSTANCE.getExtractor(project)
 					.addArchive(addedFile.removeFirstSegments(1));
 			} else {
@@ -230,10 +228,9 @@ public class RhqResourceChangeListener implements IResourceChangeListener {
 			
 			switch (currentDelta.getKind()) {
 			case IResourceDelta.ADDED:
-				System.out.println("added " + currentResource.getName());
 				// ignore added files into proj/.bin of proj/build
 				if (currentResource.getFullPath()
-						.removeFirstSegments(1).toString().startsWith(RhqConstants.RHQ_DEFAULT_BUILD_DIR) ||
+						.removeFirstSegments(1).toString().startsWith(RhqConstants.RHQ_DEFAULT_DEPLOY_DIR) ||
 					currentResource.getFullPath()
 						.removeFirstSegments(1).toString().startsWith(RhqConstants.RHQ_DEFAULT_BUILD_DIR))
 						{
@@ -265,7 +262,6 @@ public class RhqResourceChangeListener implements IResourceChangeListener {
 				if(fileExtension != null 
 						&& (fileExtension.equalsIgnoreCase("zip") 
 								|| fileExtension.equalsIgnoreCase("jar"))) {
-					System.out.println("changed" + currentResource.getFullPath());
 					extractor.reloadArchive(currentResource.getFullPath().removeFirstSegments(1));
 					break;
 				}
@@ -278,15 +274,13 @@ public class RhqResourceChangeListener implements IResourceChangeListener {
 				break;
 
 			case IResourceDelta.REMOVED:
-				System.out.println("removed " + currentResource.getName());
 				if (currentResource.getFullPath()
-						.removeFirstSegments(1).toString().startsWith(RhqConstants.RHQ_DEFAULT_BUILD_DIR) ||
+						.removeFirstSegments(1).toString().startsWith(RhqConstants.RHQ_DEFAULT_DEPLOY_DIR) ||
 					currentResource.getFullPath()
 						.removeFirstSegments(1).toString().startsWith(RhqConstants.RHQ_DEFAULT_BUILD_DIR))
 						{
 					break;
 				}
-				System.out.println("REMOVE: "+ currentDelta.getFullPath());
 				extractor.removeFile(currentDelta.getFullPath()
 						.removeFirstSegments(1));
 				removedResourcePath = currentDelta.getFullPath();

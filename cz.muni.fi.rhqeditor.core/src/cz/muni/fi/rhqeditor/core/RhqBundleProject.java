@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.eclipse.core.internal.resources.ProjectDescription;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -48,7 +47,7 @@ public class RhqBundleProject {
 		
 		IProjectDescription description;
 		if(location != null){
-			description = new ProjectDescription();
+			description = project.getDescription();
 			description.setLocation(location);
 			description.setName(projectName);
 			String[] natures = new String[1];

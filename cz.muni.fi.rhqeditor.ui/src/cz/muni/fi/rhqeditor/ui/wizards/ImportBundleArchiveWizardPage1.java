@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Stack;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -65,6 +66,11 @@ public class ImportBundleArchiveWizardPage1 extends WizardPage {
 	private static final int COMBO_HISTORY 			= 5;
 	private String[] comboState;
 	private int comboStateIndex = 0;
+	
+	/**
+	 * mutex used to prevent multiple directory scanning
+	 */
+	private AtomicBoolean fMutex = new AtomicBoolean(false);
 	
 	//set of existing project in workspace
 	private HashSet<String> existingProjects = new HashSet<>();
@@ -146,15 +152,7 @@ public class ImportBundleArchiveWizardPage1 extends WizardPage {
 	      	@Override
 	      	public void widgetSelected(SelectionEvent e) {
 	      		openSelectDirectoryDialog(new Shell());
-	      		if(lastSearchedPath != null && !lastSearchedPath.equals(fBudleImportDirectory)){
-		    		File dir = new File(fBudleImportDirectory);
-		    		System.out.println(dir.getAbsolutePath());
-		    		
-		    		getItemsFromDirectory(dir);
-		    		setComboAfterChange();
-		    		setComplete();
-	      		}
-	      		lastSearchedPath = fBudleImportDirectory;
+	      		scanProjects();	
 	      	}
 	      });
 	    btnBrowse.setText("Browse");
@@ -209,8 +207,11 @@ public class ImportBundleArchiveWizardPage1 extends WizardPage {
 	}
 	
 	private void scanProjects() {
+//		if(fMutex.compareAndSet(false, true) == false) {
+//			return;
+//		}
 		fBudleImportDirectory = fCombo.getText();
-		if(lastSearchedPath != null && !lastSearchedPath.equals(fBudleImportDirectory)){
+		if(lastSearchedPath == null || !lastSearchedPath.equals(fBudleImportDirectory)){
 			File dir = new File(fBudleImportDirectory);
 			System.out.println(dir.getAbsolutePath());
 		
@@ -220,9 +221,12 @@ public class ImportBundleArchiveWizardPage1 extends WizardPage {
 		}
 		
 		lastSearchedPath = fBudleImportDirectory;
+		fMutex.set(false);
 	}
 	
 	private void getItemsFromDirectory(final File dir){
+		
+		
 		table.clearAll();
 		fCheckBoxTableViewer.refresh();
 		if(!dir.isDirectory())
@@ -238,31 +242,35 @@ public class ImportBundleArchiveWizardPage1 extends WizardPage {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-					System.out.println("job start");
+					File currentFile;
 					int worked = 0;
 					monitor.beginTask("Searching for RHQ bundles", 100);
 						while(!folders.empty()){
-								File currentFile;
-								currentFile = folders.pop();
-								monitor.setTaskName(currentFile.getAbsolutePath());
-								for(File file: currentFile.listFiles()){
-									if(file.isDirectory())
-										folders.push(file);
-									if(monitor.isCanceled())
-										return;
-									if(file.isFile() && file.canRead() && checkFile(file)){
-										if(worked < 95){
-											monitor.worked(++worked);
-										}
-										
-										DisplayedObject obj = new DisplayedObject();
-										obj.setName(file.getName());
-										obj.setPath(file.toPath());
-										obj.setRelativeParent(dir.toPath());
-										list.add(obj);
-										
+								
+							currentFile = folders.pop();	
+							if (!currentFile.canRead()) {
+								continue;
+							}
+							
+							monitor.setTaskName(currentFile.getAbsolutePath());
+							for(File file: currentFile.listFiles()){
+								if(file.isDirectory() )
+									folders.push(file);
+								if(monitor.isCanceled())
+									return;
+								if(file.isFile() && file.canRead() && checkFile(file)){
+									if(worked < 95){
+										monitor.worked(++worked);
 									}
+									
+									DisplayedObject obj = new DisplayedObject();
+									obj.setName(file.getName());
+									obj.setPath(file.toPath());
+									obj.setRelativeParent(dir.toPath());
+									list.add(obj);
+									
 								}
+							}
 								
 							
 						}
@@ -280,7 +288,7 @@ public class ImportBundleArchiveWizardPage1 extends WizardPage {
 			});
 		} catch (InvocationTargetException | InterruptedException e1) {
 			setErrorMessage(e1.getMessage());
-		}	
+		} 
 	}
 	
 	/**
@@ -288,7 +296,7 @@ public class ImportBundleArchiveWizardPage1 extends WizardPage {
 	 * @param file
 	 * @return true if file should be added into table
 	 */
-	private boolean checkFile(File file){
+	private boolean checkFile(File file) {
 		if(file.getName().endsWith(RhqConstants.RHQ_ARCHIVE_JAR_SUFFIX) 
 				|| file.getName().endsWith(RhqConstants.RHQ_ARCHIVE_ZIP_SUFFIX))
 			return ArchiveReader.isBundle(file);

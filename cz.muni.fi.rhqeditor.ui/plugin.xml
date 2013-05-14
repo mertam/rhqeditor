@@ -68,13 +68,14 @@
             class="cz.muni.fi.rhqeditor.ui.launch.LunchShortcut"
             id="cz.muni.fi.rhqeditor.ui.shortcut1"
             label="RHQ bundle standalone deployment"
+            description="Standalone deployment of RHQ bundle"
             modes="run"
             icon="icons/rhq.gif"
             >
             <contextualLaunch>
             <contextLabel
                   mode="run"
-                  label="RHQ bundle standalone deployment">
+                  label="Launch RHQ bundle standalone deployment">
             </contextLabel>
             <enablement>
             	<with variable="selection">
@@ -130,29 +131,7 @@
    </extension>
 
 
-<extension point="org.eclipse.ui.navigator.navigatorContent">
-    <commonFilter
-        description="Hides *.pj resources"
-        id="com.xyz.commonFilter.hidePj"
-        name="*.pj resources"
-        activeByDefault="true">
-        <filterExpression>
-            <and>
-                <adapt type="org.eclipse.core.resources.IResource">
-                    <test property="org.eclipse.core.resources.name" value="*.pj"/>
-                </adapt>
-            </and>
-        </filterExpression>
-    </commonFilter>
-</extension>
-<extension point="org.eclipse.ui.navigator.viewer">
-    <viewerContentBinding
-          viewerId="org.eclipse.ui.navigator.ProjectExplorer">
-          <includes>
-            <contentExtension pattern="com.xyz.commonFilter.hidePj"/> 
-          </includes>
-    </viewerContentBinding>
-</extension>
+
 <extension
       id="cz.muni.fi.rhqeditor.import.bundle.wizard"
       point="org.eclipse.ui.importWizards"

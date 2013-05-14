@@ -1,6 +1,10 @@
 package cz.muni.fi.rhqeditor.core.utils;
 
+import java.util.Arrays;
+import java.util.HashSet;
+
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 
@@ -83,6 +87,30 @@ public class RhqConstants {
 			.append(new Path(".metadata/.rhq-dialog-settings.xml")).toString();
 	
 	public static final String RHQ_ALL_POSSIBLE_PARENTS = "#all_posible_parents";
+
+	
+	/**
+	 * lowercase representation of all possible archive types used in <rhq:archive name=""
+	 */
+	public static final HashSet<String> RHQ_SUPPORTED_ARCHIVE_TYPES = new HashSet<>(Arrays.asList(new String[]{"zip","jar","war","ear"}));
+	
+	
+	/**
+	 * finds whetehter is filename valid archive type
+	 * @param filename
+	 * @return
+	 */
+	public static boolean isSupportedArchive(final String filename) {
+		if(filename == null || filename.length() < 4) {
+			return false;
+		}
+		String extension = filename.substring(filename.length() -3, filename.length());
+		return RHQ_SUPPORTED_ARCHIVE_TYPES.contains(extension.toLowerCase());
+	}
+	
+	public static boolean isSupportedArchive( IPath path) {
+		return isSupportedArchive(path.toString());
+	}
 	
 
 }

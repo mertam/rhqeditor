@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -55,7 +56,7 @@ public class BundleExport {
 	 * @return
 	 * @throws IOException
 	 */
-	public boolean exportBundle(boolean overwrite) throws IOException{
+	public boolean exportBundle(boolean overwrite) {
 
 		
 		if(fExtractor.shouldBeListed())
@@ -66,7 +67,18 @@ public class BundleExport {
 	    	return false;
 	    }
 		
-		
+		final HashSet<IPath> foldersToCreate = new HashSet<>();
+		for	(IPath path: fExtractor.getAllFiles()) {
+			 for ( int i = 0; i < path.segmentCount(); i++ ) {
+	    		   
+	    		   for (int j = 0; j < i; j++) {
+	    			   path = path.removeLastSegments(i);
+	    			   System.out.println("added folder: " + path);
+	    			   foldersToCreate.add(path);
+	    		   }
+	    		  
+			 }		
+		}
 	    Job export = new Job("Export RHQ bundle") {
 			
 	    
@@ -76,42 +88,58 @@ public class BundleExport {
 				try(
 					 ZipOutputStream out = new ZipOutputStream(new FileOutputStream(file));
 						) {
+						   int alreadyWorked = 0;
 					 	   byte[] buf = new byte[1024];
 					       IFile currentFile;
+					       FileInputStream in;
+					       
+					       //crate folders
+					       for	(IPath path: foldersToCreate ) {
+					    	   out.putNextEntry(new ZipEntry(path.toString() + "/"));
+					           out.closeEntry();
+					       }
+					       
 					       for (IPath file: fExtractor.getAllFiles() ) {
-					    	   if(file.toString().startsWith("."))
+					    	   
+					    	   if(monitor.isCanceled()) {
+					    		   return Status.CANCEL_STATUS;
+					    	   }
+					    	   if(alreadyWorked < 95) {
+					    		   monitor.worked(alreadyWorked++);
+					    	   }
+					    	   monitor.setTaskName("Exporting "+file.toString());
+					    	   
+					    	   if(file == null || file.segmentCount() < 1 || file.toString().startsWith("."))
 					    		   continue;
+					    	   
+
 					           currentFile = fProject.getFile(file);
-					    	   FileInputStream in = new FileInputStream(currentFile.getLocation().toString());
-					    
+					    	   in = new FileInputStream(currentFile.getLocation().toString());
 					           
 					           
-					           // Add ZIP entry to output stream.
 					           out.putNextEntry(new ZipEntry(file.toString()));
 					    
-					           // Transfer bytes from the file to the ZIP file
 					           int len;
 					           while ((len = in.read(buf)) > 0) {
 					               out.write(buf, 0, len);
+					               
 					           }
 					           in.close();
 					       }
 					    
-					        // Complete the ZIP file
 					        out.close();
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+						} catch (IOException e) {							
+							return new Status(IStatus.ERROR, RhqConstants.PLUGIN_CORE_ID, e.getMessage(), e);
 						} 
 				return Status.OK_STATUS;	
 				}	
 				
 		};
+		export.setUser(true);
 		export.schedule();
-		return true;
 		
+
+		return true;		
 	    
 	}
-	
-	
 }

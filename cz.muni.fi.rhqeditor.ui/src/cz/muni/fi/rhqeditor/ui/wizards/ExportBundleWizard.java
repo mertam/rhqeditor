@@ -1,6 +1,6 @@
 package cz.muni.fi.rhqeditor.ui.wizards;
 
-import java.io.IOException;
+import java.io.FileNotFoundException;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -59,10 +59,9 @@ public class ExportBundleWizard extends Wizard implements IWorkbenchWizard {
 	@Override
 	public boolean performFinish() {
 		String projectName = fPage1.getProject();
-		
 		BundleExport export = new BundleExport(ResourcesPlugin.getWorkspace().getRoot().getProject(projectName), fPage1.getTargetFile());
 		try {
-			if(!export.exportBundle(false)) {
+			if (!export.exportBundle(false)) {
 				Shell shell = new Shell();
 		    	shell.setSize(300, 100);
 		        MessageBox messageDialog = new MessageBox(shell, SWT.ICON_QUESTION | SWT.CANCEL | SWT.NO | SWT.YES);
@@ -80,8 +79,12 @@ public class ExportBundleWizard extends Wizard implements IWorkbenchWizard {
 			}
 			
 			}
-		} catch (IOException e) {
-			UiActivator.getLogger().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_UI_ID,"ExportBundleeWizard.performFinish " + e.getMessage()));
+		} catch (Throwable e) {
+			if(e instanceof FileNotFoundException) {
+				//ignore, dialog is displayed from Job
+			} else {
+				UiActivator.getLogger().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_UI_ID,"ExportBundleeWizard.performFinish " + e.getMessage()));
+			}
 		}
 		return true;
 	}

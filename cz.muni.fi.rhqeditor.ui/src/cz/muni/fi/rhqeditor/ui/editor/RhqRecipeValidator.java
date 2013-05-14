@@ -114,7 +114,6 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 		} catch (SAXException e) {
 			//do nothing if document isn't well formed
 		} catch (IOException e) {
-			System.out.println(e.getMessage());
 			UiActivator.getLogger().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_UI_ID, e.getMessage()));
 		}
 	}
@@ -189,7 +188,6 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 			
 			
 			fOpenArchiveName = attrValue;
-			System.out.println("open archive: " + fOpenArchiveName);
 			break;
 			
 		case  RhqConstants.RHQ_TYPE_FILE:
@@ -286,7 +284,6 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 	 */
 	private void manageTargets(){
 		for(String target: fRequiredTargets.keySet()){
-			System.out.println(target);
 			if(!fExistingTargets.containsKey(target)){
 				fRhqAnnotationModel.addMarker(fRequiredTargets.get(target).intValue(), "Target\""+target+"not found", IMarker.SEVERITY_WARNING);
 			}

@@ -250,32 +250,38 @@ public class RhqPathExtractor {
 			IFolder temp = null;
 			
 //iterates over files in project directory
-			for(IResource forResource : res){
+			for(IResource forResource : res) {
 				if(forResource instanceof IFolder){
-				//ignore content of /.bin/ and /build/
-					if(!forResource.getName().equals(".bin") && !forResource.getName().equals("build"))
+				//ignore content of /.bin/ and /build/ and .settings
+					if(!forResource.getName().equals(RhqConstants.RHQ_DEFAULT_BUILD_DIR) 
+							&& !forResource.getName().equals(RhqConstants.RHQ_DEFAULT_DEPLOY_DIR)
+							&& !forResource.getName().equals(".settings"))
 						folders.push((IFolder)forResource);
+				
+				} else {
+					if(!forResource.getName().equals(".project")) {
+						manageResource(forResource);
+					}
 				}
-			else
-				manageResource(forResource);
 			}
 //iterates over directories inside parent project
-			while(!folders.isEmpty()){
+			while (!folders.isEmpty()){
 				temp = folders.pop();
-				for(IResource forResource : temp.members()){
-					if(forResource instanceof IFolder)
+				for (IResource forResource : temp.members()){
+					if (forResource instanceof IFolder) {
 						folders.push((IFolder)forResource);
-					else
+					} else {
 						manageResource(forResource);
+					}
 				}
 			}
+			
 		
 		} catch (CoreException e) {
 			Activator.getLog().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_CORE_ID,"RhqPathExtractor.listFiles " + e.getMessage()));
 			fShouldBeJobScheduled.compareAndSet(false, true);
 		}
 		
-		System.out.println("job for project done "+ fProject.getName());
 		fShouldBeJobScheduled.compareAndSet(false, true);			
 
 	}
@@ -299,12 +305,10 @@ public class RhqPathExtractor {
 		if(path == null || path.isEmpty())
 			return;
 		
-		if(resource instanceof IFile) {
-			if(path.toString().endsWith(RhqConstants.RHQ_ARCHIVE_JAR_SUFFIX) ||
-				path.toString().endsWith(RhqConstants.RHQ_ARCHIVE_ZIP_SUFFIX))
-			{
+		if (resource instanceof IFile) {
+			if (RhqConstants.isSupportedArchive(path)) {
 				manageArchive(path);
-			}else{
+			} else {
 				fAbsolutePathsFiles.add(path);
 			}
 			return;
@@ -317,8 +321,16 @@ public class RhqPathExtractor {
 	 * adds to fArchiveContent archive and all it's content. Runs in separated thread.
 	 * @param pathToArchive
 	 */
-	private void manageArchive(final IPath pathToArchive){		
+	private void manageArchive(final IPath pathToArchive){
+		ArrayList<IPath> formerContent = fArchiveContent.get(pathToArchive);
 		
+		if(formerContent == null)
+			formerContent = new ArrayList<IPath>();
+		else
+			formerContent.clear();
+		
+		fArchiveContent.put(pathToArchive, formerContent);
+		final ArrayList<IPath> filesOfArchive = formerContent;
 		Job listArchiveContent = new Job("listArchiveContent") {
 			
 			@Override
@@ -329,13 +341,7 @@ public class RhqPathExtractor {
 
 				File file = new File(finalPath);
 				ZipEntry ze;
-				ArrayList<IPath> filesOfArchive = fArchiveContent.get(pathToArchive);
-		
-				if(filesOfArchive == null)
-					filesOfArchive = new ArrayList<IPath>();
-				else
-					filesOfArchive.clear();
-		
+				
 				try(
 						ZipFile archive = new ZipFile(file, ZipFile.OPEN_READ);
 					) {
@@ -363,35 +369,39 @@ public class RhqPathExtractor {
 	
 	
 	/**
-	 * 
-	 * @param expresion relative path from file, i.e. path="**\/*.txt
+	 * validates whether given expression corresponds to at least one path of given list
+	 * expandable values - ** 	= all characters
+	 * 			  		 - *	= all characters except '/'
+	 * 					 - ?    = one character 
+	 * @param expression relative path from file, i.e. path="**\/*.txt
 	 * @param possiblePaths list of path that should be searched
 	 * @return true is at least one path from given list is valid
 	 */
-	private boolean validateRelativePath(String expresion, List<IPath> possiblePaths){
+	private boolean validateRelativePath(String expression, List<IPath> possiblePaths){
 		
-		String replacedfrom = expresion.replaceAll("\\.", "\\\\.");
+		String replacedfrom = expression.replaceAll("\\.", "\\\\.");
 		replacedfrom = replacedfrom.replaceAll("\\?", ".");
 		replacedfrom = replacedfrom.replaceAll("\\*\\*",".*" );
 		
 		StringBuilder regexBuilder = new StringBuilder();
-		for (int i = 0; i < replacedfrom.length(); i++){
+		for (int i = 0; i < replacedfrom.length(); i++) {
 			if(replacedfrom.charAt(i) == '*') {
 				if(i > 1 && replacedfrom.charAt(i-1) == '.') {
-					if(replacedfrom.charAt(i-2) == '\\') 
-							// \.*
-							regexBuilder.append("[^/]*");
-						else
-							// .*
-							regexBuilder.append("*");
+					if(replacedfrom.charAt(i-2) == '\\') {
+						regexBuilder.append("[^/]*");
+					} else {
+						regexBuilder.append("*"); 
+					}
+				} else if (i == 1 && replacedfrom.charAt(i-1) == '.' && replacedfrom.charAt(i) == '*') {
+					regexBuilder.append("*");
 				} else {
 					regexBuilder.append("[^/]*");
+
 				}
 			} else {
 				regexBuilder.append(replacedfrom.charAt(i));
 			}
 		}
-		System.out.println(regexBuilder);
 		
 		String currentPath;
 		for(IPath path: possiblePaths){
@@ -409,10 +419,9 @@ public class RhqPathExtractor {
 	 * @param file
 	 */
 	public void removeFile(IPath file){
-		if(file.toString().endsWith(RhqConstants.RHQ_ARCHIVE_JAR_SUFFIX) ||
-				file.toString().endsWith(RhqConstants.RHQ_ARCHIVE_ZIP_SUFFIX)){
+		if (RhqConstants.isSupportedArchive(file)) {
 			fArchiveContent.remove(file);
-		}else{
+		} else {
 			fAbsolutePathsFiles.remove(file);
 		}
 	}

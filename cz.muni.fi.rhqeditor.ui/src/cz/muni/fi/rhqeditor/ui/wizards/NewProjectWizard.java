@@ -37,7 +37,8 @@ public class NewProjectWizard extends Wizard implements IWorkbenchWizard{
 		
 		page1  = new NewProjectWizardPage1("ProjectWizardPage1");
 		page1.setSelection(selection);
-		page1.setMessage("Create new RHQ bundle");
+		page1.setTitle("RHQ bundle");
+		page1.setDescription("Create new RHQ bundle");
 		addPage(page1);
 	}
 

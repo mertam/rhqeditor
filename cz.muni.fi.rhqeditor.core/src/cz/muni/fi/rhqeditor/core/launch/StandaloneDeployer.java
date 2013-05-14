@@ -173,7 +173,7 @@ public class StandaloneDeployer {
 				.getFolder(RhqConstants.RHQ_DEFAULT_BUILD_DIR).getLocation()
 				.toString());
 
-		Job deployment = new Job("Standalone deployment") {
+		Job deployment = new Job("RHQ bundle standalone deployment") {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -189,15 +189,12 @@ public class StandaloneDeployer {
 					while ((line = stdInput.readLine()) != null) {
 						fConsoleStream.println(line);
 					}
+					
 				} catch (IOException e) {
-					e.printStackTrace();
-					try {
-						fConsoleStream.println(e.toString());
-						fProject.refreshLocal(IResource.DEPTH_INFINITE, null);
-					} catch (CoreException e1) {
-						fConsoleStream.println("Refresh of resources failed");
-					}
+					fConsoleStream.println(e.toString());
+					Activator.getLog().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_CORE_ID,"StandaloneDeployer.deploy.run " + e.getMessage()));
 				}
+				
 				try {
 					fProject.refreshLocal(IResource.DEPTH_INFINITE, null);
 				} catch (CoreException e) {
