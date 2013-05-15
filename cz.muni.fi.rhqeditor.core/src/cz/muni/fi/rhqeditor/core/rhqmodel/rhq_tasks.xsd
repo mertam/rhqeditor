@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema">
+   
+   <element name="tasks">
+   
+   	<complexType>
+   		<sequence>
+   		  <element name="task" minOccurs="0" maxOccurs="100"></element>
+   		  <element name="entity" minOccurs="0" maxOccurs="100"></element>
+   		  <element name="replacements" minOccurs="0" maxOccurs="100"></element>
+   		</sequence>
+   	</complexType>
+   </element>
+   
+   
+   
+   <element name="task">
+   	<complexType>
+		<sequence>
+			<element name="rhqparents"></element>
+			<element name="antparents"></element>
+			<element name="attributes"></element>
+		</sequence>
+   		<attribute name="name" use="required" type="IDREF"></attribute>
+   		<attribute name="paired" use="required" type="boolean"></attribute>
+
+   	</complexType>
+   </element>
+   
+   <!-- reference to RHQ parents -->
+   <element name="rhqparents">
+   	<complexType>
+   	 <sequence>
+   	 	<element name="parent" minOccurs="0" maxOccurs="100">
+   	 	</element>
+   	 </sequence>
+   	</complexType>
+   </element>
+   
+   <!-- reference to ant parents -->
+    <element name="antparents">
+   	<complexType>
+   	 <sequence>
+   	 	<element name="parent" minOccurs="0"></element>
+   	 </sequence>
+   	</complexType>
+   </element>
+   
+   <element name="parent">
+   	<complexType>
+   		<attribute name="name"></attribute>
+   	</complexType>
+   </element>
+   
+   <!-- an attribute of RHQ task -->
+   <element name="attributes">
+   	<complexType>
+   		<sequence>
+   			<element name="attribute" minOccurs="0" maxOccurs="100">
+   				<complexType>
+					<simpleContent>
+   				    	<extension base="string">
+   				    		<attribute name="name" use="required"></attribute>
+   				    		<!-- should be this attribute printed in content proposing? <element attr=""...></element> -->
+							<attribute name="visible" use="required" type="boolean"></attribute>
+							<!-- should be this attribute checked as required by editor? -->
+   					  		<attribute name="required" use="required" type="boolean"></attribute>
+   					  		<!--  attribute can have have entity value used to content proposing. This should refere to entity element. TODO handle reference-->
+   							<attribute name="entity" use="optional" ></attribute>
+   				    	</extension>
+   				    </simpleContent>
+					
+   				</complexType>
+   			</element>
+   			<!-- attribute description displayed while content proposing -->
+   			<element name="description" minOccurs="0"></element>
+   		</sequence>
+   	</complexType>
+   </element>
+   
+   <!-- attributes can refer to this entity. It provides them set of value used to content proposing -->
+   <element name="entity">
+   	<complexType mixed="true">
+   	  <sequence>  	  
+   	  	<element name="value">
+   	  		<complexType>
+   	  			<attribute name="name" use="required"></attribute>
+   	  		</complexType>
+   	  	</element>
+   	  </sequence>
+	  <attribute name="name" type="ID"></attribute>
+ 
+   	</complexType>
+   </element>
+   
+   <!-- replacement variables suppored by RHQ -->
+   <element name="replacements">
+   	 <complexType>
+   	 	<sequence>
+   	 		<element name="replacement">
+				<complexType>
+					<attribute name="name" use="required"></attribute>
+				</complexType>
+   	 		</element>
+   	 	</sequence>
+   	 </complexType>
+   </element>
+   
+   
+  
+</schema>
