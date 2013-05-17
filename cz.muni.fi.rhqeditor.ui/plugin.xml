@@ -1,165 +1,86 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin>
-   <extension
-         point="org.eclipse.ui.newWizards">
-     <category 
-		id = "cz.muni.fi.rhqeditor.category"
-		name = "RHQ Bundle"/>
-		<wizard
-	   		id = "cz.muni.fi.rhqbunle.ui.wizards.newproject"
-      	   	name = "RHQ Bundle"
-      	   	project="true"
-	   		class="cz.muni.fi.rhqeditor.ui.wizards.NewProjectWizard"
-	   		category = "cz.muni.fi.rhqeditor.category"
-	   		icon="icons/rhq.gif">
-	   		<description>RHQ Bundle project</description>
-		</wizard>
+   <extension point="org.eclipse.ui.newWizards">
+      <category id="cz.muni.fi.rhqeditor.category" name="RHQ Bundle" />
+      <wizard id="cz.muni.fi.rhqbunle.ui.wizards.newproject" name="RHQ Bundle" project="true" class="cz.muni.fi.rhqeditor.ui.wizards.NewProjectWizard" category="cz.muni.fi.rhqeditor.category" icon="icons/rhq.gif">
+         <description>RHQ Bundle project</description>
+      </wizard>
    </extension>
-   
-   <extension
-         point="org.eclipse.ui.exportWizards">
-         <category
-               id="cz.muni.fi.rhqeditor.ui.export"
-               name="RHQ Bundle">
-         </category>
-         <wizard
-               id="cz.muni.fi.rhqeditor.ui.exportwizard"
-               name="RHQ Bundle"
-               icon="icons/rhq.gif"
-               category="cz.muni.fi.rhqeditor.ui.export"
-               class="cz.muni.fi.rhqeditor.ui.wizards.ExportBundleWizard">
-               <description>
-                  RHQ bundle export wizard
-               </description>
-               
-         </wizard>
+   <extension point="org.eclipse.ui.exportWizards">
+      <category id="cz.muni.fi.rhqeditor.ui.export" name="RHQ Bundle" />
+      <wizard id="cz.muni.fi.rhqeditor.ui.exportwizard" name="RHQ Bundle" icon="icons/rhq.gif" category="cz.muni.fi.rhqeditor.ui.export" class="cz.muni.fi.rhqeditor.ui.wizards.ExportBundleWizard">
+         <description>RHQ bundle export wizard</description>
+      </wizard>
    </extension>
-   <extension
-         point="org.eclipse.ui.editors">
-      <editor
-            default="true"
-            id="cz.muni.fi.rhqeditor.ui.editor1"
-            name="RHQ Editor"
-            class="cz.muni.fi.rhqeditor.ui.editor.RhqEditor"
-            icon="icons/rhq.gif"
-            filenames="deploy.xml"
-            >
-            
-            <contentTypeBinding
-                  contentTypeId="cz.muni.fi.rhqeditor.ui.content-type1">
-            </contentTypeBinding>
+   <extension point="org.eclipse.ui.editors">
+      <editor default="true" id="cz.muni.fi.rhqeditor.ui.editor1" name="RHQ Editor" class="cz.muni.fi.rhqeditor.ui.editor.RhqEditor" icon="icons/rhq.gif" filenames="deploy.xml">
+         <contentTypeBinding contentTypeId="cz.muni.fi.rhqeditor.ui.content-type1" />
       </editor>
    </extension>
-
-   <extension
-         id="rhqproblemmarker"
-         name="rhqproblemmarker"
-         point="org.eclipse.core.resources.markers">
-      <super
-            type="org.eclipse.core.resources.problemmarker">
-      </super>
+   <extension id="rhqproblemmarker" name="rhqproblemmarker" point="org.eclipse.core.resources.markers">
+      <super type="org.eclipse.core.resources.problemmarker" />
       <persistent value="true" />
    </extension>
-
-
    <extension
+         id="cz.muni.fi.rhqeditor.ui.shortcut"
+         name="cz.muni.fi.rhqeditor.ui.launchshortcut"
          point="org.eclipse.debug.ui.launchShortcuts">
       <shortcut
+            
             class="cz.muni.fi.rhqeditor.ui.launch.LunchShortcut"
+            description="Standalone deployment of RHQ bundle"
+            icon="icons/rhq.gif"
             id="cz.muni.fi.rhqeditor.ui.shortcut1"
             label="RHQ bundle standalone deployment"
-            description="Standalone deployment of RHQ bundle"
             modes="run"
-            icon="icons/rhq.gif"
-            >
-            <contextualLaunch>
-            <contextLabel
-                  mode="run"
-                  label="Launch RHQ bundle standalone deployment">
-            </contextLabel>
+            path="aaaaa">
+         <contextualLaunch>
+            <contextLabel mode="run" label="lll" />
             <enablement>
-            	<with variable="selection">
-			 <count value="1"/>
-			  <iterate>
-			  	  <or>
-			  	     <test property="org.eclipse.debug.ui.matchesPattern" value="deploy.xml"/>
-			  	  </or> 	 
-			  </iterate>
-			 </with>
+               <or>
+                  <iterate>
+                     <adapt type="org.eclipse.core.resources.IResource">
+                        <and>
+                           <test property="org.eclipse.core.resources.projectNature" value="cz.muni.fi.rhqeditor.natures.rhqeditornature" />
+                           <adapt type="org.eclipse.core.resources.IProject" />
+                        </and>
+                     </adapt>
+                  </iterate>
+                  <and>
+                     <with variable="selection">
+                        <count value="1" />
+                        <iterate>
+                           <test property="org.eclipse.debug.ui.matchesPattern" value="deploy.xml" />
+                        </iterate>
+                     </with>
+                     <with variable="activeEditorId">
+                        <and>
+                           <equals value="cz.muni.fi.rhqeditor.ui.editor1" />
+                        </and>
+                     </with>
+                  </and>
+               </or>
             </enablement>
-            </contextualLaunch>
+         </contextualLaunch>
       </shortcut>
    </extension>
-   <extension
-         point="org.eclipse.ui.preferencePages">
-      <page
-            class="cz.muni.fi.rhqeditor.ui.preferences.PreferencePage"
-            id="cz.muni.fi.rhqeditor.ui.prefenecePages"
-            name="RHQ">
-      </page>
+   <extension point="org.eclipse.ui.preferencePages">
+      <page class="cz.muni.fi.rhqeditor.ui.preferences.PreferencePage" id="cz.muni.fi.rhqeditor.ui.prefenecePages" name="RHQ" />
    </extension>
-   
-      <extension
-         point="org.eclipse.debug.core.launchConfigurationTypes">
-      <launchConfigurationType
-            id="cz.muni.fi.rhqeditor.core.launchconfigurationtype"
-            name="RHQ Bundle"
-            delegate="cz.muni.fi.rhqeditor.core.launch.RhqLaunchConfigurationDelegate"
-            public="true"
-            delegateName="delegateName"
-            modes="run"
-            >
-            
-      </launchConfigurationType>
+   <extension point="org.eclipse.debug.core.launchConfigurationTypes">
+      <launchConfigurationType id="cz.muni.fi.rhqeditor.core.launchconfigurationtype" name="RHQ Bundle" delegate="cz.muni.fi.rhqeditor.core.launch.RhqLaunchConfigurationDelegate" public="true" delegateName="delegateName" modes="run" />
    </extension>
-   <extension
-         point="org.eclipse.debug.ui.launchConfigurationTypeImages">
-      <launchConfigurationTypeImage
-            configTypeID="cz.muni.fi.rhqeditor.core.launchconfigurationtype"
-            icon="icons/rhq.gif"
-            id="cz.muni.fi.rhqeditor.ui.launchConfigurationTypeImage1">
-      </launchConfigurationTypeImage>
+   <extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+      <launchConfigurationTypeImage configTypeID="cz.muni.fi.rhqeditor.core.launchconfigurationtype" icon="icons/rhq.gif" id="cz.muni.fi.rhqeditor.ui.launchConfigurationTypeImage1" />
    </extension>
-   
-   <extension
-         point="org.eclipse.debug.ui.launchConfigurationTabGroups">
-      <launchConfigurationTabGroup
-            class="cz.muni.fi.rhqeditor.ui.launch.LaunchConfigurationTagGroup"
-            id="cz.muni.fi.rhqeditor.core.launchConfigurationTabGroup1"
-            type="cz.muni.fi.rhqeditor.core.launchconfigurationtype">
-      </launchConfigurationTabGroup>
+   <extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+      <launchConfigurationTabGroup class="cz.muni.fi.rhqeditor.ui.launch.LaunchConfigurationTagGroup" id="cz.muni.fi.rhqeditor.core.launchConfigurationTabGroup1" type="cz.muni.fi.rhqeditor.core.launchconfigurationtype" />
    </extension>
-
-
-
-<extension
-      id="cz.muni.fi.rhqeditor.import.bundle.wizard"
-      point="org.eclipse.ui.importWizards"
-      name="RHQ"
-      >
-      <category
-            id="cz.muni.fi.rhqeditor.ui.import.wizard"
-            name="RHQ Bundle">
-      </category>
-      <wizard
-            id="cz.muni.fi.rhqeditor.ui.import.bundle"
-            name="Import bundle from archive"
-            icon="icons/rhq.gif"
-            class="cz.muni.fi.rhqeditor.ui.wizards.ImportBundleArchiveWizard"
-            category="cz.muni.fi.rhqeditor.ui.import.wizard"
-            >
-      </wizard>
-</extension>
-	<extension
-	      point="org.eclipse.core.contenttype.contentTypes"
-	      >
-	      <content-type
-	      	name="cz.muni.fi.rhqeditor.contenttype"
-             id="cz.muni.fi.rhqeditor.ui.content-type1"
-             file-names="deploy.xml"
-             >
-	      </content-type>
-	</extension>
-    
-   
+   <extension id="cz.muni.fi.rhqeditor.import.bundle.wizard" point="org.eclipse.ui.importWizards" name="RHQ">
+      <category id="cz.muni.fi.rhqeditor.ui.import.wizard" name="RHQ Bundle" />
+      <wizard id="cz.muni.fi.rhqeditor.ui.import.bundle" name="Import bundle from archive" icon="icons/rhq.gif" class="cz.muni.fi.rhqeditor.ui.wizards.ImportBundleArchiveWizard" category="cz.muni.fi.rhqeditor.ui.import.wizard" />
+   </extension>
+   <extension point="org.eclipse.core.contenttype.contentTypes">
+      <content-type name="cz.muni.fi.rhqeditor.contenttype" id="cz.muni.fi.rhqeditor.ui.content-type1" file-names="deploy.xml" />
+   </extension>
 </plugin>

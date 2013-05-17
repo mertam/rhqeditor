@@ -191,7 +191,7 @@ public class RhqPathExtractor {
 	public boolean isPathToFileValid(IPath abslutePath){
 		if(abslutePath == null)
 			return false;
-		return fAbsolutePathsFiles.contains(abslutePath);
+		return fAbsolutePathsFiles.contains(abslutePath) || isPathToArchiveValid(abslutePath);
 	}
 	
 	public boolean isPathToArchiveFileValid(IPath path, String archive){
