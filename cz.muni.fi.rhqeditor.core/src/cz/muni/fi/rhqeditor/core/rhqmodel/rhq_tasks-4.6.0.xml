@@ -206,7 +206,7 @@ be compressed and stored in the top level destination directory.
 	</task>
 	
 	<!-- entities -->
-	<entity name="boolen">
+	<entity name="boolean">
 		<value name="true"/>
 		<value name="false"/>
 	</entity>
