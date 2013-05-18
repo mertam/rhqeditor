@@ -168,7 +168,6 @@ public class ImportBundleArchiveWizardPage1 extends WizardPage {
 			public boolean isGrayed(Object element) {
 				if(element instanceof DisplayedObject){
 					if(existingProjects.contains(((DisplayedObject) element).getProjectName())){
-						System.out.println(((DisplayedObject) element).getName());
 						return true;
 					}
 				}
@@ -186,7 +185,8 @@ public class ImportBundleArchiveWizardPage1 extends WizardPage {
 	      	
 	      	@Override
 	      	public void checkStateChanged(CheckStateChangedEvent event) {
-	      		set(new Object[]{event.getElement()});
+	
+	      		fCheckBoxTableViewer.setChecked(event.getElement(), event.getChecked());
 	      		if(fCheckBoxTableViewer.getGrayedElements().length > 0)
 	      			fCheckBoxTableViewer.setGrayedElements(new Object[0]);
 	      		setComplete();
@@ -202,14 +202,11 @@ public class ImportBundleArchiveWizardPage1 extends WizardPage {
 		setComplete();
 	}
 	
-	private void set(Object[] obj){
-		fCheckBoxTableViewer.setCheckedElements(obj);
-	}
-	
+
 	private void scanProjects() {
-//		if(fMutex.compareAndSet(false, true) == false) {
-//			return;
-//		}
+		if(fMutex.compareAndSet(false, true) == false) {
+			return;
+		}
 		fBudleImportDirectory = fCombo.getText();
 		if(lastSearchedPath == null || !lastSearchedPath.equals(fBudleImportDirectory)){
 			File dir = new File(fBudleImportDirectory);
@@ -315,22 +312,27 @@ public class ImportBundleArchiveWizardPage1 extends WizardPage {
 			setPageComplete(false);
 			return;
 		}
-		setPageComplete(fCheckBoxTableViewer.getCheckedElements().length == 1);
+		setPageComplete(fCheckBoxTableViewer.getCheckedElements().length > 0);
 	}
 
 	/**
-	 * return path to archive from selected value
+	 * return paths to archives from selected values
 	 * @return
 	 */
-	public String getArchivePath(){
+	public List<String> getArchivePath(){
+		List<String> result;
 		if(fCheckBoxTableViewer == null)
 			return null;
 		Object[] checkedObjects = fCheckBoxTableViewer.getCheckedElements();
-		if(checkedObjects != null && checkedObjects.length == 1){
-			if(checkedObjects[0] instanceof DisplayedObject)
-				return ((DisplayedObject) checkedObjects[0]).getPath().toString();
+		if (checkedObjects == null)
+			return null;
+		result = new ArrayList<>();
+		
+		for (Object checked : checkedObjects) {
+			if(checked instanceof DisplayedObject)
+				result.add(((DisplayedObject) checked).getPath().toString());
 		}
-		return null;
+		return result;
 	}
 	
 	
@@ -501,7 +503,10 @@ public class ImportBundleArchiveWizardPage1 extends WizardPage {
 		}
 
 	}
-	
+	/**
+	 * returns selected working sets
+	 * @return
+	 */
 	public IWorkingSet[] getWorkingSets(){
 		return group.getSelectedWorkingSets();
 	}	

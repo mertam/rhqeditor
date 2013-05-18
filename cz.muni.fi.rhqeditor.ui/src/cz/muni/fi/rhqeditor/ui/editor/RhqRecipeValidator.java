@@ -216,8 +216,11 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 				fRhqAnnotationModel.addMarker(locator.getLineNumber(), "Forbidden destination", IMarker.SEVERITY_ERROR);
 				break;
 			}
-			if(!fRhqPathExtractor.isPathToFileValid(attrPath))
-				fRhqAnnotationModel.addMarker(locator.getLineNumber(), "File '"+ attrValue+"' not found", IMarker.SEVERITY_WARNING);			
+			if(!fRhqPathExtractor.isPathToFileValid(attrPath)) {
+				System.out.println(fRhqPathExtractor.getAllFiles());
+				fRhqAnnotationModel.addMarker(locator.getLineNumber(), "File '"+ attrValue+"' not found", IMarker.SEVERITY_WARNING);	
+				
+			}
 
 			break;
 		

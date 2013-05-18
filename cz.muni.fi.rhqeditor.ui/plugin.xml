@@ -35,7 +35,7 @@
             modes="run"
             path="aaaaa">
          <contextualLaunch>
-            <contextLabel mode="run" label="lll" />
+            <contextLabel mode="run" label="RHQ bundle standalone deployment" />
             <enablement>
                <or>
                   <iterate>
@@ -59,6 +59,12 @@
                         </and>
                      </with>
                   </and>
+                  <with variable="selection">
+                        <count value="1" />
+                        <iterate>
+                           <test property="org.eclipse.debug.ui.matchesPattern" value="deploy.xml" />
+                        </iterate>
+                     </with>
                </or>
             </enablement>
          </contextualLaunch>

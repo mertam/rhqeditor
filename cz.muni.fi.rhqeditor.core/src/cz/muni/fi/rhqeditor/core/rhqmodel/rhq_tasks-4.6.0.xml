@@ -206,7 +206,7 @@ be compressed and stored in the top level destination directory.
 	</task>
 	
 	<!-- entities -->
-	<entity name="boolean">
+	<entity name="boolen">
 		<value name="true"/>
 		<value name="false"/>
 	</entity>
@@ -230,29 +230,29 @@ be compressed and stored in the top level destination directory.
 	
 	<!-- Built-in Replacement Variables -->
 	<replacements>
-		<replacemnet name="rhq.system.sysprop.java.io.tmpdir"/>
-		<replacemnet name="rhq.system.sysprop.file.separator"/>
-		<replacemnet name="rhq.system.sysprop.line.separator"/>
-		<replacemnet name="rhq.system.sysprop.path.separator"/>
-		<replacemnet name="rhq.system.sysprop.java.home"/>
-		<replacemnet name="rhq.system.sysprop.java.version"/>
-		<replacemnet name="rhq.system.sysprop.user.timezone"/>
-		<replacemnet name="rhq.system.sysprop.user.region"/>
-		<replacemnet name="rhq.system.sysprop.user.country"/>
-		<replacemnet name="rhq.system.sysprop.user.language"/>
-		<replacemnet name="rhq.system.hostname"/>
-		<replacemnet name="rhq.system.os.name"/> 
-		<replacemnet name="rhq.system.os.version"/>
-		<replacemnet name="rhq.system.os.type"/> 
-		<replacemnet name="rhq.system.architecture"/>
-		<replacemnet name="rhq.system.cpu.count"/>
-		<replacemnet name="rhq.system.interfaces.java.address"/> 
-		<replacemnet name="rhq.system.interfaces.(network-adapter-name).mac"/>
-		<replacemnet name="rhq.system.interfaces.(network-adapter-name).type"/>
-		<replacemnet name="rhq.system.interfaces.(network-adapter-name).flags"/>
-		<replacemnet name="rhq.system.interfaces.(network-adapter-name).address"/>
-		<replacemnet name="rhq.system.interfaces.(network-adapter-name).multicast.address"/>
+		<replacement name="rhq.system.sysprop.java.io.tmpdir"/>
+		<replacement name="rhq.system.sysprop.file.separator"/>
+		<replacement name="rhq.system.sysprop.line.separator"/>
+		<replacement name="rhq.system.sysprop.path.separator"/>
+		<replacement name="rhq.system.sysprop.java.home"/>
+		<replacement name="rhq.system.sysprop.java.version"/>
+		<replacement name="rhq.system.sysprop.user.timezone"/>
+		<replacement name="rhq.system.sysprop.user.region"/>
+		<replacement name="rhq.system.sysprop.user.country"/>
+		<replacement name="rhq.system.sysprop.user.language"/>
+		<replacement name="rhq.system.hostname"/>
+		<replacement name="rhq.system.os.name"/> 
+		<replacement name="rhq.system.os.version"/>
+		<replacement name="rhq.system.os.type"/> 
+		<replacement name="rhq.system.architecture"/>
+		<replacement name="rhq.system.cpu.count"/>
+		<replacement name="rhq.system.interfaces.java.address"/> 
+		<replacement name="rhq.system.interfaces.(network-adapter-name).mac"/>
+		<replacement name="rhq.system.interfaces.(network-adapter-name).type"/>
+		<replacement name="rhq.system.interfaces.(network-adapter-name).flags"/>
+		<replacement name="rhq.system.interfaces.(network-adapter-name).address"/>
+		<replacement name="rhq.system.interfaces.(network-adapter-name).multicast.address"/>
+
 	</replacements>
-	
 
 </tasks>

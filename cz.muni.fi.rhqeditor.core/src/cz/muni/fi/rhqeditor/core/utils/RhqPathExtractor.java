@@ -435,6 +435,10 @@ public class RhqPathExtractor {
 
 		@Override
 		public int compare(IPath o1, IPath o2) {
+			if (o1 == null)
+				return -1;
+			if (o2 == null)
+				return 1;
 			return o1.toString().compareTo(o2.toString());
 		}
 		

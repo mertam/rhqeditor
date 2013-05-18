@@ -44,24 +44,27 @@ public class ImportBundleArchiveWizard extends Wizard implements IWorkbenchWizar
 	public boolean performFinish() {
 		page1.saveComboState();
 		
-		RhqBundleProject project = new RhqBundleProject();
-		String archive = page1.getArchivePath();
-		if(archive == null)
-			return false;
-		try{
-			IPath path = new Path(archive);
-			project.createProjectFromBundle(path);
-			String name = path.removeFirstSegments(path.segmentCount()-1).removeFileExtension().toString();
-			if(page1.getWorkingSets().length > 0) {
-				 PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(ResourcesPlugin.getWorkspace().getRoot().getProject(name), page1.getWorkingSets());
+		
+		for(String archive: page1.getArchivePath()) {
+			RhqBundleProject project = new RhqBundleProject();
+			if(archive == null)
+				return false;
+			try{
+				IPath path = new Path(archive);
+				project.createProjectFromBundle(path);
+				String name = path.removeFirstSegments(path.segmentCount()-1).removeFileExtension().toString();
+				System.out.println();
+				if(page1.getWorkingSets().length > 0) {
+					 PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(ResourcesPlugin.getWorkspace().getRoot().getProject(name), page1.getWorkingSets());
+				}
+			} catch (CoreException e){
+				ErrorDialog.openError(new Shell(), "Project creationg error", e.getMessage(),e.getStatus());
+				UiActivator.getLogger().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_UI_ID,"ImportBundleArchiveWizard.performFinish " + e.getMessage()));
+			} catch (IOException e) {
+				ErrorDialog.openError(new Shell(), "Project importing error", e.getMessage(),new Status(IStatus.ERROR,
+						RhqConstants.PLUGIN_UI_ID, "Import error occured"));
+				UiActivator.getLogger().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_UI_ID,"ImportBundleArchiveWizard.performFinish " + e.getMessage()));
 			}
-		} catch (CoreException e){
-			ErrorDialog.openError(new Shell(), "Project creationg error", e.getMessage(),e.getStatus());
-			UiActivator.getLogger().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_UI_ID,"ImportBundleArchiveWizard.performFinish " + e.getMessage()));
-		} catch (IOException e) {
-			ErrorDialog.openError(new Shell(), "Project importing error", e.getMessage(),new Status(IStatus.ERROR,
-					RhqConstants.PLUGIN_UI_ID, "Import error occured"));
-			UiActivator.getLogger().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_UI_ID,"ImportBundleArchiveWizard.performFinish " + e.getMessage()));
 		}
 		return true;
 	}
