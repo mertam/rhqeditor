@@ -217,7 +217,6 @@ public class RhqRecipeValidator extends DefaultHandler2 {
 				break;
 			}
 			if(!fRhqPathExtractor.isPathToFileValid(attrPath)) {
-				System.out.println(fRhqPathExtractor.getAllFiles());
 				fRhqAnnotationModel.addMarker(locator.getLineNumber(), "File '"+ attrValue+"' not found", IMarker.SEVERITY_WARNING);	
 				
 			}

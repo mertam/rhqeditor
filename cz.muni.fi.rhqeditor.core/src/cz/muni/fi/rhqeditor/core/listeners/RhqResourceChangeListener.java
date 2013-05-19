@@ -116,7 +116,7 @@ public class RhqResourceChangeListener implements IResourceChangeListener {
 		
 		for(IPath addedFile: fAddedFiles){
 			project = getProjectFromPath(addedFile);
-			
+			System.out.println("adding " +addedFile);
 			if (RhqConstants.isSupportedArchive(addedFile)) {
 				ExtractorProvider.INSTANCE.getExtractor(project)
 					.addArchive(addedFile.removeFirstSegments(1));

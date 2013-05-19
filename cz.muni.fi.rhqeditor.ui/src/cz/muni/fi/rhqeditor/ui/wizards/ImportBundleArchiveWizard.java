@@ -17,7 +17,9 @@ import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.ui.PlatformUI;
 
 import cz.muni.fi.rhqeditor.core.RhqBundleProject;
+import cz.muni.fi.rhqeditor.core.utils.ExtractorProvider;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
+import cz.muni.fi.rhqeditor.core.utils.RhqPathExtractor;
 import cz.muni.fi.rhqeditor.ui.UiActivator;
 
 public class ImportBundleArchiveWizard extends Wizard implements IWorkbenchWizard{
@@ -51,9 +53,10 @@ public class ImportBundleArchiveWizard extends Wizard implements IWorkbenchWizar
 				return false;
 			try{
 				IPath path = new Path(archive);
+				ExtractorProvider x = ExtractorProvider.INSTANCE;
 				project.createProjectFromBundle(path);
 				String name = path.removeFirstSegments(path.segmentCount()-1).removeFileExtension().toString();
-				System.out.println();
+RhqPathExtractor ext = ExtractorProvider.INSTANCE.getExtractor(ResourcesPlugin.getWorkspace().getRoot().getProject(name));
 				if(page1.getWorkingSets().length > 0) {
 					 PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(ResourcesPlugin.getWorkspace().getRoot().getProject(name), page1.getWorkingSets());
 				}

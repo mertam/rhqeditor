@@ -54,8 +54,10 @@ public class RhqRecipeContentChange extends TextFileChange {
 					setSaveMode(KEEP_SAVE_STATE);
 					
 					Matcher matcher = pattern.matcher(content);
+					
 					while(matcher.find()){
-						content = content.replaceFirst("name\\s*=\\s*\"\\s*" + formerName,"name=\"" + newName);
+						String uneditedPart = content.substring(0,matcher.start());
+						content = uneditedPart + content.substring(matcher.start()).replaceFirst("name\\s*=\\s*\"\\s*" + formerName,"name=\"" + newName);
 					}
 					
 					document.set(content);

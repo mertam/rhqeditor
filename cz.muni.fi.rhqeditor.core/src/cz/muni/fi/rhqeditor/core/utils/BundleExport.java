@@ -73,7 +73,6 @@ public class BundleExport {
 	    		   
 	    		   for (int j = 0; j < i; j++) {
 	    			   path = path.removeLastSegments(i);
-	    			   System.out.println("added folder: " + path);
 	    			   foldersToCreate.add(path);
 	    		   }
 	    		  

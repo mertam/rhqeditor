@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -214,10 +215,12 @@ public class RhqPathExtractor {
 	}
 	
 	public List<IPath> getAllFiles(){
-		List<IPath> all = getAbsolutePathsArchives();
+		HashSet<IPath> all = new HashSet<>();
+		all.addAll(getAbsolutePathsArchives());
 		all.addAll(getAbsolutePathsFiles());
-		Collections.sort(all, fPathComparator);
-		return all;
+		ArrayList<IPath> result = new ArrayList<>(all);
+		Collections.sort(result, fPathComparator);
+		return result;
 		
 	}
 	
@@ -355,7 +358,7 @@ public class RhqPathExtractor {
 					Collections.sort(filesOfArchive,fPathComparator);
 					fArchiveContent.put(pathToArchive, filesOfArchive);
 				} catch (IOException e) {
-					Activator.getLog().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_CORE_ID,"RhqPathExtractor.manageArchive" + e.getMessage()));
+					Activator.getLog().log(new Status(IStatus.WARNING,RhqConstants.PLUGIN_CORE_ID,"RhqPathExtractor.manageArchive " + pathToArchive +" "+ e.getMessage()));
 					return Status.CANCEL_STATUS;
 				} 
 				return Status.OK_STATUS;
@@ -503,7 +506,7 @@ public class RhqPathExtractor {
 	 */
 	public void addFolder(IPath folderName){
 		IFolder folder = fProject.getFolder(folderName);
-		if(folder == null)
+		if(folder == null || folder.isHidden(IResource.CHECK_ANCESTORS))
 			return;
 		try{
 		Stack<IFolder> stack = new Stack<>();

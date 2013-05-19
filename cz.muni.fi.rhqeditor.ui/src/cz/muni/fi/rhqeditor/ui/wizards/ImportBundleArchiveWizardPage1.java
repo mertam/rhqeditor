@@ -365,10 +365,12 @@ public class ImportBundleArchiveWizardPage1 extends WizardPage {
 	 */
 	private void openSelectDirectoryDialog(Shell shell){
 		DirectoryDialog selectDirDialog = new DirectoryDialog(shell);
-		selectDirDialog.setMessage("Choose fBudleImportDirectory for project content");
+		selectDirDialog.setMessage("Choose root directory");
 		fBudleImportDirectory = selectDirDialog.open();
-		if(fBudleImportDirectory == null) 
+		if (fBudleImportDirectory == null) 
 			fBudleImportDirectory = EMPTY_STRING;
+		else
+			fCombo.setText(fBudleImportDirectory);
 	}
 	
 	/**

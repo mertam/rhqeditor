@@ -2105,6 +2105,7 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
     private ICompletionProposal[] addFilesProposals(IDocument document, String textToSearch, String prefix, String attributeName){
 
     	List<IPath> files = fRhqpathExtractor.getAbsolutePathsFilesByPrefix(prefix);
+    	
     	if(files.isEmpty())
     		return new ICompletionProposal[0];
    
@@ -2117,6 +2118,9 @@ public class RhqEditorCompletionProcessor  extends AntEditorCompletionProcessor{
     		if(!(pathToFile.lastSegment().toString().equals(RhqConstants.RHQ_RECIPE_FILE) ||
     			pathToFile.toString().startsWith(".")))
     		 	proposals.add(attributeValueProposal(document, prefix, pathToFile.toString()));
+    	}
+    	for(IPath archiveFile: fRhqpathExtractor.getAbsolutePathsArchivesByPrefix(prefix)) {
+    		proposals.add(attributeValueProposal(document, prefix, archiveFile.toString()));
     	}
     	return (ICompletionProposal[])proposals.toArray(new ICompletionProposal[proposals.size()]);  
     }
