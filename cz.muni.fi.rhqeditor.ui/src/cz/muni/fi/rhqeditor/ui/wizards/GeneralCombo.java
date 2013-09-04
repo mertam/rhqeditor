@@ -111,10 +111,15 @@ public class GeneralCombo {
 			DialogSettings settings = new DialogSettings(strComboSectionID);
 			settings.load(RhqConstants.RHQ_DIALOG_SETTINGS);
 			String[] items = settings.getArray(strComboStateID);
+			if (items == null || items.length == 0) {
+				return;
+			}
 			setComboState(items);
 			
 		} catch (IOException e) {
-			
+			Activator.getLog().log(
+					new Status(IStatus.WARNING, RhqConstants.PLUGIN_UI_ID,
+							"Loading combo state failed", e));
 		}
 		
 	}

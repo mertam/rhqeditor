@@ -1,14 +1,11 @@
 package cz.muni.fi.rhqeditor.ui.wizards;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -16,7 +13,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
@@ -29,10 +25,11 @@ import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.TraverseEvent;
+import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
@@ -44,28 +41,17 @@ import org.eclipse.ui.dialogs.WorkingSetGroup;
 
 import cz.muni.fi.rhqeditor.core.utils.ArchiveReader;
 import cz.muni.fi.rhqeditor.core.utils.RhqConstants;
-import org.eclipse.swt.events.TraverseListener;
-import org.eclipse.swt.events.TraverseEvent;
 
 public class ImportBundleArchiveWizardPage1 extends WizardPage {
 	private Table table;
-
 	private CheckboxTableViewer fCheckBoxTableViewer;
-	
 	private Button btnBrowse;
 	
 	private 			String fBudleImportDirectory;
 	private final 		String EMPTY_STRING = "";
-	private Combo 		fCombo;
 	
 	private String 		lastSearchedPath = null;
-	
-	//saving settings
-	private static final String COMBO_STATE 		= "rhq.import.combo.state";
-	private static final String COMBO_SECTION 		= "rhq.import.combo.section";
-	private static final int COMBO_HISTORY 			= 5;
-	private String[] comboState;
-	private int comboStateIndex = 0;
+	private GeneralCombo fCombo;
 	
 	/**
 	 * mutex used to prevent multiple directory scanning
@@ -81,7 +67,6 @@ public class ImportBundleArchiveWizardPage1 extends WizardPage {
 	
 	protected ImportBundleArchiveWizardPage1(String pageName) {
 		super(pageName);
-		comboState = new String[COMBO_HISTORY];
 		for(IProject project:  ResourcesPlugin.getWorkspace().getRoot().getProjects()){
 			existingProjects.add(project.getName());
 			System.out.println(project.getName());
@@ -96,7 +81,6 @@ public class ImportBundleArchiveWizardPage1 extends WizardPage {
 	
 	@Override
 	public void createControl(Composite parent) {
-//		Composite composite = (Composite) getControl();
 		Composite composite = new Composite(parent, SWT.NONE);
 		
 		initializeDialogUnits(composite);
@@ -110,22 +94,23 @@ public class ImportBundleArchiveWizardPage1 extends WizardPage {
 
 		setControl(composite);
 
-	    
+	    System.out.println("point 1");
 		
 	    setDescription("Import RHQ bundle");
 
 	    Label lblRootFolder = new Label(composite, SWT.NONE);
 	    lblRootFolder.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 	    lblRootFolder.setText("Root folder:");
-	    
-	    fCombo = new Combo(composite, SWT.NONE);
-	    fCombo.addTraverseListener(new TraverseListener() {
+	    System.out.println("point 2");
+	    fCombo = new GeneralCombo("importcombo",composite, SWT.NONE, 5);
+	    fCombo.getCombo().addTraverseListener(new TraverseListener() {
 	    	public void keyTraversed(TraverseEvent arg0) {
 	    		scanProjects();
 		    }
 	    	
 	    });
-	    fCombo.addSelectionListener(new SelectionAdapter() {
+	    System.out.println("point 3");
+	    fCombo.getCombo().addSelectionListener(new SelectionAdapter() {
 	    	@Override
 	    	public void widgetDefaultSelected(SelectionEvent e) {
 	    		scanProjects();
@@ -136,17 +121,18 @@ public class ImportBundleArchiveWizardPage1 extends WizardPage {
 	    		scanProjects();
 	    	}
 	    });
-	    fCombo.addFocusListener(new FocusAdapter() {
+	    fCombo.getCombo().addFocusListener(new FocusAdapter() {
 	    	@Override
 	    	public void focusLost(FocusEvent e) {
 	    		scanProjects();
 	    	}
 	    });
+	    System.out.println("point 4");
 	    restoreComboState();
 	    GridData gd_fCombo = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
 	    gd_fCombo.widthHint = 413;
-	    fCombo.setLayoutData(gd_fCombo);
-	    
+	    fCombo.getCombo().setLayoutData(gd_fCombo);
+	    System.out.println("point 5");
 	    btnBrowse = new Button(composite, SWT.NONE);
 	    btnBrowse.addSelectionListener(new SelectionAdapter() {
 	      	@Override
@@ -157,7 +143,7 @@ public class ImportBundleArchiveWizardPage1 extends WizardPage {
 	      });
 	    btnBrowse.setText("Browse");
 	    btnBrowse.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-	    
+	    System.out.println("point 6");
 	    fCheckBoxTableViewer = CheckboxTableViewer.newCheckList(composite, SWT.BORDER | SWT.FULL_SELECTION | SWT.FILL);	
 	    table = fCheckBoxTableViewer.getTable();
 	    table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true, 3, 1));
@@ -207,7 +193,7 @@ public class ImportBundleArchiveWizardPage1 extends WizardPage {
 		if(fMutex.compareAndSet(false, true) == false) {
 			return;
 		}
-		fBudleImportDirectory = fCombo.getText();
+		fBudleImportDirectory = fCombo.getCombo().getText();
 		if(lastSearchedPath == null || !lastSearchedPath.equals(fBudleImportDirectory)){
 			File dir = new File(fBudleImportDirectory);
 			System.out.println(dir.getAbsolutePath());
@@ -339,24 +325,21 @@ public class ImportBundleArchiveWizardPage1 extends WizardPage {
 	/**
 	 * sets content of fCombo after so change occured
 	 */
-	private void setComboAfterChange(){
-		
+	private void setComboAfterChange() {
+
 		boolean isInHistory = false;
-		for(String comboItem: fCombo.getItems()){
-			isInHistory = isInHistory || fBudleImportDirectory.equals(comboItem);	
+		for (String comboItem : fCombo.getCombo().getItems()) {
+			isInHistory = isInHistory
+					|| fBudleImportDirectory.equals(comboItem);
 		}
-		
-		if(fCombo.getItemCount() == 0)
+
+		if (fCombo.getCombo().getItemCount() == 0)
 			isInHistory = false;
-		if(!isInHistory && !fBudleImportDirectory.equals(EMPTY_STRING)){
-			System.out.println(comboState.length);
-			comboState[comboStateIndex % COMBO_HISTORY] = fBudleImportDirectory;
-			fCombo.add(fBudleImportDirectory);
-			comboStateIndex++;
+		if (!isInHistory && !fBudleImportDirectory.equals(EMPTY_STRING)) {
+			fCombo.addItemToCombo(fBudleImportDirectory);
 		}
-		fCombo.setText(fBudleImportDirectory);
-		
-		
+		fCombo.getCombo().setText(fBudleImportDirectory);
+
 	}
 	
 	/**
@@ -370,46 +353,21 @@ public class ImportBundleArchiveWizardPage1 extends WizardPage {
 		if (fBudleImportDirectory == null) 
 			fBudleImportDirectory = EMPTY_STRING;
 		else
-			fCombo.setText(fBudleImportDirectory);
+			fCombo.getCombo().setText(fBudleImportDirectory);
 	}
 	
 	/**
 	 * restores state of the fCombo
 	 */
 	private void restoreComboState() {
-		 try{
-			 DialogSettings settings = new DialogSettings(COMBO_SECTION);
-			 settings.load(RhqConstants.RHQ_DIALOG_SETTINGS);
-			 comboState = settings.getArray(COMBO_STATE);
-			 if(comboState != null){
-				 for (String value : comboState) 
-					 fCombo.add(value);
-			 } else {
-				 comboState = new String[COMBO_HISTORY];
-			 }
-		 } catch (IOException e){
-			 //ignore exception
-		 }
+		fCombo.loadComboState();
 	}
 
 	/**
 	 * saves state of fCombo
 	 */
 	public void saveComboState() {
-		 DialogSettings settings = new DialogSettings(COMBO_SECTION);
-		 LinkedHashSet<String> newState = new LinkedHashSet<String>();
-		 newState.add(fCombo.getText());
-		 newState.addAll(Arrays.asList(fCombo.getItems()));
-
-		 int size = Math.min(COMBO_HISTORY, newState.size());
-		 String[] newStateArray = new String[size];
-		 newState.toArray(newStateArray);
-		 settings.put(COMBO_STATE, newStateArray);
-		 try {
-			settings.save(RhqConstants.RHQ_DIALOG_SETTINGS);
-		} catch (IOException e) {
-			//ignore exception
-		}
+		fCombo.saveComboState();
 	}
 
 	
