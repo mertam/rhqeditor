@@ -9,7 +9,7 @@
    </description>
 
    <copyright>
-  
+  	...
    </copyright>
 
    <license>
@@ -18,7 +18,7 @@
       
    <plugin
      id="cz.muni.fi.rhqeditor.ui"
-     version="1.0.0.qualifier"/>
+     version="1.0.1.qualifier"/>
       
    <plugin
      id="cz.muni.fi.rhqeditor.core"
